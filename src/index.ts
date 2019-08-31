@@ -8,6 +8,11 @@ import express = require("express");
     const port = process.env.PORT || 15000;
     await app.prepare();
     const server = express();
+    server.get("/", (req, res) => {
+      const actualPage = "/app.component";
+      const queryParams = {};
+      app.render(req, res, actualPage, queryParams);
+    });
     server.get("*", (req, res) => handle(req, res));
     server.listen(port, () =>
       console.log(`Server is listening on port ${port}!`)
