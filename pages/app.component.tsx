@@ -1,5 +1,6 @@
 import Layout from './components/layout/layout.component';
 import './app.component.sass';
+import './sass/bootstrap.sass';
 import Head from 'next/head'
 
 const Index = (props) => (
