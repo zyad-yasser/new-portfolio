@@ -1,3 +1,5 @@
+import NavBtn from "../nav-btn/nav-btn.component";
+
 const styles = require('./navbar.component.sass');
 const Navbar = (props) => {
   return (
@@ -5,13 +7,7 @@ const Navbar = (props) => {
       <div className={`d-flex justify-content-center align-items-center ${styles.icon}`}>
         ZY
       </div>
-      <div className={`d-flex justify-content-center align-items-center ${styles.navMenu}`}>
-        <div className={`${styles.navIcon}`}>
-          <div></div>
-          <div></div>
-          <div></div>
-        </div>
-      </div>
+      <NavBtn />
     </div>
   );
 }

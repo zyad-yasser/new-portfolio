@@ -1,0 +1,51 @@
+.navMenu
+    height: 70px
+    width: 100%
+    background-color: #d34a47
+    .navIcon
+        width: 30px
+        height: 30px
+        cursor: pointer
+        div:nth-child(1)
+            width: calc(30px - 50%)
+        div:nth-child(2)
+            width: calc(30px - 25%)
+            
+        div:nth-child(3)
+            width: 30px
+        div
+            height: 2px
+            position: relative
+            margin: 6px 0
+            transition: 0.5s all ease
+            background-color: #FFF
+    .open
+        div:nth-child(1)
+            width: 40px !important
+            top: 14px !important
+            left: -5px !important
+            transform: rotate(45deg) !important
+        div:nth-child(2)
+            margin: auto !important
+            width: calc(30px - 25%) !important
+            opacity: 0 !important
+            top: 12px !important
+        div:nth-child(3)
+            width: 40px !important
+            transform: rotate(-45deg) !important
+            top: 10px !important
+            left: -5px !important
+        div
+            margin: 0 !important
+            transition: 0.5s all ease 
+    .hover
+        div:nth-child(1)
+            width: 30px
+        div:nth-child(2)
+            width: calc(30px - 25%)
+            
+        div:nth-child(3)
+            width: calc(30px - 50%)
+        div
+            position: relative
+            transition: 0.5s all ease
