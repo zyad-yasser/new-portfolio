@@ -11,8 +11,8 @@ const MegaMenu = (props) => {
           (section, index) => (
             <div className={`w-100 ${styles.item}`} key={index}>
               <div className={`${styles.wrapper}`}>
-                { capetalizeFirstLetter(section.name) }
-                { section.active && <div className={`${styles.line}`}></div> }
+                {capetalizeFirstLetter(section.name)}
+                {section.active && <div className={`${styles.line}`} />}
               </div>
             </div>
           )

@@ -8,7 +8,7 @@ const Layout = (props) => (
     <MegaMenu />
     <Navbar />
     <div className="flex-grow-1 h-100">
-      { props.children }
+      {props.children}
     </div>
     <Footer />
   </div>

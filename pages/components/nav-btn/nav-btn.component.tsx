@@ -1,29 +1,34 @@
-import { useState } from "react";
 const styles = require("./nav-btn.component.sass");
+import { useSelector, useDispatch } from "react-redux";
+import { TOGGLE_MENU, HOVER_NAV_BUTTON } from "../../../pages/store/types";
 const NavBtn = props => {
-  const [isOpen, toggleOpen] = useState(false);
-  const [isHover, toggleHover] = useState(false);
-  const toggleMenu = (): void => {
-    toggleOpen(!isOpen);
-  };
-  const toggleEffect = (): void => {
-    if(!isOpen) {
-      toggleHover(!isHover);
-    }
-  };
+  const ui = useSelector((state: any) => state.ui);
+  const dispatch: any = useDispatch();
   return (
     <div
       className={`d-flex justify-content-center align-items-center ${styles.navMenu}`}
     >
       <div
-        className={`${styles.navIcon} ${isOpen && styles.open} ${isHover && styles.hover}`}
-        onClick={toggleMenu}
-        onMouseEnter={toggleEffect}
-        onMouseLeave={toggleEffect}
+        className={`${styles.navIcon} ${ui.isOpen && styles.open} ${ui.isHover && styles.hover}`}
+        onClick={
+          () => dispatch({
+            type: TOGGLE_MENU
+          })
+        }
+        onMouseEnter={
+          () => dispatch({
+            type: HOVER_NAV_BUTTON
+          })
+        }
+        onMouseLeave={
+          () => dispatch({
+            type: HOVER_NAV_BUTTON 
+          })
+        }
       >
-        <div></div>
-        <div></div>
-        <div></div>
+        <div/>
+        <div/>
+        <div/>
       </div>
     </div>
   );
