@@ -5,9 +5,9 @@ const styles = require('./layout.component.sass');
 
 const Layout = (props) => (
   <div className={`d-flex ${styles.mainContainer}`}>
-    <MegaMenu />
+    {/* <MegaMenu /> */}
     <Navbar />
-    <div className="flex-grow-1 h-100">
+    <div className={`flex-grow-1 h-100 ${styles.customScroll}`}>
       {props.children}
     </div>
     <Footer />

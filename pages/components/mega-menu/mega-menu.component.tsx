@@ -8,8 +8,7 @@ const styles = require("./mega-menu.component.sass");
 const MegaMenu = (props) => {
   const ui = useSelector((state: any) => state.ui);
   return (
-    ui.isOpen && (
-    <Fade left="true">
+    <Fade left={true} when={ui.isOpen}>
       <div className={`h-100 d-flex align-items-center ${styles.megaMenu}`}>
         <div>
           {sections.map(
@@ -28,7 +27,6 @@ const MegaMenu = (props) => {
         </div>
       </div>
     </Fade>
-    )
   );
 }
 
