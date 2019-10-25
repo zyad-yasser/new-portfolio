@@ -8,11 +8,13 @@ const Index = (props) => (
   <>
     <Head>
       <title>Zyad Yasser | Portfolio</title>
-      <link rel="stylesheet" href="/static/bootstrap.min.css"/>
       <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,700,900&display=swap" rel="stylesheet"/>
       <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed&display=swap" rel="stylesheet"/>
-      <link rel="shortcut icon" href="/static/favicon.ico" />
-      <meta name="viewport" content="initial-scale=1.0, width=device-width" />
+      <link href="/static/css/bootstrap.min.css" rel="stylesheet"/>
+      <link href="/static/css/general.css" rel="stylesheet"/>
+      <link href="/static/css/lineicons.min.css" rel="stylesheet"/>
+      <link rel="shortcut icon" href="/static/favicon.ico"/>
+      <meta name="viewport" content="initial-scale=1.0, width=device-width"/>
     </Head>
     <Layout>
       <Introduction />

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import MiniSlider from '../mini-slider/mini-slider.component';
 const styles = require("./about.component.sass");
 
 const About = (props) => {
@@ -27,12 +28,10 @@ const About = (props) => {
                 </div>
               </div>
             </div>
-            <div className={`h-100 ${styles.rightImage}`}>
-
-            </div>
+            <div className={`h-100 ${styles.rightImage}`} />
           </div>
           <div className={`w-100 mt-5 ${styles.miniSlider}`}>
-
+            <MiniSlider />
           </div>
         </div>
     </div>

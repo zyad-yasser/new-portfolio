@@ -1,0 +1,39 @@
+.miniSlider
+    height: 100%
+    width: 100%
+    .items
+        width: calc(100% - 60px)
+        overflow: hidden
+        .title
+            font-size: 22px
+            font-weight: 700
+        .text
+            color: #85868c
+            font-size: 15px
+    .controller
+        width: 30px
+        font-size: 25px
+        background-color: #FFF
+        i
+            color: #85868c
+            &:hover
+                color: #444
+                cursor: pointer
+.miniSliderIcon
+    width: 64px
+    height: 64px
+    border: 2px solid #d34a47
+    border-radius: 100%
+    min-width: 64px
+    font-size: 25px
+    color: #d34a47
+.bottomController
+    width: 10px
+    height: 10px
+    border: 2px solid #85868c
+    border-radius: 100%
+    cursor: pointer
+    &:hover
+        border: 2px solid #444
+    &.active
+        background-color: #85868c
