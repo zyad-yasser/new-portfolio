@@ -132,52 +132,28 @@ const MiniSlider = props => {
   const defaultItems = [
     {
       icon: "cup",
-      title: "Premium quality 1",
+      title: "Premium quality",
       text:
         "With high skills, and modern stack, we can deliver the best premium quality you need for your project."
     },
     {
-      icon: "cup",
-      title: "Premium quality 2",
+      icon: "chrome",
+      title: "Cross browsers",
       text:
-        "With high skills, and modern stack, we can deliver the best premium quality you need for your project."
+        "You get a products that run perfectly for the set of browsers you select, to insure the best availability."
     },
     {
-      icon: "cup",
-      title: "Premium quality 3",
+      icon: "code-alt",
+      title: "Optimized code",
       text:
-        "With high skills, and modern stack, we can deliver the best premium quality you need for your project."
+        "Optimized, and clean code, ready to be reused, easily maintained, or have new relases upon it."
     },
     {
-      icon: "cup",
-      title: "Premium quality 4",
+      icon: "paint-bucket",
+      title: "Perfect designs",
       text:
-        "With high skills, and modern stack, we can deliver the best premium quality you need for your project."
+        "Whatever how complex the design we can do it, or we can design high precision and modern designs."
     },
-    {
-      icon: "cup",
-      title: "Premium quality 5",
-      text:
-        "With high skills, and modern stack, we can deliver the best premium quality you need for your project."
-    },
-    {
-      icon: "cup",
-      title: "Premium quality 5",
-      text:
-        "With high skills, and modern stack, we can deliver the best premium quality you need for your project."
-    },
-    {
-      icon: "cup",
-      title: "Premium quality 5",
-      text:
-        "With high skills, and modern stack, we can deliver the best premium quality you need for your project."
-    },
-    {
-      icon: "cup",
-      title: "Premium quality 5",
-      text:
-        "With high skills, and modern stack, we can deliver the best premium quality you need for your project."
-    }
   ];
 
   const { items = defaultItems, config = defaultConfig } = props;
