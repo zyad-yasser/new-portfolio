@@ -2,8 +2,9 @@
     height: 250px
     .rightContent
         width: 48%
+        overflow: hidden
         img
-            max-height: 200px
+            max-height: 300px
             height: 100%
     .leftContent
         width: 48%
@@ -43,7 +44,7 @@
             .content
                 background-color: #f7f7f7
                 border-radius: 5px
-                height: 94px
+                height: 74px
                 line-height: 14px !important
                 color: #212529
                 font-size: 12px
@@ -62,7 +63,9 @@
                 position: relative
                 border: 0px
                 outline: none
+                pointer-events: none
                 &.active
+                    pointer-events: all
                     &:hover
                         background-color: #666
                         cursor: pointer

@@ -2,6 +2,7 @@ import * as React from "react";
 import { useState, useEffect } from "react";
 const styles = require("./single-slider.component.sass");
 import Fade from "react-reveal/Fade";
+import Slide from "react-reveal/Slide";
 
 const SingleSlider = props => {
   const [activeSlide, setActiveSlide] = useState(0);
@@ -14,76 +15,78 @@ const SingleSlider = props => {
     automatic: true
   };
 
+  const [activeImage, setActiveImage] = useState(null);
+
   const defaultItems = [
     {
       icon: "/static/logos/mean.png",
       title: "MEAN stack development",
-      text: "All about full stack development using Angular / NodeJS",
+      text: "All about full stack development using Angular / Node.js",
       caption:
         "Starting from backend development using the amazing Node.js runtime, to frontend development using Angular (latest) the most powerful beloved framework, and finally we neverforget about database design and queries using MongoDB.",
       image: "/static/logos/mean-expanded.png"
     },
     {
       icon: "/static/logos/mern.png",
-      title: "MEAN stack development",
-      text: "All about full stack development using Angular / NodeJS",
+      title: "MERN stack development",
+      text: "Full stack development using React.js / Node.js",
       caption:
-        "Starting from backend development using the amazing Node.js runtime, to frontend development using Angular (latest) the most powerful beloved framework, and finally we neverforget about database design and queries using MongoDB.",
-      image: "/static/logos/mean.png"
+        "I find amazing enjoyable work when I write full stack apps using React and when it combined with Next.js and Node.js, it becomes super stack.",
+      image: "/static/logos/mern-expanded.png"
     },
     {
-      icon: "/static/logos/vue.png",
-      title: "MEAN stack development",
-      text: "All about full stack development using Angular / NodeJS",
+      icon: "/static/logos/frontend.png",
+      title: "Frontend development",
+      text: "It's like art to me when I work using Vue / Svelte",
       caption:
-        "Starting from backend development using the amazing Node.js runtime, to frontend development using Angular (latest) the most powerful beloved framework, and finally we neverforget about database design and queries using MongoDB.",
-      image: "/static/logos/mean.png"
+        "Making and building applications using amazing frontend frameworks available, also building libraries, components, and building blocks which can be combined to acheive your dreams in your app.",
+      image: "/static/logos/frontend-expanded.png"
     },
     {
       icon: "/static/logos/cross-platform.png",
-      title: "MEAN stack development",
-      text: "All about full stack development using Angular / NodeJS",
+      title: "Cross platform development",
+      text: "Developing mobile applications using cross platform technologies",
       caption:
-        "Starting from backend development using the amazing Node.js runtime, to frontend development using Angular (latest) the most powerful beloved framework, and finally we neverforget about database design and queries using MongoDB.",
-      image: "/static/logos/mean.png"
+        "Building mobile applications functionality and interfaces one of the most enjoyable jobs to do, Ionic, Native Script, Flutter, each one of them has it's special impact on the application.",
+      image: "/static/logos/cross-platform-expanded.png"
     },
     {
       icon: "/static/logos/devops.png",
-      title: "MEAN stack development",
-      text: "All about full stack development using Angular / NodeJS",
+      title: "DevOps",
+      text: "Moving your app from the state of development, to the production",
       caption:
-        "Starting from backend development using the amazing Node.js runtime, to frontend development using Angular (latest) the most powerful beloved framework, and finally we neverforget about database design and queries using MongoDB.",
-      image: "/static/logos/mean.png"
+        "Your app is the most important thing to pay attention to when it comes to production, with the experience in AWS, Firebase, heroku, Nginx, Apache, Linux, we can deliver your application to production with the most stable state with all your needs.",
+      image: "/static/logos/devops-expanded.png"
     },
     {
       icon: "/static/logos/ui.png",
-      title: "MEAN stack development",
-      text: "All about full stack development using Angular / NodeJS",
+      title: "UI design / development",
+      text: "Designing, and developing impressive UIs",
       caption:
-        "Starting from backend development using the amazing Node.js runtime, to frontend development using Angular (latest) the most powerful beloved framework, and finally we neverforget about database design and queries using MongoDB.",
-      image: "/static/logos/mean.png"
+        "Building UIs is the so important key parameter of successfull application, as when it comes to easy, amd attactive design, this makes the user keen to use the app, HTML5, CSS3, Bootstrap, JavaScript solid experience to deliver the desired UIS.",
+      image: "/static/logos/ui-expanded.png"
     },
     {
       icon: "/static/logos/gfx.png",
-      title: "MEAN stack development",
-      text: "All about full stack development using Angular / NodeJS",
+      title: "Graphic design",
+      text: "All about graphics and media design",
       caption:
-        "Starting from backend development using the amazing Node.js runtime, to frontend development using Angular (latest) the most powerful beloved framework, and finally we neverforget about database design and queries using MongoDB.",
-      image: "/static/logos/mean.png"
+        "As this was my first hobby to have, I love using designing apps, Photoshop, Illustrator, XD, Abstract, Sketch, I love when the wireframes become interactive dynamic user experience.",
+      image: "/static/logos/gfx-expanded.png"
     },
     {
       icon: "/static/logos/iot.png",
-      title: "MEAN stack development",
-      text: "All about full stack development using Angular / NodeJS",
+      title: "IOT / Desktop applications development",
+      text: "Building robotics, desktop applications, and smart houses",
       caption:
-        "Starting from backend development using the amazing Node.js runtime, to frontend development using Angular (latest) the most powerful beloved framework, and finally we neverforget about database design and queries using MongoDB.",
-      image: "/static/logos/mean.png"
+        "The field of building robotics and control it throw apps is robust, I use Node.js to control several boards to build robotics and control smart houses, also I use Electron.js to build desktop applications.",
+      image: "/static/logos/iot-expanded.png"
     }
   ];
 
   const { items = defaultItems, config = defaultConfig } = props;
 
-  const handleSlideChange = (type, area) => {
+  const handleSlideChange = (type) => {
     const pagesNumber = items.length;
     let currentActiveSlide = activeSlide;
     if (type === "increment" && currentActiveSlide < (pagesNumber - 1)) {
@@ -94,6 +97,13 @@ const SingleSlider = props => {
       currentActiveSlide--;
     }
     setActiveSlide(currentActiveSlide);
+  }
+
+  const handleImageChange = () => {
+    setActiveImage(null);
+    setTimeout(() => {
+      setActiveImage(items[activeSlide].image);
+    }, 200);
   }
 
   const handleAutomatic = () => {
@@ -122,6 +132,10 @@ const SingleSlider = props => {
     }
   }, [automatic]);
 
+  useEffect(() => {
+    handleImageChange();
+  }, [activeSlide]);
+
   return (
     <div
       className={`w-100 mt-5 d-flex align-items-center justify-content-between ${styles.skillsContent}`}
@@ -139,12 +153,11 @@ const SingleSlider = props => {
               styles.prev
             } ${activeSlide > 0 && styles.active}`}
             onClick={handleSlideChange.bind(null, "decrement")}
-            disabled={activeSlide === 0}
           >
             <i className="lni-chevron-left" />
           </button>
           <button
-            className={`d-flex align-items-center justify-content-center si-sl-b ${
+            className={`d-flex align-items-center justify-content-center ${
               styles.next
             } ${activeSlide < (items.length - 1) && styles.active}`}
             onClick={handleSlideChange.bind(null, "increment")}
@@ -152,6 +165,10 @@ const SingleSlider = props => {
           >
             <i className="lni-chevron-right" />
           </button>
+          <button
+            className="d-none si-sl-b "
+            onClick={handleSlideChange.bind(null, "increment")}
+          />
         </div>
         {items.map((item, index) => (
           <Fade
@@ -190,7 +207,9 @@ const SingleSlider = props => {
       <div
         className={`h-100 d-flex align-items-center justify-content-center ${styles.rightContent}`}
       >
-        <img src={items[activeSlide].image} />
+        <Slide left={true} when={activeImage}>
+          <img src={items[activeSlide].image} />
+        </Slide>
       </div>
     </div>
   );
