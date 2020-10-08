@@ -207,7 +207,7 @@ const SingleSlider = props => {
       <div
         className={`h-100 d-flex align-items-center justify-content-center ${styles.rightContent}`}
       >
-        <Slide left={true} when={activeImage}>
+        <Slide bottom={true} when={activeImage}>
           <img src={items[activeSlide].image} />
         </Slide>
       </div>

@@ -4,6 +4,7 @@ import Head from 'next/head'
 import Introduction from './components/introduction/introduction.component';
 import About from './components/about/about.component';
 import Skills from './components/skills/skills.component';
+import Projects from './components/projects/projects.component';
 
 const Index = (props) => (
   <>
@@ -21,6 +22,7 @@ const Index = (props) => (
       <Introduction />
       <About />
       <Skills />
+      <Projects />
     </Layout>
   </>
 );

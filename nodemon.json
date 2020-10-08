@@ -3,6 +3,6 @@
   "ignore": ["node_modules", ".next"],
   "watch": ["src/**/*.ts", "pages/**/*"],
   "execMap": {
-    "ts": "ts-node --typeCheck --compilerOptions \"{\\\"module\\\":\\\"commonjs\\\"}\""
+    "ts": "ts-node"
   }
 }

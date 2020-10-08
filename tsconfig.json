@@ -3,7 +3,7 @@
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "strictPropertyInitialization": false,
-    "baseUrl": ".",
+    "baseUrl": "./",
     "jsx": "preserve",
     "lib": [
       "es5",
@@ -20,12 +20,10 @@
       "es2015.symbol.wellknown",
       "esnext.asynciterable"
     ],
-    "paths": {
-      "*": ["./types/*"]
-    },
     "types" : [
       "node"
     ],
+    "typeRoots" : ["./node_modules/@types", "./typings"],
     "module": "commonjs",
     "moduleResolution": "node",
     "noImplicitUseStrict": true,
