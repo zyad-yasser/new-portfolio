@@ -13,3 +13,20 @@ export class SubProject {
     link?: string;
     description?: string;
 }
+
+export class Section {
+    name: string;
+    active: boolean;
+}
+
+export class Tab {
+    name: string;
+    component: (props: any) => JSX.Element| JSX.Element[];
+}
+
+export class Testimonial {
+    writer: string;
+    title: string;
+    photo: string;
+    body: string;
+}

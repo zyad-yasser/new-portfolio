@@ -5,6 +5,7 @@ import Introduction from './components/introduction/introduction.component';
 import About from './components/about/about.component';
 import Skills from './components/skills/skills.component';
 import Projects from './components/projects/projects.component';
+import Testimonials from './components/testimonials/testimonials.component';
 
 const Index = (props) => (
   <>
@@ -23,6 +24,7 @@ const Index = (props) => (
       <About />
       <Skills />
       <Projects />
+      <Testimonials />
     </Layout>
   </>
 );

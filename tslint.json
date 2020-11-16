@@ -1,6 +1,7 @@
 {
     "defaultSeverity": "warning",
     "jsRules": {
+        "no-empty": true
     },
     "rules": {
         "member-access": false,

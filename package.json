@@ -13,6 +13,7 @@
   "author": "Zyad Yasser",
   "license": "MIT",
   "dependencies": {
+    "@material-ui/core": "^4.11.0",
     "axios": "^0.18.0",
     "compression": "1.7.3",
     "dotenv": "6.2.0",

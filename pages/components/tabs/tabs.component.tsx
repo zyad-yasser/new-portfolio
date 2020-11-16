@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { Tab } from '../../../pages/models/tab';
+import { Tab } from '../../../pages/models';
 const styles = require("./tabs.component.sass");
 
 const Tabs = ({ tabs }) => {

@@ -3,6 +3,9 @@ import { Provider } from "react-redux";
 import App, { Container } from "next/app";
 import withRedux from "next-redux-wrapper";
 import { initialStore } from "./store";
+import config from 'react-reveal/globals';
+
+config({ ssrFadeout: true });
 
 export default withRedux(initialStore)(
   class MyApp extends App {

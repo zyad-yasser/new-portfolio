@@ -1,8 +1,6 @@
-import { Project } from './../models/project';
-import { Section } from "../models/section";
+import { Project, Section, Tab, Testimonial } from './../models';
 import ProductionProjects from "../../pages/components/production-projects/production-projects.component";
 import OtherProjects from "../../pages/components/other-projects/other-projects.component";
-import { Tab } from "../models/tab";
 
 export const projectsTabs: Tab[] = [
     {
@@ -294,4 +292,13 @@ export const otherProjects: Project[] = [
         colors: ['#f64d36', '#CCC'],
         technologies: ['html', 'css', 'javascript'],
     },
+]
+
+export const testimonials: Testimonial[] = [
+    {
+        writer: '',
+        title: '',
+        photo: '',
+        body: '',
+    }
 ]
