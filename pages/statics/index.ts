@@ -1,4 +1,4 @@
-import { Project, Section, Tab, Testimonial } from './../models';
+import { Partner, Project, Section, Tab, Testimonial } from './../models';
 import ProductionProjects from "../../pages/components/production-projects/production-projects.component";
 import OtherProjects from "../../pages/components/other-projects/other-projects.component";
 
@@ -296,9 +296,42 @@ export const otherProjects: Project[] = [
 
 export const testimonials: Testimonial[] = [
     {
-        writer: '',
-        title: '',
-        photo: '',
-        body: '',
-    }
+        writer: 'Yasmine Mostafa',
+        title: 'VAS & Payments Planning Manager at Vodafone Egypt',
+        photo: 'testimonials/yasmine.png',
+        body: 'Zyad is very professional, committed and passionate. Very fast learner and self motivated. Zyad is having great potential to develop himself and always capable of achieving what he aims to',
+    },
+    {
+        writer: 'Sydney Liu',
+        title: 'Co-founder at Commaful',
+        photo: 'testimonials/sydney.png',
+        body: 'Zyad is very professional',
+    },
+]
+
+export const partners: Partner[] = [
+    {
+        image: '/partners/ocs.png',
+        name: 'Over coffee solutions',
+    },
+    {
+        image: '/partners/commaful.png',
+        name: 'Commaful',
+    },
+    {
+        image: '/partners/moneyfellows.png',
+        name: 'Money Fellows',
+    },
+    {
+        image: '/partners/lartquitecte.png',
+        name: 'Lartquitecte',
+    },
+    {
+        image: '/partners/shasha.png',
+        name: 'Shasha.io',
+    },
+    {
+        image: '/partners/moweex.png',
+        name: 'Moweex GmbH',
+    },
 ]

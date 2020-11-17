@@ -30,3 +30,8 @@ export class Testimonial {
     photo: string;
     body: string;
 }
+
+export class Partner {
+    name: string;
+    image: string;
+}

@@ -6,7 +6,7 @@ const styles = require("./testimonials.component.sass");
 
 const Testimonials = (props) => {
   return(
-    <div className={`d-flex align-items-center justify-content-center w-100 p-4 ${styles.projects}`}>
+    <div className={`d-flex align-items-center justify-content-center w-100 ${styles.projects}`}>
       <div className={`d-flex align-items-center justify-content-center w-100 ${styles.about}`}>
         <div className={`text-left container ${styles.centeredContent}`}>
           <div className={`w-100 mx-auto text-center ${styles.title}`}>

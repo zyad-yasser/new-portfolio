@@ -1,15 +1,35 @@
-.projects
-    height: auto
-    background: #121212
-    .centeredContent
-        padding: 20px
-        .title
-            .text
-                font-size: 42px
-                line-height: 72px
-                text-transform: uppercase
-                font-weight: 700
-                color: #FFF
-            .liner
-                height: 2px
-                background-color: #d34947
+.card
+    width: 132px
+    height: 82px
+    border: 1px solid #eee
+    transition: 500ms ease all
+    overflow: hidden
+    cursor: pointer
+    img
+        filter: grayscale(100%)
+        transition: 500ms ease all
+    .name
+        font-size: 14px
+        text-transform: uppercase
+        z-index: 1
+        font-weight: bold
+        background-color: transparent
+        bottom: 100px
+        width: 130px
+        height: 80px
+        opacity: 0
+        transition: 500ms ease all
+    &.hovered
+        border: 0px solid #FFF
+        transition: 500ms ease all
+        img
+            width: 130px
+            height: 80px
+            transition: 500ms ease all
+            opacity: 0.4
+            filter: grayscale(0%)
+            border: 0px solid #FFF
+        .name
+            opacity: 1
+            bottom: 0
+            transition: 500ms ease all
