@@ -298,14 +298,14 @@ export const testimonials: Testimonial[] = [
     {
         writer: 'Yasmine Mostafa',
         title: 'VAS & Payments Planning Manager at Vodafone Egypt',
-        photo: 'testimonials/yasmine.png',
+        photo: '/testimonials/yasmine.png',
         body: 'Zyad is very professional, committed and passionate. Very fast learner and self motivated. Zyad is having great potential to develop himself and always capable of achieving what he aims to',
     },
     {
         writer: 'Sydney Liu',
         title: 'Co-founder at Commaful',
-        photo: 'testimonials/sydney.png',
-        body: 'Zyad is very professional',
+        photo: '/testimonials/sydney.png',
+        body: 'Zyad is very professional, always delivers on time, hardworker, and his output quality is impressive.',
     },
 ]
 

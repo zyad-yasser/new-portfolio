@@ -1,15 +1,28 @@
-.projects
-    height: auto
-    background: #FFF
-    .centeredContent
-        padding: 20px
+.card
+    .content
+        padding: 0 30px
+        .begin, .end
+            position: absolute
+            font-size: 25px
+            color: #999
+        .begin
+            transform: rotate(180deg)
+            top: 0
+            left: 0
+        .end
+            bottom: 0
+            right: 0
+    .body
+        color: #444
+    .author
+        img
+            overflow: hidden
+            border-radius: 50%
+            box-shadow: 2px 5px 10px 0 rgba(0, 0, 0, .2)
+        .writer
+            font-size: 16px
+            color: #222
+            font-weight: bold
         .title
-            .text
-                font-size: 42px
-                line-height: 72px
-                text-transform: uppercase
-                font-weight: 700
-                color: #121212
-            .liner
-                height: 2px
-                background-color: #d34947
+            font-size: 12px
+            color: #85868c

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 const styles = require("./react-slider.component.sass");
 
 const ReactSlider = props => {
@@ -26,7 +26,7 @@ const ReactSlider = props => {
   }
 
   const pagesCalculator = (screenSize) => {
-    const outerElements = items.length - config.elementsPerPage[screenSize];
+    const outerElements = children.length - config.elementsPerPage[screenSize];
     let count = outerElements > 0
       ? outerElements
       : 0;
@@ -48,30 +48,39 @@ const ReactSlider = props => {
     setActivePage(currentActivePage);
   }
 
+  const sliderContainer = useRef(null)
+  const moverEl = useRef(null)
+  const controllerButton = useRef(null)
+
   const handleDimensions = () => {
-    const containerElement = document.querySelector(".mi-sl-c-c");
-    const width = `${containerElement.clientWidth}px`;
-    const marginLeft = moverCalculator();
-    const moverStyle = { width, marginLeft };
-    setMoverStyle(moverStyle);
+    const containerElement = sliderContainer.current;
+    if (containerElement) {
+      const width = `${containerElement.clientWidth}px`;
+      const marginLeft = moverCalculator();
+      const moverStyle = { width, marginLeft };
+      setMoverStyle(moverStyle);
+    }
   }
 
   const moverCalculator = () => {
-    const oneElement = document.querySelector(".mi-sl-c");
-    const elementSize = oneElement.clientWidth;
-    const marginLeft = -activePage * elementSize;
-    return `${marginLeft}px`;
+    const oneElement = moverEl.current;
+    if (oneElement) {
+      const elementSize = oneElement.clientWidth;
+      const marginLeft = -activePage * elementSize;
+      return `${marginLeft}px`;
+    }
+    return `0px`;
   }
 
   const columnCalculator = () => {
-    const containerElement = document.querySelector(".mi-sl-c-c");
+    const containerElement = sliderContainer.current;
     const elements = elementsPerPage();
     const width = `${Math.ceil(containerElement.clientWidth / elements)}px`;
     return width;
   }
 
   const screenSize = () => {
-    const bodyWidth = document.querySelector("body").clientWidth;
+    const bodyWidth = window.innerWidth;
     return bodyWidth > 992
       ? 'lg'
       : bodyWidth <= 992 && bodyWidth > 576
@@ -118,46 +127,25 @@ const ReactSlider = props => {
 
   const defaultConfig = {
     iconPrefix: "lni",
-    rightIcon: "arrow-right-circle",
-    leftIcon: "arrow-left-circle",
     elementsPerPage: {
-      lg: 3,
-      md: 2,
+      lg: 1,
+      md: 1,
       sm: 1
     },
     duration: 3,
-    automatic: true
+    automatic: true,
+    bullets: {
+      show: false,
+    },
+    nav: {
+      show: false,
+      rightIcon: "arrow-right-circle",
+      leftIcon: "arrow-left-circle",
+    }
   };
 
-  const defaultItems = [
-    {
-      icon: "cup",
-      title: "Premium quality",
-      text:
-        "With high skills, and modern stack, we can deliver the best premium quality you need for your project."
-    },
-    {
-      icon: "chrome",
-      title: "Cross browsers",
-      text:
-        "You get a products that run perfectly for the set of browsers you select, to insure the best availability."
-    },
-    {
-      icon: "code-alt",
-      title: "Optimized code",
-      text:
-        "Optimized, and clean code, ready to be reused, easily maintained, or have new relases upon it."
-    },
-    {
-      icon: "paint-bucket",
-      title: "Perfect designs",
-      text:
-        "Whatever how complex the design we can do it, or we can design high precision and modern designs."
-    },
-  ];
-
-  const { items = defaultItems, config = defaultConfig } = props;
-
+  const { children = [], config = defaultConfig } = props;
+  
   useEffect(() => {
     const screen = screenSize();
     pagesCalculator(screen);
@@ -185,9 +173,9 @@ const ReactSlider = props => {
   useEffect(() => {
     if(config.automatic) {
       const interval = setInterval(() => {
-        const controllerButton: HTMLElement = document.querySelector(".mi-sl-b");
-        if (automatic) {
-          controllerButton.click();
+        const controllerButtonEl: HTMLElement = controllerButton.current;
+        if (automatic && controllerButtonEl) {
+          controllerButtonEl.click();
         }
       }, config.duration * 1000);
       return () => clearInterval(interval);
@@ -195,49 +183,44 @@ const ReactSlider = props => {
   }, [automatic]);
 
   return (
-    <div onMouseEnter={handleMouseEvent.bind(null, true)} onMouseLeave={handleMouseEvent.bind(null, false)}>
+    <div className="w-100" onMouseEnter={handleMouseEvent.bind(null, true)} onMouseLeave={handleMouseEvent.bind(null, false)}>
       <div className={`d-flex align-items-center w-100 ${styles.miniSlider}`}>
         <div
-          className={`d-flex align-items-center justify-content-center h-100 ${styles.controller}`}
+          className={`align-items-center justify-content-center h-100 ${styles.controller} ${config.nav.show ? 'd-flex' : 'd-none'}`}
         >
           <i 
-            className={`${config.iconPrefix}-${config.leftIcon} ${activePage === 0 && styles.disabled}`} 
+            className={`${config.iconPrefix}-${config.nav.leftIcon} ${activePage === 0 && styles.disabled}`} 
             onClick={handleController.bind(null, 'decrement')}
           />
         </div>
-        <div className={`d-flex align-items-center position-relative h-100 mi-sl-c-c ${styles.items}`}>
+        <div ref={sliderContainer} className={`d-flex align-items-center position-relative h-100 ${styles.items}`}>
           <div className={`d-flex align-items-center position-absolute ${styles.mover}`} style={moverStyle}>
-            {items.map((item, index) => {
-              return (
-                <div key={index} className="d-flex align-items-start mi-sl-c col" style={computedColumn}>
-                  <div className="left">
-                    <div
-                      className={`d-flex align-items-center justify-content-center ${styles.miniSliderIcon}`}
-                    >
-                      <i className={`${config.iconPrefix}-${item.icon}`} />
-                    </div>
-                  </div>
-                  <div className="right ml-2 flex-grow-1">
-                    <div className={`w-100 ${styles.title} ${ itemsPerPage === 1 ? "text-center": ""}`}>{item.title}</div>
-                    <div className={`w-100 mt-1 ${styles.text} ${ itemsPerPage === 1 ? "text-center": ""}`}>{item.text}</div>
-                  </div>
-                </div>
-              );
-            })}
+            {
+              children.length 
+                ? children.map((item, index) => {
+                    return (
+                      <div key={index} ref={moverEl} className="d-flex align-items-start col px-0" style={computedColumn}>
+                        { item }
+                      </div>
+                    );
+                  })
+                : { children }
+            }
           </div>
         </div>
         <div
-          className={`d-flex align-items-center justify-content-center h-100 ${styles.controller}`}
+          className={`align-items-center justify-content-center h-100 ${styles.controller} ${config.nav.show ? 'd-flex ' : 'd-none'}`}
         >
-          <i 
-            className={`mi-sl-b ${config.iconPrefix}-${config.rightIcon} ${activePage === (pagesArray.length - 1) && styles.disabled}`} 
+          <i
+            ref={controllerButton}
+            className={`${config.iconPrefix}-${config.nav.rightIcon} ${activePage === (pagesArray.length - 1) && styles.disabled}`} 
             onClick={handleController.bind(null, 'increment')}
           />
         </div>
       </div>
-      <div className="w-100 d-flex align-items-center justify-content-center">
+      { config.bullets.show && children.length && <div className="w-100 d-flex align-items-center justify-content-center">
         <div className="d-flex mt-2">
-          {pagesArray.map((item, index) => {
+          {pagesArray.map((_, index) => {
             return (
               <div
                 key={index}
@@ -248,6 +231,7 @@ const ReactSlider = props => {
           })}
         </div>
       </div>
+    }
     </div>
   );
 };
