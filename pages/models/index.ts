@@ -35,3 +35,8 @@ export class Partner {
     name: string;
     image: string;
 }
+
+export class Service {
+    name: string;
+    image: string;
+}

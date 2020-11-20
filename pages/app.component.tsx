@@ -6,6 +6,9 @@ import About from './components/about/about.component';
 import Skills from './components/skills/skills.component';
 import Projects from './components/projects/projects.component';
 import Testimonials from './components/testimonials/testimonials.component';
+import Services from './components/services/services.component';
+import Contacts from './components/contacts/contacts.component';
+import UiAdditions from './components/ui-additions/ui-additions.component';
 
 const Index = (props) => (
   <>
@@ -25,6 +28,9 @@ const Index = (props) => (
       <Skills />
       <Projects />
       <Testimonials />
+      <Services />
+      <Contacts />
+      <UiAdditions />
     </Layout>
   </>
 );

@@ -1,4 +1,4 @@
-import { Partner, Project, Section, Tab, Testimonial } from './../models';
+import { Partner, Project, Section, Service, Tab, Testimonial } from './../models';
 import ProductionProjects from "../../pages/components/production-projects/production-projects.component";
 import OtherProjects from "../../pages/components/other-projects/other-projects.component";
 
@@ -333,5 +333,28 @@ export const partners: Partner[] = [
     {
         image: '/partners/moweex.png',
         name: 'Moweex GmbH',
+    },
+]
+
+export const services: Service[] = [
+    {
+        image: '/services/backend.png',
+        name: 'Backend development',
+    },
+    {
+        image: '/services/frontend.png',
+        name: 'Frontend development',
+    },
+    {
+        image: '/services/ui.png',
+        name: 'UI design & development',
+    },
+    {
+        image: '/services/devops.png',
+        name: 'Development operations',
+    },
+    {
+        image: '/services/mobile.png',
+        name: 'Mobile app development',
     },
 ]

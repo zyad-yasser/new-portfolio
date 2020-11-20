@@ -26,7 +26,7 @@ const TestimonialsSlider = (props) => {
   return(
     <div className={`d-flex flex-column align-items-center justify-content-center w-100 ${styles.testimonialsSlider}`}>
       <div className={`d-flex align-items-center justify-content-start w-100 ${styles.title}`}>
-        Top testimonials
+        Picked testimonials
       </div>
       <ReactSlider config={config}>
         {
