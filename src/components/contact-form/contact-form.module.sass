@@ -1,0 +1,24 @@
+.contactForm
+    max-width: 750px
+    margin: auto
+    input, textarea
+        background-color: rgba(70, 70, 70, 0.2)
+        outline: none
+        border: 0
+        border-radius: 6px
+        padding: 10px
+        text-align: center
+        font-size: 13px
+        text-transform: uppercase
+        color: #ffffff
+        min-width: 250px
+        width: 100%
+        &:focus, &:active
+            &::placeholder
+                color: #FFF
+        &::placeholder
+            font-size: 13px
+            text-transform: uppercase
+            color: #444
+    textarea
+        height: 150px
