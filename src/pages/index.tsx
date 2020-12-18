@@ -9,6 +9,7 @@ import Services from '@/components/services/services.component';
 import Skills from '@/components/skills/skills.component';
 import Testimonials from '@/components/testimonials/testimonials.component';
 import UiAdditions from '@/components/ui-additions/ui-additions.component';
+import ReactNotification from 'react-notifications-component';
 
 const Index = (props) => (
   <>
@@ -23,6 +24,7 @@ const Index = (props) => (
       <meta name="viewport" content="initial-scale=1.0, width=device-width"/>
     </Head>
     <Layout>
+      <ReactNotification />
       <Introduction />
       <About />
       <Skills />
@@ -30,7 +32,7 @@ const Index = (props) => (
       <Testimonials />
       <Services />
       <Contacts />
-      <UiAdditions />
+      <UiAdditions />  
     </Layout>
   </>
 );

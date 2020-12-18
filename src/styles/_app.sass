@@ -1,3 +1,8 @@
+@import 'react-notifications-component/dist/theme.css'
+
+.notifications-component
+  width: calc(100% - 140px)
+
 body
   background-color: #FFF
   font-family: 'Roboto', sans-serif !important
@@ -8,3 +13,50 @@ body, html
   height: 100% !important
   width: 100% !important
   overflow: hidden
+
+/* Ripple Out
+@-webkit-keyframes hvr-ripple-out
+  100%
+    top: -12px
+    right: -12px
+    bottom: -12px
+    left: -12px
+    opacity: 0
+
+@keyframes hvr-ripple-out
+  100%
+    top: -12px
+    right: -12px
+    bottom: -12px
+    left: -12px
+    opacity: 0
+
+.hvr-ripple-out
+  display: inline-block
+  vertical-align: middle
+  -webkit-transform: perspective(1px) translateZ(0)
+  transform: perspective(1px) translateZ(0)
+  box-shadow: 0 0 1px rgba(0, 0, 0, 0)
+  position: relative
+
+  &:before
+    content: ''
+    position: absolute
+    border: #e1e1e1 solid 6px
+    top: 0
+    right: 0
+    bottom: 0
+    left: 0
+    -webkit-animation-duration: 1s
+    animation-duration: 1s
+
+  &:hover:before, &:focus:before, &:active:before
+    -webkit-animation-name: hvr-ripple-out
+    animation-name: hvr-ripple-out
+
+.err-message
+  color: #ba2724
+  font-size: 12px
+  margin: 5px auto
+  width: 100%
+  text-align: center

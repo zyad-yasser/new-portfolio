@@ -113,7 +113,7 @@ const ReactSlider = (props) => {
   };
 
   const handleMouseEvent = (value) => {
-    if (config.mouse.pauseOnHover) {
+    if (config && config.mouse && config.mouse.pauseOnHover) {
       setAutomatic(!value);
     }
   };

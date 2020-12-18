@@ -7,7 +7,7 @@ const Layout = (props) => (
   <div className={`d-flex position-relative ${styles.mainContainer}`}>
     <MegaMenu />
     <Navbar />
-    <div className={`flex-grow-1 h-100 ${styles.customScroll}`}>
+    <div className={`flex-grow-1 h-100 content-main ${styles.customScroll}`}>
       {props.children}
     </div>
     <Footer />

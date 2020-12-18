@@ -170,7 +170,7 @@ export const otherProjects: Project[] = [
         description: 'Desktop application to control RGB LED lighting connected via USB.',
         image: '/projects/rgb.png',
         technologies: ['javascript', 'arduino', 'react', 'electron'],
-        link: 'https://zyadyasser.com/zezooco',
+        link: 'https://zyadyasser.net/zezooco',
         colors: ['#FFF', '#FFF'],
     },
     {
@@ -178,7 +178,7 @@ export const otherProjects: Project[] = [
         description: 'My personal old web site and CMS for hadware reviews.',
         image: '/projects/zezooco.jpg',
         technologies: ['php', 'jquery'],
-        link: 'https://zyadyasser.com/zezooco',
+        link: 'https://zyadyasser.net/zezooco',
         colors: ['#ee0000', '#FFF'],
     },
     {
@@ -186,7 +186,7 @@ export const otherProjects: Project[] = [
         description: 'Instagram clone.',
         image: '/projects/photocorner.jpg',
         technologies: ['node', 'vue'],
-        link: 'https://zyadyasser.com/photo-corner',
+        link: 'https://zyadyasser.net/photo-corner',
         colors: ['#a40227', '#CCC'],
     },
     {
@@ -194,7 +194,7 @@ export const otherProjects: Project[] = [
         description: 'Blog app.',
         image: '/projects/blogging.jpg',
         technologies: ['node', 'angular'],
-        link: 'https://zyadyasser.com/blogging',
+        link: 'https://zyadyasser.net/blogging',
         colors: ['#ee0000', '#FFF'],
     },
     {
@@ -202,7 +202,7 @@ export const otherProjects: Project[] = [
         description: 'Redesign for the UI of Titan cooling co.',
         image: '/projects/titan.jpg',
         technologies: ['php', 'jquery', 'html', 'css'],
-        link: 'https://zyadyasser.com/titan',
+        link: 'https://zyadyasser.net/titan',
         colors: ['blue', '#FFF'],
     },
     {
@@ -210,7 +210,7 @@ export const otherProjects: Project[] = [
         description: 'UI design/develop for ZIO civil.',
         image: '/projects/ziocivil.jpg',
         technologies: ['php', 'jquery', 'html', 'css'],
-        link: 'https://zyadyasser.com/ziocivil',
+        link: 'https://zyadyasser.net/ziocivil',
         colors: ['#ee0000', '#FFF'],
     },
     {
@@ -223,39 +223,39 @@ export const otherProjects: Project[] = [
             {
                 name: 'Snake game',
                 description: 'The famous snake game',
-                link: 'https://zyadyasser.com/snake'
+                link: 'https://zyadyasser.net/snake'
             },
             {
                 name: 'Jumper fidget spinner',
                 description: 'Jumping fidget spinner game',
-                link: 'https://zyadyasser.com/spinner'
+                link: 'https://zyadyasser.net/spinner'
             },
             {
                 name: 'Balls gravity',
                 description: 'Real gravity physics simulator',
-                link: 'https://zyadyasser.com/gravity'
+                link: 'https://zyadyasser.net/gravity'
             },
             {
                 name: 'Collision',
                 description: 'Collision physics simulator',
-                link: 'https://zyadyasser.com/collision'
+                link: 'https://zyadyasser.net/collision'
             },
             {
                 name: 'Mouse balls effect',
                 description: 'Pure balls following the mouse cursor',
-                link: 'https://zyadyasser.com/sketch'
+                link: 'https://zyadyasser.net/sketch'
             },
             {
                 name: 'Illusion lines and balls',
-                link: 'https://zyadyasser.com/ines-t'
+                link: 'https://zyadyasser.net/ines-t'
             },
             {
                 name: 'Lines',
-                link: 'https://zyadyasser.com/lines'
+                link: 'https://zyadyasser.net/lines'
             },
             {
                 name: 'Bubbles',
-                link: 'https://zyadyasser.com/bubbles'
+                link: 'https://zyadyasser.net/bubbles'
             },
         ],
     },
@@ -269,12 +269,12 @@ export const otherProjects: Project[] = [
             {
                 name: 'Steel design app',
                 description: 'Design efficient steel sections.',
-                link: 'https://zyadyasser.com/steel-designer'
+                link: 'https://zyadyasser.net/steel-designer'
             },
             {
                 name: 'Supermarket',
                 description: 'Supermarket app.',
-                link: 'https://zyadyasser.com/super-market'
+                link: 'https://zyadyasser.net/super-market'
             },
         ],
     },

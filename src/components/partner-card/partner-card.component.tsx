@@ -16,8 +16,8 @@ const PartnerCard = ({ partner }) => {
       onMouseLeave={toggleHover(false)}
       className={`d-flex align-items-center justify-content-center position-relative m-3 ${styles.card}  ${hovered && styles.hovered}`}
     >
-      {/* <div className={`d-flex align-items-center justify-content-center position-absolute ${styles.name}`}>{partner.name}</div>
-      <img src={ assetsPrefixUrl + partner.image } width="100px" height="62px"/> */}
+      <div className={`d-flex align-items-center justify-content-center position-absolute ${styles.name}`}>{partner.name}</div>
+      <img src={ assetsPrefixUrl + partner.image } width="100px" height="62px"/>
     </div>
   );
 };

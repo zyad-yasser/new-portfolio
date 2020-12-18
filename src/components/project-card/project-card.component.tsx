@@ -7,7 +7,7 @@ const ProjectCard = ({ project, type }) => {
   const { link, subProjects, colors, technologies, name, image, description } = project;
   const [name1, name2] = name.split(" ");
   const [mainColor = "#FFF", secondaryColor = "#d34947"] = colors;
-  const projectNavigate = (link) => {
+  const projectNavigate = (link) => () => {
     window.open(link, '_blank');
   }
   return (
@@ -23,7 +23,7 @@ const ProjectCard = ({ project, type }) => {
         <div className={`d-flex justify-content-center align-items-center ${styles.technologies}`}>
           {technologies.map((item, index) => <TechnologyIcon key={index} technology={item}/>)}
         </div>
-        {link && <div className={`d-flex justify-content-center align-items-center mt-4 ${styles.link}`}>
+        {link && <div onClick={ projectNavigate(link) } className={`d-flex justify-content-center align-items-center mt-4 ${styles.link}`}>
           <i className="lni-arrow-left mr-4"></i>
           Learn more
         </div>}
@@ -33,7 +33,7 @@ const ProjectCard = ({ project, type }) => {
               subProjects
                 .sort((a, b) => a.link > b.link ? 1 : -1)
                 .map(({name: subName, link}, index) => (
-                  <div key={index} onClick={projectNavigate.bind(null, link)} className={`d-flex align-items-center justify-content-start ${styles.subProject} ${link ? styles['link'] : ''}`}>
+                  <div key={index} onClick={ projectNavigate(link) } className={`d-flex align-items-center justify-content-start ${styles.subProject} ${link ? styles['link'] : ''}`}>
                     <div className="dot red mr-1" />
                     <span>{subName}</span>
                   </div>
