@@ -3,7 +3,7 @@ import Tabs from "../tabs/tabs.component";
 import styles from "./projects.module.sass";
 import { projectsTabs } from "../../statics";
 
-const Projects = (props) => {
+const Projects = () => {
   return(
     <div id="projects" className={`d-flex align-items-center justify-content-center w-100 p-4 ${styles.projects}`}>
       <div className={`d-flex align-items-center justify-content-center w-100 ${styles.about}`}>

@@ -6,7 +6,7 @@ import Reveal from 'react-reveal/Reveal';
 
 const ProductionProjects = (props) => {
   return(
-    <Reveal effect="fade" effectOut="fade" exit delay={4000} wait={4000} left cascade>
+    <Reveal effect="fade" effectOut="fade" left cascade>
       {
         productionProjects.map((item, index) => <ProjectCard project={item} key={index} type={ projectDirection(index) }/>)
       }

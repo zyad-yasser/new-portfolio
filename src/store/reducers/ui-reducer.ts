@@ -5,7 +5,6 @@ export function uiReducer(
   state = uiState,
   { type, payload: { activeSection } = {} as UiState }: UiActionTypes
 ): UiState {
-  console.log('here')
   switch (type) {
     case TOGGLE_MENU: {
       return {
@@ -23,7 +22,6 @@ export function uiReducer(
       };
     }
     case ACTIVATE_SECTION: {
-      console.log(activeSection)
       return {
         ...state,
         activeSection

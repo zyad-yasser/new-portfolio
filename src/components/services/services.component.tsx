@@ -2,7 +2,7 @@ import Grid from "@material-ui/core/Grid";
 import { services } from "../../statics";
 import * as React from "react";
 import ReactSlider from "../react-slider/react-slider.component";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Fade from "react-reveal/Fade";
 import { assetsPrefixUrl } from "../../constants";
 import { useEffect } from "react";
@@ -30,7 +30,10 @@ const Services = (props) => {
       pauseOnHover: false,
     }
   };
+
   const [slideText, setSlideText] = useState<string|null>('');
+
+  const imageRef = useRef(null);
 
   const onSlideChange = (slideIndex: number) =>{
     const slideText = services[slideIndex].name;
@@ -40,12 +43,20 @@ const Services = (props) => {
     }, 200);
   }
 
+  const onMouseMove = (event: any) => {
+    const { clientX, clientY } = event;
+    const imgEl: HTMLElement = imageRef.current
+    imgEl.style.transform = `translate(-${clientX/50}px, -${clientY/50}px)`
+    console.log(imgEl.style.top)
+
+  }
+
   useEffect(() => {
     onSlideChange(0);
   }, [])
 
   return(
-    <div id="services" className={`d-flex align-items-center justify-content-center w-100 py-3 ${styles.services}`}>
+    <div onMouseMove={onMouseMove} id="services" className={`d-flex align-items-center justify-content-center w-100 py-3 ${styles.services}`}>
       <div className={`text-left container ${styles.centeredContent}`}>
         <div className={`w-100 mx-auto text-center ${styles.title}`}>
           <div className={`w-100 ${styles.text}`}>
@@ -56,13 +67,15 @@ const Services = (props) => {
         <div className="content mt-5">
           <Grid container spacing={3}>
             <Grid item sm={12} md={6}>
-              <ReactSlider config={config} onSlideChange={onSlideChange}>
-                {
-                  services.map(({ image }, index) => (
-                    <img key={`sl-${index}`} height="300px" src={ assetsPrefixUrl + image} />
-                  ))
-                }
-              </ReactSlider>
+              <div ref={imageRef} className={`position-relative ${styles.mover}`} >
+                <ReactSlider config={config} onSlideChange={onSlideChange}>
+                  {
+                    services.map(({ image }, index) => (
+                      <img key={`sl-${index}`} height="300px" src={ assetsPrefixUrl + image} />
+                    ))
+                  }
+                </ReactSlider>
+              </div>
             </Grid>
             <Grid item sm={12} md={6}>
               <Fade className="d-flex align-items-center justify-content-center w-100 h-100" top={true}>
