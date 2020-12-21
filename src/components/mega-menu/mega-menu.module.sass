@@ -1,24 +1,48 @@
-.megaMenu
-    overflow: hidden
-    background-color: #2e2e2e
-    position: absolute
-    justify-content: space-between
+.menuContainer
+  width: calc(100% - 140px)
+  pointer-events: none
+  &.open
     z-index: 11
-    width: calc(100% - 140px)
-    height: 100vh
-    left: 70px
-    padding: 100px
-    img.logo
-        max-width: 700px
-    .item
-        color:#FFF
-        margin-bottom: 10px
-        font-size: 40px
-        font-weight: bold
-        .wrapper
-            display: inline-block
-            cursor: pointer
-            .line
-                height: 2px
-                width: 70%
-                background-color: #d34a47
+    pointer-events: all
+  .megaMenu
+      overflow: hidden
+      background-color: #2e2e2e
+      position: absolute
+      justify-content: space-between
+      z-index: 11
+      width: calc(100% - 140px)
+      height: 100vh
+      padding: 100px
+      img.logo
+          max-width: 700px
+      .item
+          color:#FFF
+          margin-bottom: 10px
+          font-size: 40px
+          font-weight: bold
+          .wrapper
+              display: inline-block
+              cursor: pointer
+              .line
+                  height: 2px
+                  width: 70%
+                  background-color: #d34a47
+
+@media screen and ( max-width: 768px )
+  .menuContainer
+    width: 100%
+    .megaMenu
+      display: flex
+      justify-content: center
+      margin: auto
+      text-align: center
+      width: 100%
+      left: 0
+      padding: 50px
+      .item
+        font-size: 30px
+        .line
+          margin: auto
+          right: 0
+          left: 0
+

@@ -25,16 +25,36 @@
         .flipper
             transform: rotate(90deg)
             margin-bottom: 68px
-            .hireMe
-                width: 110px
-                border-radius: 25px
-                background-color: #d34a47 !important
-                border-color: #d34a47 !important
-                font-size: 12px
-                &:hover
-                    background-color: #ba2724 !important
-                &:focus, &:active
-                    background-color: #971e1c !important
-                    border-color: #971e1c !important
-                &::before
-                    border-radius: 25px
+
+@media screen and ( max-width: 768px )
+  .footer
+    background-color: rgba(0, 0, 0, 0.7)
+    position: absolute
+    bottom: 0
+    width: calc(100% - 5px)
+    height: 70px !important
+    min-height: 70px !important
+    flex-direction: row
+    padding: 0 1rem
+    .sectionUp, .sectionDown
+      height: 100%
+      display: flex
+      align-items: center
+    .about
+      top: auto !important
+      right: auto !important
+    .flipper, .about
+      margin: 0 !important
+      transform: rotate(0deg) !important
+
+@media screen and ( max-width: 500px )
+  .footer
+    .flipper
+      position: absolute
+      .hireMe
+        display: none !important
+    .sectionUp
+      width: 100%
+      .about
+        width: 100%
+        text-align: center

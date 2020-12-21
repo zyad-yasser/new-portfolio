@@ -68,7 +68,7 @@ const Introduction = (props) => {
       };
 
       var updateTransformStyle = function (x, y) {
-        var style = 'rotateX(' + x * 25 + 'deg) rotateY(' + y * 50 + 'deg)';
+        var style = 'rotateX(' + x * 25 + 'deg) rotateY(' + y * 25 + 'deg)';
         inner.style.transform = style;
       };
 

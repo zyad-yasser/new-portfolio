@@ -14,15 +14,6 @@ body, html
   width: 100% !important
   overflow: hidden
 
-/* Ripple Out
-@-webkit-keyframes hvr-ripple-out
-  100%
-    top: -12px
-    right: -12px
-    bottom: -12px
-    left: -12px
-    opacity: 0
-
 @keyframes hvr-ripple-out
   100%
     top: -12px
@@ -31,6 +22,27 @@ body, html
     left: -12px
     opacity: 0
 
+@keyframes hvr-ripple-out-delayed
+  0%
+    top: 0px
+    right: 0px
+    bottom: 0px
+    left: 0px
+    opacity: 1
+  80%
+    top: 0px
+    right: 0px
+    bottom: 0px
+    left: 0px
+    opacity: 1
+  100%
+    top: -12px
+    right: -12px
+    bottom: -12px
+    left: -12px
+    opacity: 0
+    
+
 .hvr-ripple-out
   display: inline-block
   vertical-align: middle
@@ -38,6 +50,13 @@ body, html
   transform: perspective(1px) translateZ(0)
   box-shadow: 0 0 1px rgba(0, 0, 0, 0)
   position: relative
+
+  &.infinite
+    &:before
+      animation-timing-function: ease-in-out
+      animation-duration: 3s
+      animation-name: hvr-ripple-out-delayed
+      animation-iteration-count: infinite
 
   &:before
     content: ''
@@ -85,10 +104,10 @@ body, html
 
 
 .animated 
-    animation-duration: 1s
-    animation-fill-mode: both
-    -webkit-animation-duration: 1s
-    -webkit-animation-fill-mode: both
+  animation-duration: 1s
+  animation-fill-mode: both
+  -webkit-animation-duration: 1s
+  -webkit-animation-fill-mode: both
 
 
 .animatedFadeInUp 

@@ -1,5 +1,6 @@
 import * as React from 'react';
-import styles from "./footer.module.sass";
+import HireMe from '../hire-me/hire-me.component';
+import styles from './footer.module.sass';
 
 const Footer = (props) => {
   const scrollBottom = () => {
@@ -10,7 +11,7 @@ const Footer = (props) => {
         behavior: 'smooth',
       });
     }
-  }
+  };
   return (
     <div className={`d-flex h-100 ${styles.footer}`}>
       <div className={`${styles.sectionUp}`}>
@@ -20,11 +21,13 @@ const Footer = (props) => {
       </div>
       <div className={`${styles.sectionDown}`}>
         <div className={`${styles.flipper}`}>
-          <button onClick={scrollBottom} className={`btn btn-danger hvr-ripple-out ${styles.hireMe}`}>Hire me</button>
+          <div className={`${styles.hireMe}`}>
+            <HireMe />
+          </div>
         </div>
       </div>
     </div>
   );
-}
+};
 
 export default Footer;
