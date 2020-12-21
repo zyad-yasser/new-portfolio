@@ -4,7 +4,7 @@ import styles from "./skills.module.sass";
 
 const Skills = () => {
   return (
-    <div className={`d-flex align-items-center justify-content-center w-100 ${styles.skills}`}>
+    <div id="skills" className={`d-flex align-items-center justify-content-center w-100 ${styles.skills}`}>
       <div className={`d-flex align-items-center justify-content-center w-100 ${styles.about}`}>
         <div className={`text-left container ${styles.centeredContent}`}>
           <div className={`w-100 mx-auto text-center ${styles.title}`}>

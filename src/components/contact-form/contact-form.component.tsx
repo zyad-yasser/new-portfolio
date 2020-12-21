@@ -108,9 +108,11 @@ const ContactForm = (props) => {
                   placeholder="email"
                   name="email"
                 />
-                <div className="err-message">
-                  {errors.email && touched.email && errors.email}
-                </div>
+                { errors.email && touched.email && errors.email &&
+                  <div className="err-message">
+                    { errors.email }
+                  </div>
+                }
               </Grid>
               <Grid item sm={12} md={12}>
                 <textarea
@@ -121,12 +123,15 @@ const ContactForm = (props) => {
                   placeholder="content"
                   name="content"
                 ></textarea>
-                <div className="err-message">
-                  {errors.content && touched.content && errors.content}
-                </div>
+                { errors.content && touched.content && errors.content &&
+                  <div className="err-message">
+                    { errors.content }
+                  </div>
+                }
               </Grid>
               <Grid item sm={12} md={12}>
                 <ActionButton
+                  classes="hvr-ripple-out"
                   style={{ marginLeft: 'auto' }}
                   state={ isSubmitting ? 'loading' : 'ready' }
                   label="send"

@@ -1,11 +1,12 @@
 import { uiState } from "../state"
-import { UiState, UiActionTypes, HOVER_NAV_BUTTON, TOGGLE_MENU } from "../types/";
+import { UiState, UiActionTypes, HOVER_NAV_BUTTON, TOGGLE_MENU, ACTIVATE_SECTION } from "../types/";
 
 export function uiReducer(
   state = uiState,
-  action: UiActionTypes
+  { type, payload: { activeSection } = {} as UiState }: UiActionTypes
 ): UiState {
-  switch (action.type) {
+  console.log('here')
+  switch (type) {
     case TOGGLE_MENU: {
       return {
         ...state,
@@ -19,6 +20,13 @@ export function uiReducer(
           !state.isOpen
           ? !state.isHover
           : state.isHover
+      };
+    }
+    case ACTIVATE_SECTION: {
+      console.log(activeSection)
+      return {
+        ...state,
+        activeSection
       };
     }
     default:

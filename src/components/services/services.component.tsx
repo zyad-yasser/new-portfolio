@@ -45,7 +45,7 @@ const Services = (props) => {
   }, [])
 
   return(
-    <div className={`d-flex align-items-center justify-content-center w-100 py-3 ${styles.services}`}>
+    <div id="services" className={`d-flex align-items-center justify-content-center w-100 py-3 ${styles.services}`}>
       <div className={`text-left container ${styles.centeredContent}`}>
         <div className={`w-100 mx-auto text-center ${styles.title}`}>
           <div className={`w-100 ${styles.text}`}>

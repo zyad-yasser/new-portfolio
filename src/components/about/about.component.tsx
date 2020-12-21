@@ -4,7 +4,7 @@ import styles from "./about.module.sass";
 
 const About = (props) => {
   return (
-    <div className={`d-flex align-items-center justify-content-center w-100 ${styles.about}`}>
+    <div id="about" className={`d-flex align-items-center justify-content-center w-100 ${styles.about}`}>
       <div className={`text-left container ${styles.centeredContent}`}>
         <div className={`w-100 mx-auto text-center ${styles.title}`}>
           <div className={`w-100 ${styles.text}`}>

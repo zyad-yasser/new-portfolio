@@ -6,7 +6,7 @@ import styles from "./contacts.module.sass";
 
 const Contacts = (props) => {
   return(
-    <div className={`d-flex align-items-center justify-content-center w-100 ${styles.contacts}`}>
+    <div id="contacts" className={`d-flex align-items-center justify-content-center w-100 ${styles.contacts}`}>
       <div className={`text-left container ${styles.centeredContent}`}>
         <div className={`w-100 mx-auto text-center ${styles.title}`}>
           <div className={`w-100 ${styles.text}`}>

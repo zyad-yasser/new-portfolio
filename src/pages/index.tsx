@@ -11,7 +11,7 @@ import Testimonials from '@/components/testimonials/testimonials.component';
 import UiAdditions from '@/components/ui-additions/ui-additions.component';
 import ReactNotification from 'react-notifications-component';
 
-const Index = (props) => (
+const Index = () => (
   <>
     <Head>
       <title>Zyad Yasser | Portfolio</title>
@@ -25,14 +25,14 @@ const Index = (props) => (
     </Head>
     <Layout>
       <ReactNotification />
-      <Introduction />
+      <Introduction/>
       <About />
       <Skills />
       <Projects />
       <Testimonials />
       <Services />
       <Contacts />
-      <UiAdditions />  
+      <UiAdditions />
     </Layout>
   </>
 );
