@@ -1,19 +1,18 @@
+import { Grid } from '@material-ui/core';
 import * as React from 'react';
 import MiniSlider from '../mini-slider/mini-slider.component';
+import Title from '../title/title.component';
 import styles from "./about.module.sass";
 
 const About = (props) => {
   return (
     <div id="about" className={`d-flex align-items-center justify-content-center w-100 ${styles.about}`}>
       <div className={`text-left container ${styles.centeredContent}`}>
-        <div className={`w-100 mx-auto text-center ${styles.title}`}>
-          <div className={`w-100 ${styles.text}`}>
-            Let me introduce my self
-          </div>
-          <div className={`w-25 mx-auto ${styles.liner}`} />
-        </div>
+        <Title label='Let me introduce my self' textColor="#212529" lineColor="#d34a47" />
         <div className={`w-100 mt-5 d-flex align-items-center justify-content-between ${styles.aboutContent}`}>
-          <div className={`d-flex align-items-center h-100 ${styles.leftContent}`}>
+          <Grid container spacing={3}>
+            <Grid item sm={12} md={6}>
+            <div className={`d-flex align-items-center h-100 ${styles.leftContent}`}>
             <div>
               <div className={`w-100 ${styles.title}`}>
                 A full stack web developer
@@ -28,9 +27,13 @@ const About = (props) => {
               </div>
             </div>
           </div>
-          <div className={`h-100 ${styles.rightImage}`} />
+            </Grid>
+            <Grid item sm={12} md={6} className="w-100">
+              <div className={`h-100 ${styles.rightImage}`} />
+            </Grid>
+          </Grid>
         </div>
-        <div className={`w-100 mt-5 ${styles.miniSlider}`}>
+        <div className={`w-100 mt-3 mt-lg-5 ${styles.miniSlider}`}>
           <MiniSlider />
         </div>
       </div>

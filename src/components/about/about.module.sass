@@ -1,27 +1,16 @@
 .about
-    height: 100vh
     background-color: #FFF
     .centeredContent
         padding: 20px
-        .title
-            .text
-                font-size: 42px
-                line-height: 72px
-                text-transform: uppercase
-                font-weight: 700
-            .liner
-                height: 2px
-                background-color: #d34a47
         .aboutContent
-            height: 340px
             .rightImage
                 background-image: url("/static/placeholder.jpg")
                 background-size: 100%
                 background-position: center
                 background-repeat: no-repeat
-                width: 48%
+                min-height: 260px
+                min-width: 100%
             .leftContent
-                width: 48%
                 .title
                     font-size: 29px
                     font-weight: 700
@@ -40,3 +29,14 @@
                     &:focus, &:active
                         background-color: #971e1c !important
                         border-color: #971e1c !important
+
+@media screen and ( max-width: 768px )
+  .about
+    .centeredContent
+        .aboutContent
+            .leftContent
+                .title
+                    font-size: 20px
+                .text
+                    color: #85868c
+                    font-size: 13px
