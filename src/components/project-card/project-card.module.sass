@@ -44,4 +44,20 @@
             .link
                 text-transform: none !important
                 text-decoration: underline
-                cursor: pointer                    
+                cursor: pointer
+
+@media screen and ( max-width: 768px )
+  .oneProject
+    flex-direction: column-reverse !important
+    .text, .image
+        width: 100% !important
+        .name
+          text-align: center
+          right: 0 !important
+          left: 0 !important
+          span
+            font-size: 35px !important
+    .image
+      height: 250px
+    .description
+      font-size: 14px !important

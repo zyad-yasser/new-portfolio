@@ -57,6 +57,8 @@ body, html
       animation-duration: 3s
       animation-name: hvr-ripple-out-delayed
       animation-iteration-count: infinite
+    &:hover:before, &:focus:before, &:active:before
+      border-color: transparent !important
 
   &:before
     content: ''

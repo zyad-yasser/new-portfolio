@@ -19,7 +19,7 @@ const ContactForm = (props) => {
     } else if (!values.content) {
       errors.content = 'This field is required';
     } else if (values.content.length < 4) {
-      errors.content = 'Very small content, write some more';
+      errors.content = 'Very xsall content, write some more';
     }
     return errors;
   };
@@ -35,7 +35,7 @@ const ContactForm = (props) => {
         container: "top-right",
         animationIn: ["animate__animated", "animate__fadeIn"],
         animationOut: ["animate__animated", "animate__fadeOut"],
-        dismiss: {
+        dixsiss: {
           duration: 5000,
           onScreen: true
         }
@@ -50,7 +50,7 @@ const ContactForm = (props) => {
         container: "top-right",
         animationIn: ["animate__animated", "animate__fadeIn"],
         animationOut: ["animate__animated", "animate__fadeOut"],
-        dismiss: {
+        dixsiss: {
           duration: 5000,
           onScreen: true
         }
@@ -79,7 +79,7 @@ const ContactForm = (props) => {
         }) => (
           <form onSubmit={handleSubmit}>
             <Grid container spacing={3}>
-              <Grid item sm={12} md={6}>
+              <Grid item xs={12} md={6}>
                 <input
                   onChange={handleChange}
                   onBlur={handleBlur}
@@ -89,7 +89,7 @@ const ContactForm = (props) => {
                   name="name"
                 />
               </Grid>
-              <Grid item sm={12} md={6}>
+              <Grid item xs={12} md={6}>
                 <input
                   onChange={handleChange}
                   onBlur={handleBlur}
@@ -99,7 +99,7 @@ const ContactForm = (props) => {
                   name="subject"
                 />
               </Grid>
-              <Grid item sm={12} md={12}>
+              <Grid item xs={12} md={12}>
                 <input
                   onChange={handleChange}
                   onBlur={handleBlur}
@@ -114,7 +114,7 @@ const ContactForm = (props) => {
                   </div>
                 }
               </Grid>
-              <Grid item sm={12} md={12}>
+              <Grid item xs={12} md={12}>
                 <textarea
                   onChange={handleChange}
                   onBlur={handleBlur}
@@ -129,7 +129,7 @@ const ContactForm = (props) => {
                   </div>
                 }
               </Grid>
-              <Grid item sm={12} md={12}>
+              <Grid item xs={12} md={12}>
                 <ActionButton
                   classes="hvr-ripple-out"
                   style={{ marginLeft: 'auto' }}

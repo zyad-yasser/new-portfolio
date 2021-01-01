@@ -8,7 +8,7 @@ const ContactIcons = (props) => {
       className={`d-flex align-items-center justify-content-center w-100 ${styles.contactIcons}`}
     >
       <Grid container spacing={3}>
-        <Grid item sm={12} md={3}>
+        <Grid item xs={12} md={3}>
           <div className={`${styles.contactItem}`}>
             <div className={`${styles.icon}`}>
               <i className="lni-phone-handset" />
@@ -23,7 +23,7 @@ const ContactIcons = (props) => {
             </div>
           </div>
         </Grid>
-        <Grid item sm={12} md={3}>
+        <Grid item xs={12} md={3}>
           <div className={`${styles.contactItem}`}>
             <div className={`${styles.icon}`}>
               <i className="lni-envelope" />
@@ -38,7 +38,7 @@ const ContactIcons = (props) => {
             </div>
           </div>
         </Grid>
-        <Grid item sm={12} md={6}>
+        <Grid item xs={12} md={6}>
           <div className={`${styles.contactItem}`}>
             <div className={`${styles.icon}`}>
             <i className="lni-pin" />
