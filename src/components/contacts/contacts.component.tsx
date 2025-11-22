@@ -1,3 +1,5 @@
+'use client';
+
 import ContactForm from "../contact-form/contact-form.component";
 import ContactIcons from "../contact-icons/contact-icons.component";
 import ContactSocial from "../contact-social/contact-social.component";
@@ -13,8 +15,8 @@ const Contacts = (props) => {
         </div>
         <div className="content mt-5">
           <ContactIcons />
-          <ContactForm className="mt-3" />
-          <ContactSocial className="mt-3" />
+          <ContactForm />
+          <ContactSocial />
         </div>
       </div>
     </div>

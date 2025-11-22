@@ -1,7 +1,7 @@
 import { Grid } from "@mui/material";
 import styles from "./contact-form.module.sass";
 
-const ContactForm = (props) => {
+const ContactForm = () => {
   return (
     <div
       className={`d-flex align-items-center justify-content-center w-100 mt-3 ${styles.contactForm}`}

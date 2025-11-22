@@ -1,8 +1,7 @@
 "use client";
 
+import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import Fade from "react-reveal/Fade";
-import Slide from "react-reveal/Slide";
 import styles from "./single-slider.module.sass";
 
 const SingleSlider = (props) => {
@@ -12,7 +11,7 @@ const SingleSlider = (props) => {
     iconPrefix: "lni",
     rightIcon: "chevron-right",
     leftIcon: "chevron-left",
-    duration: 3,
+    duration: 3, // seconds,
     automatic: true,
   };
 
@@ -167,34 +166,55 @@ const SingleSlider = (props) => {
           <button className="d-none si-sl-b " onClick={handleSlideChange.bind(null, "increment")} />
         </div>
         {items.map((item, index) => (
-          <Fade key={index} right={true} opposite={true} when={activeSlide === index}>
-            <div
-              className={`p-4 h-100 d-flex align-items-center position-absolute ${styles.mainSlider}`}
-            >
-              <div>
-                <div className={`d-flex align-items-center justify-content-start ${styles.title}`}>
-                  <div
-                    className={`d-flex align-items-center justify-content-center ${styles.icon}`}
-                  >
-                    <img src={item.icon} />
-                  </div>
-                  <div className={`${styles.text} ml-2 h-100 mt-4`}>
-                    <div className={`w-100 ${styles.head}`}>{item.title}</div>
-                    <div className={`w-100 mt-2 ${styles.info}`}>{item.text}</div>
+          <AnimatePresence key={index} mode="wait">
+            {activeSlide === index && (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -50 }}
+                transition={{ duration: 0.4, ease: "easeOut" }}
+              >
+                <div
+                  className={`p-4 h-100 d-flex align-items-center position-absolute ${styles.mainSlider}`}
+                >
+                  <div>
+                    <div
+                      className={`d-flex align-items-center justify-content-start ${styles.title}`}
+                    >
+                      <div
+                        className={`d-flex align-items-center justify-content-center ${styles.icon}`}
+                      >
+                        <img src={item.icon} />
+                      </div>
+                      <div className={`${styles.text} ml-2 h-100 mt-4`}>
+                        <div className={`w-100 ${styles.head}`}>{item.title}</div>
+                        <div className={`w-100 mt-2 ${styles.info}`}>{item.text}</div>
+                      </div>
+                    </div>
+                    <div className={`mt-2 p-3 ${styles.content}`}>{item.caption}</div>
                   </div>
                 </div>
-                <div className={`mt-2 p-3 ${styles.content}`}>{item.caption}</div>
-              </div>
-            </div>
-          </Fade>
+              </motion.div>
+            )}
+          </AnimatePresence>
         ))}
       </div>
       <div
         className={`h-100 d-flex align-items-center justify-content-center ${styles.rightContent}`}
       >
-        <Slide bottom={true} when={activeImage}>
-          <img src={items[activeSlide].image} />
-        </Slide>
+        <AnimatePresence mode="wait">
+          {activeImage && (
+            <motion.img
+              key={activeImage}
+              src={items[activeSlide].image}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -30 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+            />
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

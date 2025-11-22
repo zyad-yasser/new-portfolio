@@ -1,7 +1,7 @@
 import { Grid } from "@mui/material";
 import styles from "./contact-icons.module.sass";
 
-const ContactIcons = (props) => {
+const ContactIcons = () => {
   return (
     <div
       className={`d-flex align-items-center justify-content-center w-100 ${styles.contactIcons}`}

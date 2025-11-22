@@ -1,6 +1,6 @@
 import styles from "./footer.module.sass";
 
-const Footer = (props) => {
+const Footer = () => {
   return (
     <div className={`d-flex h-100 ${styles.footer}`}>
       <div className={`${styles.sectionUp}`}>

@@ -3,7 +3,7 @@ import Partners from "../partners/partners.component";
 import TestimonialsSlider from "../testimonials-slider/testimonials-slider.component";
 import styles from "./testimonials.module.sass";
 
-const Testimonials = (props) => {
+const Testimonials = () => {
   return (
     <div className={`d-flex align-items-center justify-content-center w-100 ${styles.projects}`}>
       <div className={`d-flex align-items-center justify-content-center w-100 ${styles.about}`}>

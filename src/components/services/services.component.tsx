@@ -1,15 +1,15 @@
 "use client";
 
 import { Grid } from "@mui/material";
+import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 import { useEffect } from "react";
-import Fade from "react-reveal/Fade";
 import { assetsPrefixUrl } from "../../constants";
 import { services } from "../../statics";
 import ReactSlider from "../react-slider/react-slider.component";
 import styles from "./services.module.sass";
 
-const Services = (props) => {
+const Services = () => {
   const config = {
     iconPrefix: "lni",
     elementsPerPage: {
@@ -62,16 +62,22 @@ const Services = (props) => {
               </ReactSlider>
             </Grid>
             <Grid item sm={12} md={6}>
-              <Fade
-                className="d-flex align-items-center justify-content-center w-100 h-100"
-                top={true}
-              >
-                <div
-                  className={`d-flex align-items-center justify-content-center text-center h-100 ${styles.name}`}
-                >
-                  {slideText}
-                </div>
-              </Fade>
+              <div className="d-flex align-items-center justify-content-center w-100 h-100">
+                <AnimatePresence mode="wait">
+                  {slideText && (
+                    <motion.div
+                      key={slideText}
+                      className={`d-flex align-items-center justify-content-center text-center h-100 ${styles.name}`}
+                      initial={{ opacity: 0, y: -20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 20 }}
+                      transition={{ duration: 0.4, ease: "easeOut" }}
+                    >
+                      {slideText}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </Grid>
           </Grid>
         </div>

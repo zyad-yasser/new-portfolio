@@ -1,2 +1,3 @@
-export const assetsPrefixUrl = `/static`;
-export const apiUrl = ``;
+export const assetsPrefixUrl = "/static";
+
+export const apiUrl = "";

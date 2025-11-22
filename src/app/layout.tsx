@@ -1,6 +1,5 @@
-import { Roboto, Roboto_Condensed } from "next/font/google";
 import type { Metadata } from "next";
-import "../styles/_app.sass";
+import { Roboto, Roboto_Condensed } from "next/font/google";
 import "./globals.css";
 
 const roboto = Roboto({

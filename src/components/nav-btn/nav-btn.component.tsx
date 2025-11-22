@@ -5,7 +5,7 @@ import styles from "./nav-btn.module.sass";
 
 const NavBtn = () => {
   const { isOpen, isHover, toggleMenu, hoverNavButton } = useUiStore();
-  
+
   return (
     <div className={`d-flex justify-content-center align-items-center ${styles.navMenu}`}>
       <div

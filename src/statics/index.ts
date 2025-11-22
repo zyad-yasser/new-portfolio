@@ -10,7 +10,7 @@ import {
   Testimonial,
 } from "../models";
 
-export const projectsTabs: Tab[] = [
+const projectsTabs: Tab[] = [
   {
     name: "Production",
     component: ProductionProjects,
@@ -21,7 +21,7 @@ export const projectsTabs: Tab[] = [
   },
 ];
 
-export const sections: Section[] = [
+const sections: Section[] = [
   {
     name: "home",
     active: true,
@@ -52,7 +52,7 @@ export const sections: Section[] = [
   },
 ];
 
-export const productionProjects: Project[] = [
+const productionProjects: Project[] = [
   {
     name: "Shasha.io platform",
     description:
@@ -182,7 +182,7 @@ export const productionProjects: Project[] = [
   },
 ];
 
-export const otherProjects: Project[] = [
+const otherProjects: Project[] = [
   {
     name: "RGB-light controller",
     description: "Desktop application to control RGB LED lighting connected via USB.",
@@ -312,7 +312,7 @@ export const otherProjects: Project[] = [
   },
 ];
 
-export const testimonials: Testimonial[] = [
+const testimonials: Testimonial[] = [
   {
     writer: "Yasmine Mostafa",
     title: "VAS & Payments Planning Manager at Vodafone Egypt",
@@ -327,7 +327,7 @@ export const testimonials: Testimonial[] = [
   },
 ];
 
-export const partners: Partner[] = [
+const partners: Partner[] = [
   {
     image: "/partners/ocs.png",
     name: "Over coffee solutions",
@@ -354,7 +354,7 @@ export const partners: Partner[] = [
   },
 ];
 
-export const services: Service[] = [
+const services: Service[] = [
   {
     image: "/services/backend.png",
     name: "Backend development",
@@ -377,7 +377,7 @@ export const services: Service[] = [
   },
 ];
 
-export const socialMediaAccounts: SocaialMediaAccount[] = [
+const socialMediaAccounts: SocaialMediaAccount[] = [
   {
     name: "facebook",
     color: "#1877f2",
@@ -415,3 +415,5 @@ export const socialMediaAccounts: SocaialMediaAccount[] = [
     value: "https://www.pinterest.ru/yasserhessin",
   },
 ];
+
+export { projectsTabs, sections, productionProjects, otherProjects, testimonials, partners, services, socialMediaAccounts };
