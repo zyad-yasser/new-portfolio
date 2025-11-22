@@ -1,0 +1,23 @@
+:root {
+  --font-roboto: "Roboto", sans-serif;
+  --font-roboto-condensed: "Roboto Condensed", sans-serif;
+}
+
+body {
+  background-color: #FFF;
+  font-family: var(--font-roboto) !important;
+  height: 100% !important;
+  width: 100% !important;
+  overflow: hidden;
+}
+
+body > div:first-child {
+  height: 100% !important;
+  width: 100% !important;
+}
+
+html {
+  height: 100% !important;
+  width: 100% !important;
+  overflow: hidden;
+}

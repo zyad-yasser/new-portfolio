@@ -1,22 +1,22 @@
 import * as React from "react";
-import { useSelector } from "react-redux";
 import Fade from "react-reveal/Fade";
+import { useUiStore } from "@/store/ui-store";
 import { capetalizeFirstLetter } from "../../helpers";
 import { sections } from "../../statics";
 import styles from "./mega-menu.module.sass";
 
-const MegaMenu = (props) => {
-  const ui = useSelector((state: any) => state.ui);
+const MegaMenu = () => {
+  const { isOpen } = useUiStore();
   return (
-    <Fade left={true} when={ui.isOpen} unmountOnExit={true} collapse={true}>
+    <Fade left={true} when={isOpen} unmountOnExit={true} collapse={true}>
       <div className={`d-flex align-items-center ${styles.megaMenu}`}>
         <Fade
           left
           cascade
           unmountOnExit={true}
           mountOnEnter={true}
-          appear={ui.isOpen}
-          when={ui.isOpen}
+          appear={isOpen}
+          when={isOpen}
           exit={true}
           distance="550px"
         >
