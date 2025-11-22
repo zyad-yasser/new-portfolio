@@ -416,4 +416,13 @@ const socialMediaAccounts: SocaialMediaAccount[] = [
   },
 ];
 
-export { projectsTabs, sections, productionProjects, otherProjects, testimonials, partners, services, socialMediaAccounts };
+export {
+  projectsTabs,
+  sections,
+  productionProjects,
+  otherProjects,
+  testimonials,
+  partners,
+  services,
+  socialMediaAccounts,
+};

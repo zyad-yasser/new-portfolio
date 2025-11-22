@@ -8,11 +8,11 @@
     "quickfix.biome": "explicit",
     "source.organizeImports.biome": "explicit"
   },
-  
+
   // Disable other formatters to avoid conflicts
   "prettier.enable": false,
   "eslint.enable": false,
-  
+
   // File associations for Biome
   "[javascript]": {
     "editor.defaultFormatter": "biomejs.biome"
@@ -32,7 +32,7 @@
   "[jsonc]": {
     "editor.defaultFormatter": "biomejs.biome"
   },
-  
+
   // Additional settings for better development experience
   "editor.rulers": [100],
   "editor.tabSize": 2,

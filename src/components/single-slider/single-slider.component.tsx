@@ -2,7 +2,6 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import styles from "./single-slider.module.sass";
 
 const SingleSlider = (props) => {
   const [activeSlide, setActiveSlide] = useState(0);
@@ -138,32 +137,34 @@ const SingleSlider = (props) => {
 
   return (
     <div
-      className={`w-100 mt-5 d-flex align-items-center justify-content-between ${styles.skillsContent}`}
+      className="w-full mt-8 flex items-center justify-between"
       onMouseEnter={handleMouseEvent.bind(null, true)}
       onMouseLeave={handleMouseEvent.bind(null, false)}
     >
-      <div className={`h-100 d-flex align-items-center position-relative ${styles.leftContent}`}>
-        <div
-          className={`text-left d-flex align-items-center justify-content-between position-absolute w-100 ${styles.controllers}`}
-        >
+      <div className="h-full flex items-center relative flex-1">
+        <div className="text-left flex items-center justify-between absolute w-full z-10 px-4">
           <button
-            className={`d-flex align-items-center justify-content-center ${
-              styles.prev
-            } ${activeSlide > 0 && styles.active}`}
+            className={`flex items-center justify-center w-12 h-12 rounded-full border-2 transition-all duration-300 ${
+              activeSlide > 0
+                ? "border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+                : "border-gray-300 text-gray-300 cursor-not-allowed"
+            }`}
             onClick={handleSlideChange.bind(null, "decrement")}
           >
             <i className="lni-chevron-left" />
           </button>
           <button
-            className={`d-flex align-items-center justify-content-center ${
-              styles.next
-            } ${activeSlide < (items.length - 1) && styles.active}`}
+            className={`flex items-center justify-center w-12 h-12 rounded-full border-2 transition-all duration-300 ${
+              activeSlide < (items.length - 1)
+                ? "border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+                : "border-gray-300 text-gray-300 cursor-not-allowed"
+            }`}
             onClick={handleSlideChange.bind(null, "increment")}
             disabled={activeSlide === items.length - 1}
           >
             <i className="lni-chevron-right" />
           </button>
-          <button className="d-none si-sl-b " onClick={handleSlideChange.bind(null, "increment")} />
+          <button className="hidden si-sl-b" onClick={handleSlideChange.bind(null, "increment")} />
         </div>
         {items.map((item, index) => (
           <AnimatePresence key={index} mode="wait">
@@ -175,24 +176,24 @@ const SingleSlider = (props) => {
                 exit={{ opacity: 0, x: -50 }}
                 transition={{ duration: 0.4, ease: "easeOut" }}
               >
-                <div
-                  className={`p-4 h-100 d-flex align-items-center position-absolute ${styles.mainSlider}`}
-                >
+                <div className="p-6 h-full flex items-center absolute inset-0">
                   <div>
-                    <div
-                      className={`d-flex align-items-center justify-content-start ${styles.title}`}
-                    >
-                      <div
-                        className={`d-flex align-items-center justify-content-center ${styles.icon}`}
-                      >
-                        <img src={item.icon} />
+                    <div className="flex items-center justify-start mb-4">
+                      <div className="flex items-center justify-center w-16 h-16 p-3 bg-primary/10 rounded-lg mr-4">
+                        <img
+                          src={item.icon}
+                          className="w-full h-full object-contain"
+                          alt={item.title}
+                        />
                       </div>
-                      <div className={`${styles.text} ml-2 h-100 mt-4`}>
-                        <div className={`w-100 ${styles.head}`}>{item.title}</div>
-                        <div className={`w-100 mt-2 ${styles.info}`}>{item.text}</div>
+                      <div className="flex-1">
+                        <h3 className="text-xl font-semibold text-foreground mb-2">{item.title}</h3>
+                        <p className="text-muted-foreground">{item.text}</p>
                       </div>
                     </div>
-                    <div className={`mt-2 p-3 ${styles.content}`}>{item.caption}</div>
+                    <div className="mt-4 p-4 bg-card border border-border rounded-lg">
+                      <p className="text-card-foreground leading-relaxed">{item.caption}</p>
+                    </div>
                   </div>
                 </div>
               </motion.div>
@@ -200,14 +201,14 @@ const SingleSlider = (props) => {
           </AnimatePresence>
         ))}
       </div>
-      <div
-        className={`h-100 d-flex align-items-center justify-content-center ${styles.rightContent}`}
-      >
+      <div className="h-full flex items-center justify-center flex-1 ml-8">
         <AnimatePresence mode="wait">
           {activeImage && (
             <motion.img
               key={activeImage}
               src={items[activeSlide].image}
+              className="max-w-full max-h-96 object-contain"
+              alt={items[activeSlide].title}
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -30 }}

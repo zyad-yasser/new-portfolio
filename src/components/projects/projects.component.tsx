@@ -1,18 +1,15 @@
 import { projectsTabs } from "../../statics";
 import Tabs from "../tabs/tabs.component";
-import styles from "./projects.module.sass";
 
 const Projects = (props) => {
   return (
-    <div
-      className={`d-flex align-items-center justify-content-center w-100 p-4 ${styles.projects}`}
-    >
-      <div className={`d-flex align-items-center justify-content-center w-100 ${styles.about}`}>
-        <div className={`text-left container ${styles.centeredContent}`}>
-          <div className={`w-100 mx-auto text-center ${styles.title}`}>
-            <div className={`w-100 ${styles.text}`}>Projects</div>
-            <div className={`w-7 mx-auto ${styles.liner}`} />
-            <div className="content mt-5">
+    <div className="flex items-center justify-center w-full p-4 py-20">
+      <div className="flex items-center justify-center w-full">
+        <div className="text-left max-w-6xl mx-auto px-4">
+          <div className="w-full mx-auto text-center">
+            <h2 className="text-4xl font-bold text-foreground mb-4">Projects</h2>
+            <div className="w-16 h-1 bg-primary mx-auto mb-12" />
+            <div className="content mt-12">
               <Tabs tabs={projectsTabs} />
             </div>
           </div>

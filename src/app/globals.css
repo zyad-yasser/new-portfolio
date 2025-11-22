@@ -1,23 +1,223 @@
-:root {
-  --font-roboto: "Roboto", sans-serif;
-  --font-roboto-condensed: "Roboto Condensed", sans-serif;
+@import "tailwindcss";
+
+@theme {
+  --font-inter: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  /* Dark theme inspired by Resend/Porter - High contrast black design */
+  --color-background: 0 0% 2%; /* Deep black background */
+  --color-foreground: 0 0% 98%; /* Pure white text */
+  --color-card: 0 0% 4%; /* Slightly elevated black */
+  --color-card-foreground: 0 0% 95%; /* Off-white for cards */
+  --color-popover: 0 0% 3%; /* Dark popover */
+  --color-popover-foreground: 0 0% 95%;
+  --color-primary: 47 96% 53%; /* Bright yellow accent like Resend */
+  --color-primary-foreground: 0 0% 2%; /* Black text on yellow */
+  --color-secondary: 0 0% 8%; /* Dark secondary */
+  --color-secondary-foreground: 0 0% 90%;
+  --color-muted: 0 0% 6%; /* Subtle background */
+  --color-muted-foreground: 0 0% 60%; /* Muted gray text */
+  --color-accent: 0 0% 10%; /* Hover states */
+  --color-accent-foreground: 0 0% 95%;
+  --color-destructive: 0 84% 60%; /* Red for errors */
+  --color-destructive-foreground: 0 0% 98%;
+  --color-border: 0 0% 12%; /* Subtle borders */
+  --color-input: 0 0% 8%; /* Input background */
+  --color-ring: 47 96% 53%; /* Focus ring matches primary */
+
+  /* Additional Porter-style colors */
+  --color-success: 142 76% 36%; /* Green for success */
+  --color-success-foreground: 0 0% 98%;
+  --color-warning: 38 92% 50%; /* Orange for warnings */
+  --color-warning-foreground: 0 0% 2%;
+
+  --radius: 0.5rem;
+
+  /* Font families */
+  --font-family-sans: var(--font-inter);
+}
+
+.light {
+  /* Light mode overrides (minimal, as we prefer dark) */
+  --color-background: 0 0% 98%;
+  --color-foreground: 0 0% 5%;
+  --color-card: 0 0% 100%;
+  --color-card-foreground: 0 0% 5%;
+  --color-border: 0 0% 90%;
+  --color-input: 0 0% 96%;
+  --color-muted: 0 0% 96%;
+  --color-muted-foreground: 0 0% 45%;
+}
+
+/* Global styles */
+* {
+  border-color: hsl(var(--color-border));
 }
 
 body {
-  background-color: #fff;
-  font-family: var(--font-roboto) !important;
-  height: 100% !important;
-  width: 100% !important;
-  overflow: hidden;
-}
-
-body > div:first-child {
-  height: 100% !important;
-  width: 100% !important;
+  background-color: hsl(var(--color-background));
+  color: hsl(var(--color-foreground));
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  scroll-behavior: smooth;
+  /* Improved text rendering */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 html {
-  height: 100% !important;
-  width: 100% !important;
-  overflow: hidden;
+  scroll-behavior: smooth;
+}
+
+/* Enhanced utility classes for high-contrast design */
+.bg-background {
+  background-color: hsl(var(--color-background));
+}
+.bg-foreground {
+  background-color: hsl(var(--color-foreground));
+}
+.bg-card {
+  background-color: hsl(var(--color-card));
+  border: 1px solid hsl(var(--color-border));
+}
+.bg-primary {
+  background-color: hsl(var(--color-primary));
+}
+.bg-secondary {
+  background-color: hsl(var(--color-secondary));
+}
+.bg-muted {
+  background-color: hsl(var(--color-muted));
+}
+.bg-accent {
+  background-color: hsl(var(--color-accent));
+}
+.bg-destructive {
+  background-color: hsl(var(--color-destructive));
+}
+.bg-success {
+  background-color: hsl(var(--color-success));
+}
+.bg-warning {
+  background-color: hsl(var(--color-warning));
+}
+
+.text-background {
+  color: hsl(var(--color-background));
+}
+.text-foreground {
+  color: hsl(var(--color-foreground));
+}
+.text-card-foreground {
+  color: hsl(var(--color-card-foreground));
+}
+.text-primary {
+  color: hsl(var(--color-primary));
+}
+.text-primary-foreground {
+  color: hsl(var(--color-primary-foreground));
+}
+.text-secondary-foreground {
+  color: hsl(var(--color-secondary-foreground));
+}
+.text-muted-foreground {
+  color: hsl(var(--color-muted-foreground));
+}
+.text-accent-foreground {
+  color: hsl(var(--color-accent-foreground));
+}
+.text-destructive {
+  color: hsl(var(--color-destructive));
+}
+.text-destructive-foreground {
+  color: hsl(var(--color-destructive-foreground));
+}
+.text-success {
+  color: hsl(var(--color-success));
+}
+.text-warning {
+  color: hsl(var(--color-warning));
+}
+
+.border-border {
+  border-color: hsl(var(--color-border));
+}
+.border-input {
+  border-color: hsl(var(--color-input));
+}
+.border-primary {
+  border-color: hsl(var(--color-primary));
+}
+
+.ring-ring {
+  --tw-ring-color: hsl(var(--color-ring));
+}
+
+/* Enhanced hover variants for better visibility */
+.hover\:bg-primary\/90:hover {
+  background-color: hsl(var(--color-primary) / 0.9);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px hsl(var(--color-primary) / 0.3);
+}
+.hover\:bg-secondary\/80:hover {
+  background-color: hsl(var(--color-secondary) / 0.8);
+  border-color: hsl(var(--color-border));
+}
+.hover\:bg-destructive\/90:hover {
+  background-color: hsl(var(--color-destructive) / 0.9);
+}
+.hover\:bg-accent:hover {
+  background-color: hsl(var(--color-accent));
+  border-color: hsl(var(--color-border));
+}
+.hover\:text-accent-foreground:hover {
+  color: hsl(var(--color-accent-foreground));
+}
+.hover\:text-primary:hover {
+  color: hsl(var(--color-primary));
+}
+
+/* Porter-style card hover effects */
+.card-hover {
+  transition: all 0.2s ease-in-out;
+  border: 1px solid hsl(var(--color-border));
+}
+
+.card-hover:hover {
+  border-color: hsl(var(--color-primary) / 0.3);
+  box-shadow: 0 4px 20px hsl(var(--color-primary) / 0.1);
+  transform: translateY(-2px);
+}
+
+/* Resend-style button glows */
+.btn-glow:hover {
+  box-shadow: 0 0 0 1px hsl(var(--color-primary)), 0 0 20px hsl(var(--color-primary) / 0.3), 0 4px
+    12px hsl(var(--color-primary) / 0.2);
+}
+
+/* High contrast focus states */
+.focus-visible\:ring-2:focus-visible {
+  outline: none;
+  ring-width: 2px;
+  ring-color: hsl(var(--color-primary));
+  ring-offset-width: 2px;
+  ring-offset-color: hsl(var(--color-background));
+}
+
+/* Gradient text effects */
+.gradient-text {
+  background: linear-gradient(
+    135deg,
+    hsl(var(--color-foreground)),
+    hsl(var(--color-muted-foreground))
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gradient-primary {
+  background: linear-gradient(135deg, hsl(var(--color-primary)), hsl(var(--color-warning)));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }

@@ -1,25 +1,23 @@
-import { Grid } from "@mui/material";
 import Partners from "../partners/partners.component";
 import TestimonialsSlider from "../testimonials-slider/testimonials-slider.component";
-import styles from "./testimonials.module.sass";
 
 const Testimonials = () => {
   return (
-    <div className={`d-flex align-items-center justify-content-center w-100 ${styles.projects}`}>
-      <div className={`d-flex align-items-center justify-content-center w-100 ${styles.about}`}>
-        <div className={`text-left container ${styles.centeredContent}`}>
-          <div className={`w-100 mx-auto text-center ${styles.title}`}>
-            <div className={`w-100 ${styles.text}`}>Testimonials & Partners</div>
-            <div className={`w-7 mx-auto ${styles.liner}`} />
-            <div className="content mt-5">
-              <Grid container spacing={3}>
-                <Grid item sm={12} md={6}>
+    <div className="flex items-center justify-center w-full py-20">
+      <div className="flex items-center justify-center w-full">
+        <div className="text-left max-w-6xl mx-auto px-4">
+          <div className="w-full mx-auto text-center">
+            <h2 className="text-4xl font-bold text-foreground mb-4">Testimonials & Partners</h2>
+            <div className="w-16 h-1 bg-primary mx-auto mb-12" />
+            <div className="content mt-12">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <div>
                   <TestimonialsSlider />
-                </Grid>
-                <Grid item sm={12} md={6}>
+                </div>
+                <div>
                   <Partners />
-                </Grid>
-              </Grid>
+                </div>
+              </div>
             </div>
           </div>
         </div>

@@ -1,13 +1,11 @@
 "use client";
 
-import { Grid } from "@mui/material";
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 import { useEffect } from "react";
 import { assetsPrefixUrl } from "../../constants";
 import { services } from "../../statics";
 import ReactSlider from "../react-slider/react-slider.component";
-import styles from "./services.module.sass";
 
 const Services = () => {
   const config = {
@@ -46,28 +44,33 @@ const Services = () => {
   }, []);
 
   return (
-    <div className={`d-flex align-items-center justify-content-center w-100 ${styles.services}`}>
-      <div className={`text-left container ${styles.centeredContent}`}>
-        <div className={`w-100 mx-auto text-center ${styles.title}`}>
-          <div className={`w-100 ${styles.text}`}>Services</div>
-          <div className={`w-7 mx-auto ${styles.liner}`} />
+    <div className="flex items-center justify-center w-full py-20 bg-background">
+      <div className="text-left max-w-6xl mx-auto px-4">
+        <div className="w-full mx-auto text-center mb-12">
+          <h2 className="text-4xl font-bold text-foreground mb-4">Services</h2>
+          <div className="w-16 h-1 bg-primary mx-auto" />
         </div>
-        <div className="content mt-5">
-          <Grid container spacing={3}>
-            <Grid item sm={12} md={6}>
+        <div className="content mt-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            <div>
               <ReactSlider config={config} onSlideChange={onSlideChange}>
                 {services.map(({ image }, index) => (
-                  <img key={`sl-${index}`} height="300px" src={assetsPrefixUrl + image} />
+                  <img
+                    key={`sl-${index}`}
+                    className="h-80 w-full object-contain"
+                    src={assetsPrefixUrl + image}
+                    alt="Service"
+                  />
                 ))}
               </ReactSlider>
-            </Grid>
-            <Grid item sm={12} md={6}>
-              <div className="d-flex align-items-center justify-content-center w-100 h-100">
+            </div>
+            <div>
+              <div className="flex items-center justify-center w-full h-full min-h-[300px]">
                 <AnimatePresence mode="wait">
                   {slideText && (
                     <motion.div
                       key={slideText}
-                      className={`d-flex align-items-center justify-content-center text-center h-100 ${styles.name}`}
+                      className="flex items-center justify-center text-center h-full text-3xl font-semibold text-primary"
                       initial={{ opacity: 0, y: -20 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 20 }}
@@ -78,8 +81,8 @@ const Services = () => {
                   )}
                 </AnimatePresence>
               </div>
-            </Grid>
-          </Grid>
+            </div>
+          </div>
         </div>
       </div>
     </div>

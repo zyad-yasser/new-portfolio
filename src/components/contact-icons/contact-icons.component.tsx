@@ -1,49 +1,38 @@
-import { Grid } from "@mui/material";
-import styles from "./contact-icons.module.sass";
-
 const ContactIcons = () => {
   return (
-    <div
-      className={`d-flex align-items-center justify-content-center w-100 ${styles.contactIcons}`}
-    >
-      <Grid container spacing={3}>
-        <Grid item sm={12} md={3}>
-          <div className={`${styles.contactItem}`}>
-            <div className={`${styles.icon}`}>
-              <i className="lni-phone-handset" />
-            </div>
-            <div className={`${styles.text}`}>
-              <div className={`${styles.title}`}>mobile</div>
-              <div className={`${styles.value}`}>+201111980284</div>
+    <div className="flex items-center justify-center w-full py-8">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 w-full max-w-6xl">
+        <div className="flex items-center space-x-4 p-4 bg-card border border-border rounded-lg">
+          <div className="flex items-center justify-center w-12 h-12 bg-primary/10 rounded-full">
+            <i className="lni-phone-handset text-primary text-xl" />
+          </div>
+          <div>
+            <div className="text-sm font-medium text-muted-foreground uppercase">mobile</div>
+            <div className="text-card-foreground font-semibold">+201111980284</div>
+          </div>
+        </div>
+        <div className="flex items-center space-x-4 p-4 bg-card border border-border rounded-lg">
+          <div className="flex items-center justify-center w-12 h-12 bg-primary/10 rounded-full">
+            <i className="lni-envelope text-primary text-xl" />
+          </div>
+          <div>
+            <div className="text-sm font-medium text-muted-foreground uppercase">email</div>
+            <div className="text-card-foreground font-semibold">zyadyasser6@gmail.com</div>
+          </div>
+        </div>
+        <div className="md:col-span-2 flex items-center space-x-4 p-4 bg-card border border-border rounded-lg">
+          <div className="flex items-center justify-center w-12 h-12 bg-primary/10 rounded-full">
+            <i className="lni-pin text-primary text-xl" />
+          </div>
+          <div>
+            <div className="text-sm font-medium text-muted-foreground uppercase">Address</div>
+            <div className="text-card-foreground">
+              <p className="text-sm">B.62, Bank El-Eskan, Al-Dawahi, Port-Said, Egypt</p>
+              <p className="text-sm">1st Tayaran St., Nasr City, Cairo, Egypt</p>
             </div>
           </div>
-        </Grid>
-        <Grid item sm={12} md={3}>
-          <div className={`${styles.contactItem}`}>
-            <div className={`${styles.icon}`}>
-              <i className="lni-envelope" />
-            </div>
-            <div className={`${styles.text}`}>
-              <div className={`${styles.title}`}>email</div>
-              <div className={`${styles.value}`}>zyadyasser6@gmail.com</div>
-            </div>
-          </div>
-        </Grid>
-        <Grid item sm={12} md={6}>
-          <div className={`${styles.contactItem}`}>
-            <div className={`${styles.icon}`}>
-              <i className="lni-pin" />
-            </div>
-            <div className={`${styles.text}`}>
-              <div className={`${styles.title}`}>Address</div>
-              <div className={`${styles.value}`}>
-                <p>B.62, Bank El-Eskan, Al-Dawahi, Port-Said, Egypt</p>
-                <p>1st Tayaran St., Nasr City, Cairo, Egypt</p>
-              </div>
-            </div>
-          </div>
-        </Grid>
-      </Grid>
+        </div>
+      </div>
     </div>
   );
 };

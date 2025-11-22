@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import ContactForm from "../contact-form/contact-form.component";
 import ContactIcons from "../contact-icons/contact-icons.component";

@@ -1,22 +1,20 @@
 import type { Metadata } from "next";
-import { Roboto, Roboto_Condensed } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
+import { ThemeProvider } from "../components/theme-provider";
 
-const roboto = Roboto({
+const inter = Inter({
   subsets: ["latin"],
-  weight: ["300", "400", "700", "900"],
-  variable: "--font-roboto",
-});
-
-const robotoCondensed = Roboto_Condensed({
-  subsets: ["latin"],
-  variable: "--font-roboto-condensed",
+  variable: "--font-inter",
 });
 
 export const metadata: Metadata = {
-  title: "Zyad Yasser | Portfolio",
-  description: "A full stack software engineer specialized in web development",
-  viewport: "initial-scale=1.0, width=device-width",
+  title: "Zyad Yasser | Full Stack Developer",
+  description:
+    "Modern portfolio showcasing expertise in React, Next.js, and full-stack development",
+  keywords: ["portfolio", "full-stack", "developer", "react", "nextjs", "typescript"],
+  authors: [{ name: "Zyad Yasser" }],
+  viewport: "width=device-width, initial-scale=1",
   icons: {
     icon: "/favicon.ico",
   },
@@ -28,13 +26,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${roboto.variable} ${robotoCondensed.variable}`}>
+    <html lang="en" className={inter.variable} suppressHydrationWarning>
       <head>
-        <link href="/static/css/bootstrap.min.css" rel="stylesheet" />
-        <link href="/static/css/general.css" rel="stylesheet" />
         <link href="/static/css/lineicons.min.css" rel="stylesheet" />
       </head>
-      <body>{children}</body>
+      <body className="font-sans antialiased">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
+      </body>
     </html>
   );
 }
