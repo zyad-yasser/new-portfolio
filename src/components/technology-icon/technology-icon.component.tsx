@@ -1,6 +1,6 @@
 import { assetsPrefixUrl } from '../../constants';
 import * as React from 'react';
-import { Tooltip } from '@material-ui/core';
+import { Tooltip } from '@mui/material';
 import styles from "./technology-icon.module.sass";
 
 const TechnologyIcon = ({ technology }) => {

@@ -2,7 +2,7 @@ import * as React from 'react';
 import MiniSlider from '../mini-slider/mini-slider.component';
 import styles from "./about.module.sass";
 
-const About = (props) => {
+const About = () => {
   return (
     <div className={`d-flex align-items-center justify-content-center w-100 ${styles.about}`}>
       <div className={`text-left container ${styles.centeredContent}`}>

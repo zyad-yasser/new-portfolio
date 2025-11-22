@@ -1,4 +1,4 @@
-export class Project {
+export interface Project {
     name: string;
     description: string;
     link?: string;
@@ -8,40 +8,40 @@ export class Project {
     subProjects?: SubProject[];
 }
 
-export class SubProject {
+export interface SubProject {
     name: string;
     link?: string;
     description?: string;
 }
 
-export class Section {
+export interface Section {
     name: string;
     active: boolean;
 }
 
-export class Tab {
+export interface Tab {
     name: string;
-    component: (props: any) => JSX.Element| JSX.Element[];
+    component: (props: any) => React.JSX.Element | React.JSX.Element[];
 }
 
-export class Testimonial {
+export interface Testimonial {
     writer: string;
     title: string;
     photo: string;
     body: string;
 }
 
-export class Partner {
+export interface Partner {
     name: string;
     image: string;
 }
 
-export class Service {
+export interface Service {
     name: string;
     image: string;
 }
 
-export class SocaialMediaAccount {
+export interface SocaialMediaAccount {
     name: string;
     icon: string;
     color: string;

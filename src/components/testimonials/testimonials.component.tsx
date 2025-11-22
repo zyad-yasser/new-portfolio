@@ -1,4 +1,4 @@
-import Grid from "@material-ui/core/Grid";
+import { Grid } from "@mui/material";
 import * as React from "react";
 import Partners from "../partners/partners.component";
 import TestimonialsSlider from "../testimonials-slider/testimonials-slider.component";
