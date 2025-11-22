@@ -1,5 +1,4 @@
 import { Grid } from "@mui/material";
-import * as React from "react";
 import Partners from "../partners/partners.component";
 import TestimonialsSlider from "../testimonials-slider/testimonials-slider.component";
 import styles from "./testimonials.module.sass";

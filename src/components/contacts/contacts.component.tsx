@@ -1,4 +1,3 @@
-import * as React from "react";
 import ContactForm from "../contact-form/contact-form.component";
 import ContactIcons from "../contact-icons/contact-icons.component";
 import ContactSocial from "../contact-social/contact-social.component";

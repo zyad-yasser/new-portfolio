@@ -1,5 +1,6 @@
+"use client";
+
 import { Grid } from "@mui/material";
-import * as React from "react";
 import { useState } from "react";
 import { useEffect } from "react";
 import Fade from "react-reveal/Fade";

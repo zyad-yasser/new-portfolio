@@ -1,4 +1,5 @@
-import * as React from "react";
+"use client";
+
 import { useEffect, useRef, useState } from "react";
 import styles from "./react-slider.module.sass";
 

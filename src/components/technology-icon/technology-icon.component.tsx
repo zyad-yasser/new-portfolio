@@ -1,5 +1,4 @@
 import { Tooltip } from "@mui/material";
-import * as React from "react";
 import { assetsPrefixUrl } from "../../constants";
 import styles from "./technology-icon.module.sass";
 

@@ -1,5 +1,4 @@
 import { SocaialMediaAccount } from "@/models";
-import * as React from "react";
 import styles from "./social-media-icon.module.sass";
 
 const SocialMediaIcon = ({

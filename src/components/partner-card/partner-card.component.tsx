@@ -1,4 +1,5 @@
-import * as React from "react";
+"use client";
+
 import { useState } from "react";
 import { assetsPrefixUrl } from "../../constants";
 import styles from "./partner-card.module.sass";

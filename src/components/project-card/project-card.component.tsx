@@ -1,4 +1,3 @@
-import * as React from "react";
 import { assetsPrefixUrl } from "../../constants";
 import TechnologyIcon from "../technology-icon/technology-icon.component";
 import styles from "./project-card.module.sass";

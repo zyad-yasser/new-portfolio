@@ -1,4 +1,3 @@
-import * as React from "react";
 import styles from "./from-blog.module.sass";
 
 const FromBlog = (props) => {

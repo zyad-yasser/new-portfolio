@@ -1,4 +1,5 @@
-import * as React from "react";
+"use client";
+
 import Fade from "react-reveal/Fade";
 import { useUiStore } from "@/store/ui-store";
 import { capetalizeFirstLetter } from "../../helpers";

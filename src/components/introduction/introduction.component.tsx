@@ -1,4 +1,3 @@
-import * as React from "react";
 import styles from "./introduction.module.sass";
 
 const Introduction = (props) => {

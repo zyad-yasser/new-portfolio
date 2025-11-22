@@ -1,4 +1,3 @@
-import * as React from "react";
 import { testimonials } from "../../statics";
 import ReactSlider from "../react-slider/react-slider.component";
 import TestimonialCard from "../testimonial-card/testimonial-card.component";

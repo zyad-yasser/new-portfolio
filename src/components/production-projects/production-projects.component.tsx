@@ -1,4 +1,3 @@
-import * as React from "react";
 import Reveal from "react-reveal/Reveal";
 import { projectDirection } from "../../helpers";
 import { productionProjects } from "../../statics";

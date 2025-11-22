@@ -1,4 +1,3 @@
-import * as React from "react";
 import SingleSlider from "../single-slider/single-slider.component";
 import styles from "./skills.module.sass";
 

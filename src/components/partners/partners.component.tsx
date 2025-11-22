@@ -1,5 +1,5 @@
-import * as React from "react";
-import { useState } from "react";
+"use client";
+
 import { partners } from "../../statics";
 import PartnerCard from "../partner-card/partner-card.component";
 import styles from "./partners.module.sass";

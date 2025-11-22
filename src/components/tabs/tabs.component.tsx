@@ -1,4 +1,5 @@
-import * as React from "react";
+"use client";
+
 import { useEffect, useState } from "react";
 import { Tab } from "../../models";
 import styles from "./tabs.module.sass";

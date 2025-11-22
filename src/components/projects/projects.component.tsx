@@ -1,4 +1,3 @@
-import * as React from "react";
 import { projectsTabs } from "../../statics";
 import Tabs from "../tabs/tabs.component";
 import styles from "./projects.module.sass";

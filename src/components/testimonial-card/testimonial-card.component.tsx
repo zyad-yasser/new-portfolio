@@ -1,4 +1,3 @@
-import * as React from "react";
 import { assetsPrefixUrl } from "../../constants";
 import { Testimonial } from "../../models";
 import styles from "./testimonial-card.module.sass";

@@ -26,6 +26,23 @@ declare module "react-reveal/Reveal" {
   export default Reveal;
 }
 
+declare module "react-reveal/Slide" {
+  import React from "react";
+  interface SlideProps {
+    children?: React.ReactNode;
+    top?: boolean;
+    bottom?: boolean;
+    left?: boolean;
+    right?: boolean;
+    className?: string;
+    duration?: number;
+    delay?: number;
+    when?: boolean;
+  }
+  const Slide: React.ComponentType<SlideProps>;
+  export default Slide;
+}
+
 declare module "react-reveal/globals" {
   interface Config {
     ssrFadeout?: boolean;

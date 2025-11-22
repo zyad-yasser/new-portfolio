@@ -1,3 +1,5 @@
+"use client";
+
 import { useUiStore } from "@/store/ui-store";
 import styles from "./nav-btn.module.sass";
 

@@ -1,5 +1,4 @@
 import { Grid } from "@mui/material";
-import * as React from "react";
 import styles from "./contact-icons.module.sass";
 
 const ContactIcons = (props) => {

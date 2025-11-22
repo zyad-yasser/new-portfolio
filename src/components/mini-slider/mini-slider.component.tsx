@@ -1,4 +1,5 @@
-import * as React from "react";
+"use client";
+
 import { useEffect, useState } from "react";
 import styles from "./mini-slider.module.sass";
 

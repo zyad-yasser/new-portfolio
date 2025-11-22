@@ -1,4 +1,3 @@
-import * as React from "react";
 import styles from "./social-media.module.sass";
 
 const SocialMedia = (props) => {

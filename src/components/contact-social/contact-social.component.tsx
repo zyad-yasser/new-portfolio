@@ -1,4 +1,3 @@
-import * as React from "react";
 import { socialMediaAccounts } from "../../statics";
 import SocialMediaIcon from "../social-media-icon/social-media-icon.component";
 import styles from "./contact-social.module.sass";
