@@ -83,7 +83,11 @@ export function ModernHero() {
             transition={{ delay: 0.6, duration: 0.8 }}
             className="flex flex-col sm:flex-row gap-4 justify-center mb-12"
           >
-            <Button size="lg" className="text-lg px-8 py-6 btn-glow">
+            <Button 
+              size="lg" 
+              className="text-lg px-8 py-6 btn-glow"
+              onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
+            >
               <Mail className="mr-2 h-5 w-5" />
               Get In Touch
             </Button>
@@ -91,6 +95,7 @@ export function ModernHero() {
               variant="outline"
               size="lg"
               className="text-lg px-8 py-6 border-border hover:border-primary/50"
+              onClick={() => document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' })}
             >
               View My Work
             </Button>

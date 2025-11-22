@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Github, Linkedin, Mail, Heart } from "lucide-react";
+import { Github, Heart, Linkedin, Mail } from "lucide-react";
 import { Button } from "./ui/button";
 
 const socialLinks = [
@@ -135,8 +135,7 @@ export function ModernFooter() {
             © {new Date().getFullYear()} Zyad Yasser. All rights reserved.
           </p>
           <p className="flex items-center">
-            Made with <Heart className="w-4 h-4 mx-1 text-red-500 fill-current" /> using Next.js &
-            Tailwind CSS
+            Made with <Heart className="w-4 h-4 mx-1 text-red-500 fill-current" />
           </p>
         </motion.div>
       </div>
