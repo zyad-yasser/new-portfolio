@@ -1,8 +1,8 @@
+import { withRedux } from "next-redux-wrapper";
+import type { AppProps } from "next/app";
 import React from "react";
 import { Provider } from "react-redux";
-import type { AppProps } from 'next/app';
-import { withRedux } from "next-redux-wrapper";
-import '../styles/_app.sass';
+import "../styles/_app.sass";
 import { wrapper } from "@/store";
 
 interface MyAppProps extends AppProps {
@@ -10,9 +10,7 @@ interface MyAppProps extends AppProps {
 }
 
 function MyApp({ Component, pageProps }: MyAppProps) {
-  return (
-    <Component {...pageProps} />
-  );
+  return <Component {...pageProps} />;
 }
 
 export default wrapper.withRedux(MyApp);

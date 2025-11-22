@@ -1,6 +1,6 @@
-import { assetsPrefixUrl } from "../../constants";
 import * as React from "react";
 import { useState } from "react";
+import { assetsPrefixUrl } from "../../constants";
 import styles from "./partner-card.module.sass";
 
 const PartnerCard = ({ partner }) => {
@@ -8,9 +8,9 @@ const PartnerCard = ({ partner }) => {
   const toggleHover = (type: boolean) => (event: React.MouseEvent) => {
     event.stopPropagation();
     setHovered(type);
-  }
+  };
 
-  return(
+  return (
     <div
       onMouseEnter={toggleHover(true)}
       onMouseLeave={toggleHover(false)}

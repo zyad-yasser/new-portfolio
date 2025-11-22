@@ -14,12 +14,8 @@ const ContactIcons = (props) => {
               <i className="lni-phone-handset" />
             </div>
             <div className={`${styles.text}`}>
-            <div className={`${styles.title}`}>
-                mobile
-              </div>
-              <div className={`${styles.value}`}>
-                +201111980284
-              </div>
+              <div className={`${styles.title}`}>mobile</div>
+              <div className={`${styles.value}`}>+201111980284</div>
             </div>
           </div>
         </Grid>
@@ -29,24 +25,18 @@ const ContactIcons = (props) => {
               <i className="lni-envelope" />
             </div>
             <div className={`${styles.text}`}>
-              <div className={`${styles.title}`}>
-                email
-              </div>
-              <div className={`${styles.value}`}>
-                zyadyasser6@gmail.com
-              </div>
+              <div className={`${styles.title}`}>email</div>
+              <div className={`${styles.value}`}>zyadyasser6@gmail.com</div>
             </div>
           </div>
         </Grid>
         <Grid item sm={12} md={6}>
           <div className={`${styles.contactItem}`}>
             <div className={`${styles.icon}`}>
-            <i className="lni-pin" />
+              <i className="lni-pin" />
             </div>
             <div className={`${styles.text}`}>
-            <div className={`${styles.title}`}>
-                Address
-              </div>
+              <div className={`${styles.title}`}>Address</div>
               <div className={`${styles.value}`}>
                 <p>B.62, Bank El-Eskan, Al-Dawahi, Port-Said, Egypt</p>
                 <p>1st Tayaran St., Nasr City, Cairo, Egypt</p>

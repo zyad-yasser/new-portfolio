@@ -1,15 +1,15 @@
-import { productionProjects } from "../../statics";
 import * as React from "react";
-import ProjectCard from "../project-card/project-card.component";
+import Reveal from "react-reveal/Reveal";
 import { projectDirection } from "../../helpers";
-import Reveal from 'react-reveal/Reveal';
+import { productionProjects } from "../../statics";
+import ProjectCard from "../project-card/project-card.component";
 
 const ProductionProjects = (props) => {
-  return(
+  return (
     <Reveal effect="fade" effectOut="fade" exit delay={4000} wait={4000} left cascade>
-      {
-        productionProjects.map((item, index) => <ProjectCard project={item} key={index} type={ projectDirection(index) }/>)
-      }
+      {productionProjects.map((item, index) => (
+        <ProjectCard project={item} key={index} type={projectDirection(index)} />
+      ))}
     </Reveal>
   );
 };

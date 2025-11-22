@@ -1,5 +1,5 @@
-declare module 'react-reveal/Fade' {
-  import React from 'react';
+declare module "react-reveal/Fade" {
+  import React from "react";
   interface FadeProps {
     children?: React.ReactNode;
     top?: boolean;
@@ -15,8 +15,8 @@ declare module 'react-reveal/Fade' {
   export default Fade;
 }
 
-declare module 'react-reveal/Reveal' {
-  import React from 'react';
+declare module "react-reveal/Reveal" {
+  import React from "react";
   interface RevealProps {
     children?: React.ReactNode;
     effect?: string;
@@ -26,7 +26,7 @@ declare module 'react-reveal/Reveal' {
   export default Reveal;
 }
 
-declare module 'react-reveal/globals' {
+declare module "react-reveal/globals" {
   interface Config {
     ssrFadeout?: boolean;
   }

@@ -1,13 +1,11 @@
-import * as React from 'react';
+import * as React from "react";
 import styles from "./footer.module.sass";
 
 const Footer = (props) => {
   return (
     <div className={`d-flex h-100 ${styles.footer}`}>
       <div className={`${styles.sectionUp}`}>
-        <div className={`${styles.about}`}>
-          Designed and developed with ❤️ by Zyad Yasser
-        </div>
+        <div className={`${styles.about}`}>Designed and developed with ❤️ by Zyad Yasser</div>
       </div>
       <div className={`${styles.sectionDown}`}>
         <div className={`${styles.flipper}`}>
@@ -16,6 +14,6 @@ const Footer = (props) => {
       </div>
     </div>
   );
-}
+};
 
 export default Footer;

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import styles from "./react-slider.module.sass";
 
 const ReactSlider = (props) => {
@@ -15,7 +15,7 @@ const ReactSlider = (props) => {
   const setActivePage = (index: number) => {
     setActivePageIndex(index);
     onSlideChange(index);
-  }
+  };
 
   const [computedColumn, setComputedColumn] = useState({
     minWidth: "33.33%",
@@ -43,11 +43,7 @@ const ReactSlider = (props) => {
     let currentActivePage = activePage;
     if (type === "increment" && activePage < pagesNumber - 1) {
       currentActivePage++;
-    } else if (
-      type === "increment" &&
-      config.automatic &&
-      currentActivePage === pagesNumber - 1
-    ) {
+    } else if (type === "increment" && config.automatic && currentActivePage === pagesNumber - 1) {
       currentActivePage = 0;
     } else if (type === "decrement" && activePage > 0) {
       currentActivePage--;
@@ -93,10 +89,10 @@ const ReactSlider = (props) => {
     return bodyWidth > 992
       ? "lg"
       : bodyWidth <= 992 && bodyWidth > 576
-      ? "md"
-      : bodyWidth <= 576
-      ? "sm"
-      : "sm";
+        ? "md"
+        : bodyWidth <= 576
+          ? "sm"
+          : "sm";
   };
 
   const elementsPerPage = () => {
@@ -154,8 +150,8 @@ const ReactSlider = (props) => {
       leftIcon: "arrow-left-circle",
     },
     mouse: {
-      pauseOnHover: true
-    }
+      pauseOnHover: true,
+    },
   };
 
   const setSliderHedight = () => {
@@ -163,13 +159,9 @@ const ReactSlider = (props) => {
     const moverElEl: HTMLElement = moverEl.current;
     const moverHeight: number = moverElEl.clientHeight;
     sliderWrapperEl.style.height = `${moverHeight}px`;
-  }
+  };
 
-  const {
-    children = [],
-    config = defaultConfig,
-    onSlideChange = () => {},
-  } = props;
+  const { children = [], config = defaultConfig, onSlideChange = () => {} } = props;
 
   useEffect(() => {
     const screen = screenSize();
@@ -229,7 +221,7 @@ const ReactSlider = (props) => {
         </div>
         <div
           ref={sliderContainer}
-          className={`d-flex align-items-center position-relative h-100 ${styles.items} ${!config.nav.show ? 'w-100' : ''}`}
+          className={`d-flex align-items-center position-relative h-100 ${styles.items} ${!config.nav.show ? "w-100" : ""}`}
         >
           <div
             ref={moverEl}
