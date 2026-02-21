@@ -1,56 +1,10 @@
-import OtherProjects from "../components/other-projects/other-projects.component";
-import ProductionProjects from "../components/production-projects/production-projects.component";
 import {
   Partner,
   Project,
-  Section,
   Service,
   SocaialMediaAccount,
-  Tab,
   Testimonial,
 } from "../models";
-
-const projectsTabs: Tab[] = [
-  {
-    name: "Production",
-    component: ProductionProjects,
-  },
-  {
-    name: "Other",
-    component: OtherProjects,
-  },
-];
-
-const sections: Section[] = [
-  {
-    name: "home",
-    active: true,
-  },
-  {
-    name: "about",
-    active: false,
-  },
-  {
-    name: "skills",
-    active: false,
-  },
-  {
-    name: "projects",
-    active: false,
-  },
-  {
-    name: "testmonials",
-    active: false,
-  },
-  {
-    name: "services",
-    active: false,
-  },
-  {
-    name: "contacts",
-    active: false,
-  },
-];
 
 const productionProjects: Project[] = [
   {
@@ -417,8 +371,6 @@ const socialMediaAccounts: SocaialMediaAccount[] = [
 ];
 
 export {
-  projectsTabs,
-  sections,
   productionProjects,
   otherProjects,
   testimonials,
