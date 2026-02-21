@@ -35,68 +35,68 @@ const SingleSlider = (props: SingleSliderProps) => {
 
   const defaultItems = [
     {
-      icon: "/static/logos/mean.png",
-      title: "MEAN stack development",
-      text: "All about full stack development using Angular / Node.js",
+      icon: "/logos/react.png",
+      title: "React & Next.js",
+      text: "Modern React development with Next.js, TypeScript & Zustand",
       caption:
-        "Starting from backend development using the amazing Node.js runtime, to frontend development using Angular (latest) the most powerful beloved framework, and finally we neverforget about database design and queries using MongoDB.",
-      image: "/static/logos/mean-expanded.png",
+        "Expert in building high-performance React applications with Next.js 16, TypeScript, server components, and modern state management using Zustand. Experienced with React 19, Framer Motion for animations, and TailwindCSS v4 for styling.",
+      image: "/logos/react-expanded.png",
     },
     {
-      icon: "/static/logos/mern.png",
-      title: "MERN stack development",
-      text: "Full stack development using React.js / Node.js",
+      icon: "/logos/vue.png",
+      title: "Vue.js & Modern Frontend",
+      text: "Vue.js, TypeScript, and component-based architecture",
       caption:
-        "I find amazing enjoyable work when I write full stack apps using React and when it combined with Next.js and Node.js, it becomes super stack.",
-      image: "/static/logos/mern-expanded.png",
+        "Building scalable applications with Vue.js and TypeScript. Experience with Ionic for hybrid mobile apps, Firebase integration, and real-time features. Created production platforms like Shasha.io and Commaful.",
+      image: "/logos/vue-expanded.png",
     },
     {
-      icon: "/static/logos/frontend.png",
-      title: "Frontend development",
-      text: "It's like art to me when I work using Vue / Svelte",
+      icon: "/logos/angular.png",
+      title: "Angular & Enterprise Apps",
+      text: "Enterprise-grade applications with Angular & TypeScript",
       caption:
-        "Making and building applications using amazing frontend frameworks available, also building libraries, components, and building blocks which can be combined to acheive your dreams in your app.",
-      image: "/static/logos/frontend-expanded.png",
+        "Developed complex enterprise solutions including Takeda production management boards, Voestalpine welding dashboard, and Money Fellows. Expert in Angular, RxJS, and building robust, scalable architectures.",
+      image: "/logos/angular-expanded.png",
     },
     {
-      icon: "/static/logos/cross-platform.png",
-      title: "Cross platform development",
-      text: "Developing mobile applications using cross platform technologies",
+      icon: "/logos/node.png",
+      title: "Node.js & Backend",
+      text: "Backend development with Node.js, Express & databases",
       caption:
-        "Building mobile applications functionality and interfaces one of the most enjoyable jobs to do, Ionic, Native Script, Flutter, each one of them has it's special impact on the application.",
-      image: "/static/logos/cross-platform-expanded.png",
+        "Full-stack backend expertise with Node.js, Express, Sails.js, Firebase, and MongoDB. Built scalable APIs for platforms like Shasha.io, Clean Tagger, and numerous production applications with AWS deployment.",
+      image: "/logos/node-expanded.png",
     },
     {
-      icon: "/static/logos/devops.png",
-      title: "DevOps",
-      text: "Moving your app from the state of development, to the production",
+      icon: "/logos/mobile.png",
+      title: "Mobile Development",
+      text: "Cross-platform mobile apps with Ionic, Capacitor & Flutter",
       caption:
-        "Your app is the most important thing to pay attention to when it comes to production, with the experience in AWS, Firebase, heroku, Nginx, Apache, Linux, we can deliver your application to production with the most stable state with all your needs.",
-      image: "/static/logos/devops-expanded.png",
+        "Created successful mobile applications using Ionic, Capacitor, and hybrid technologies. Published apps include Commaful (App Store) and Money Fellows (Google Play). Expert in building native-like mobile experiences.",
+      image: "/logos/mobile-expanded.png",
     },
     {
-      icon: "/static/logos/ui.png",
-      title: "UI design / development",
-      text: "Designing, and developing impressive UIs",
+      icon: "/logos/cloud.png",
+      title: "Cloud & DevOps",
+      text: "AWS, Firebase, Docker, and modern deployment practices",
       caption:
-        "Building UIs is the so important key parameter of successfull application, as when it comes to easy, amd attactive design, this makes the user keen to use the app, HTML5, CSS3, Bootstrap, JavaScript solid experience to deliver the desired UIS.",
-      image: "/static/logos/ui-expanded.png",
+        "Production deployment experience with AWS, Firebase, Heroku, Nginx, and Apache. Proficient in CI/CD, Docker containerization, Linux server management, and ensuring high availability for production applications.",
+      image: "/logos/cloud-expanded.png",
     },
     {
-      icon: "/static/logos/gfx.png",
-      title: "Graphic design",
-      text: "All about graphics and media design",
+      icon: "/logos/typescript.png",
+      title: "TypeScript & Modern JS",
+      text: "Type-safe development with TypeScript, ES6+",
       caption:
-        "As this was my first hobby to have, I love using designing apps, Photoshop, Illustrator, XD, Abstract, Sketch, I love when the wireframes become interactive dynamic user experience.",
-      image: "/static/logos/gfx-expanded.png",
+        "Strong advocate for type safety with extensive TypeScript experience across all frameworks. Building maintainable, scalable applications with modern JavaScript (ES6+), async/await, and functional programming patterns.",
+      image: "/logos/typescript-expanded.png",
     },
     {
-      icon: "/static/logos/iot.png",
-      title: "IOT / Desktop applications development",
-      text: "Building robotics, desktop applications, and smart houses",
+      icon: "/logos/ui.png",
+      title: "UI/UX & Design Systems",
+      text: "TailwindCSS, Sass, shadcn/ui, and responsive design",
       caption:
-        "The field of building robotics and control it throw apps is robust, I use Node.js to control several boards to build robotics and control smart houses, also I use Electron.js to build desktop applications.",
-      image: "/static/logos/iot-expanded.png",
+        "Creating beautiful, responsive interfaces with TailwindCSS v4, Sass, and modern design systems like shadcn/ui. Experience with Figma, Adobe XD, and transforming designs into pixel-perfect implementations with Framer Motion animations.",
+      image: "/logos/ui-expanded.png",
     },
   ];
 

@@ -21,6 +21,77 @@ export function ModernHero() {
         }}
       />
 
+      {/* Animated yellowish lighting effects */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {/* Spotlight 1 - Top left */}
+        <motion.div
+          className="absolute w-[600px] h-[600px] rounded-full"
+          style={{
+            background: "radial-gradient(circle, rgba(255, 200, 50, 0.25) 0%, rgba(255, 170, 50, 0.15) 40%, transparent 70%)",
+            filter: "blur(80px)",
+            mixBlendMode: "screen",
+            top: "-10%",
+            left: "10%",
+          }}
+          animate={{
+            x: [0, 30, -20, 40, 0],
+            y: [0, -40, 30, 20, 0],
+            scale: [1, 1.1, 0.95, 1.05, 1],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Number.POSITIVE_INFINITY,
+            ease: "easeInOut",
+          }}
+        />
+
+        {/* Spotlight 2 - Right */}
+        <motion.div
+          className="absolute w-[500px] h-[500px] rounded-full"
+          style={{
+            background: "radial-gradient(circle, rgba(255, 220, 100, 0.2) 0%, rgba(255, 180, 70, 0.1) 40%, transparent 70%)",
+            filter: "blur(80px)",
+            mixBlendMode: "screen",
+            top: "40%",
+            right: "15%",
+          }}
+          animate={{
+            x: [0, -40, 30, -30, 0],
+            y: [0, 30, -30, 0, 0],
+            scale: [1, 1.15, 0.9, 1, 1],
+          }}
+          transition={{
+            duration: 18,
+            repeat: Number.POSITIVE_INFINITY,
+            ease: "easeInOut",
+            delay: 5,
+          }}
+        />
+
+        {/* Spotlight 3 - Bottom center */}
+        <motion.div
+          className="absolute w-[550px] h-[550px] rounded-full"
+          style={{
+            background: "radial-gradient(circle, rgba(255, 190, 80, 0.22) 0%, rgba(255, 160, 60, 0.12) 40%, transparent 70%)",
+            filter: "blur(80px)",
+            mixBlendMode: "screen",
+            bottom: "10%",
+            left: "40%",
+          }}
+          animate={{
+            x: [0, 35, -30, 0, 0],
+            y: [0, 40, -35, 0, 0],
+            scale: [1, 1.1, 0.95, 1, 1],
+          }}
+          transition={{
+            duration: 22,
+            repeat: Number.POSITIVE_INFINITY,
+            ease: "easeInOut",
+            delay: 10,
+          }}
+        />
+      </div>
+
       {/* Theme toggle */}
       <div className="absolute top-6 right-6 z-10">
         <ThemeToggle />
