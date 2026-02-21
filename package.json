@@ -17,7 +17,8 @@
     "format:check": "biome format .",
     "check": "biome check .",
     "check:fix": "biome check --write .",
-    "format:all": "biome format --write . && biome lint --write ."
+    "format:all": "biome format --write . && biome lint --write .",
+    "clean": "rm -rf .next && rm -rf node_modules && rm -rf .turbo && rm -rf .pnpm-store"
   },
   "husky": {
     "hooks": {
