@@ -5,7 +5,7 @@ import ContactIcons from "../contact-icons/contact-icons.component";
 import ContactSocial from "../contact-social/contact-social.component";
 import styles from "./contacts.module.sass";
 
-const Contacts = (props) => {
+const Contacts = () => {
   return (
     <div className={`d-flex align-items-center justify-content-center w-100 ${styles.contacts}`}>
       <div className={`text-left container ${styles.centeredContent}`}>

@@ -3,7 +3,11 @@ import MegaMenu from "../mega-menu/mega-menu.component";
 import Navbar from "../navbar/navbar.component";
 const styles = require("./layout.module.sass");
 
-const Layout = (props) => (
+interface LayoutProps {
+  children: React.ReactNode;
+}
+
+const Layout = (props: LayoutProps) => (
   <div className={`d-flex position-relative ${styles.mainContainer}`}>
     <MegaMenu />
     <Navbar />

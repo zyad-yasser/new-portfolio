@@ -3,7 +3,24 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
-const SingleSlider = (props) => {
+interface SingleSliderProps {
+  items?: Array<{
+    icon: string;
+    title: string;
+    text: string;
+    caption: string;
+    image: string;
+  }>;
+  config?: {
+    iconPrefix?: string;
+    rightIcon?: string;
+    leftIcon?: string;
+    duration?: number;
+    automatic?: boolean;
+  };
+}
+
+const SingleSlider = (props: SingleSliderProps) => {
   const [activeSlide, setActiveSlide] = useState(0);
   const [automatic, setAutomatic] = useState(false);
   const defaultConfig = {
@@ -14,7 +31,7 @@ const SingleSlider = (props) => {
     automatic: true,
   };
 
-  const [activeImage, setActiveImage] = useState(null);
+  const [activeImage, setActiveImage] = useState<string | null>(null);
 
   const defaultItems = [
     {
@@ -85,7 +102,7 @@ const SingleSlider = (props) => {
 
   const { items = defaultItems, config = defaultConfig } = props;
 
-  const handleSlideChange = (type) => {
+  const handleSlideChange = (type: string) => {
     const pagesNumber = items.length;
     let currentActiveSlide = activeSlide;
     if (type === "increment" && currentActiveSlide < pagesNumber - 1) {
@@ -111,7 +128,7 @@ const SingleSlider = (props) => {
     }
   };
 
-  const handleMouseEvent = (value) => {
+  const handleMouseEvent = (value: boolean) => {
     setAutomatic(!value);
   };
 
@@ -122,11 +139,11 @@ const SingleSlider = (props) => {
   useEffect(() => {
     if (config.automatic) {
       const interval = setInterval(() => {
-        const controllerButton: HTMLElement = document.querySelector(".si-sl-b");
-        if (automatic) {
+        const controllerButton = document.querySelector(".si-sl-b") as HTMLElement;
+        if (automatic && controllerButton) {
           controllerButton.click();
         }
-      }, config.duration * 1000);
+      }, (config.duration || 3) * 1000);
       return () => clearInterval(interval);
     }
   }, [automatic]);

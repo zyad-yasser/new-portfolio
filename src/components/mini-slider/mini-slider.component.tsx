@@ -3,9 +3,29 @@
 import { useEffect, useState } from "react";
 import styles from "./mini-slider.module.sass";
 
-const MiniSlider = (props) => {
+interface MiniSliderProps {
+  items?: Array<{
+    icon: string;
+    title: string;
+    text: string;
+  }>;
+  config?: {
+    iconPrefix?: string;
+    rightIcon?: string;
+    leftIcon?: string;
+    elementsPerPage?: {
+      lg: number;
+      md: number;
+      sm: number;
+    };
+    duration?: number;
+    automatic?: boolean;
+  };
+}
+
+const MiniSlider = (props: MiniSliderProps) => {
   const [activePage, setActivePage] = useState(0);
-  const [pagesArray, setPagesArray] = useState([]);
+  const [pagesArray, setPagesArray] = useState<string[]>([]);
   const [automatic, setAutomatic] = useState(false);
   const [itemsPerPage, setItemsPerPage] = useState(3);
   const [moverStyle, setMoverStyle] = useState({
@@ -22,19 +42,19 @@ const MiniSlider = (props) => {
     height: 0,
   });
 
-  const handleBottomController = (activePage) => {
+  const handleBottomController = (activePage: number) => {
     setActivePage(activePage);
   };
 
-  const pagesCalculator = (screenSize) => {
-    const outerElements = items.length - config.elementsPerPage[screenSize];
+  const pagesCalculator = (screenSize: string) => {
+    const outerElements = items.length - (config.elementsPerPage?.[screenSize as keyof typeof config.elementsPerPage] || 1);
     let count = outerElements > 0 ? outerElements : 0;
     count++;
     const pagesArray = new Array(count).fill("");
     setPagesArray(pagesArray);
   };
 
-  const handleController = (type) => {
+  const handleController = (type: string) => {
     const pagesNumber = pagesArray.length;
     let currentActivePage = activePage;
     if (type === "increment" && activePage < pagesNumber - 1) {
@@ -48,7 +68,8 @@ const MiniSlider = (props) => {
   };
 
   const handleDimensions = () => {
-    const containerElement = document.querySelector(".mi-sl-c-c");
+    const containerElement = document.querySelector(".mi-sl-c-c") as HTMLElement;
+    if (!containerElement) return;
     const width = `${containerElement.clientWidth}px`;
     const marginLeft = moverCalculator();
     const moverStyle = { width, marginLeft };
@@ -56,21 +77,23 @@ const MiniSlider = (props) => {
   };
 
   const moverCalculator = () => {
-    const oneElement = document.querySelector(".mi-sl-c");
+    const oneElement = document.querySelector(".mi-sl-c") as HTMLElement;
+    if (!oneElement) return "0px";
     const elementSize = oneElement.clientWidth;
     const marginLeft = -activePage * elementSize;
     return `${marginLeft}px`;
   };
 
   const columnCalculator = () => {
-    const containerElement = document.querySelector(".mi-sl-c-c");
+    const containerElement = document.querySelector(".mi-sl-c-c") as HTMLElement;
+    if (!containerElement) return "100%";
     const elements = elementsPerPage();
     const width = `${Math.ceil(containerElement.clientWidth / elements)}px`;
     return width;
   };
 
   const screenSize = () => {
-    const bodyWidth = document.querySelector("body").clientWidth;
+    const bodyWidth = document.querySelector("body")?.clientWidth || 0;
     return bodyWidth > 992
       ? "lg"
       : bodyWidth <= 992 && bodyWidth > 576
@@ -82,9 +105,9 @@ const MiniSlider = (props) => {
 
   const elementsPerPage = () => {
     const screen = screenSize();
-    const selectedItemsPerPage = config.elementsPerPage[screen];
+    const selectedItemsPerPage = config.elementsPerPage?.[screen as keyof typeof config.elementsPerPage] || 1;
     setItemsPerPage(selectedItemsPerPage);
-    return config.elementsPerPage[screen];
+    return selectedItemsPerPage;
   };
 
   const handleAutomatic = () => {
@@ -93,12 +116,13 @@ const MiniSlider = (props) => {
     }
   };
 
-  const handleMouseEvent = (value) => {
+  const handleMouseEvent = (value: boolean) => {
     setAutomatic(!value);
   };
 
-  const handleResize = (event) => {
+  const handleResize = (event: Event) => {
     const body = document.querySelector("body");
+    if (!body) return;
     const width = body.clientWidth;
     const height = body.clientWidth;
     setBodyDimensions({ width, height });
@@ -106,7 +130,7 @@ const MiniSlider = (props) => {
   };
 
   const resizeListiner = () => {
-    let delay;
+    let delay: ReturnType<typeof setTimeout>;
     window.addEventListener("resize", (event) => {
       clearTimeout(delay);
       delay = setTimeout(() => {
@@ -180,11 +204,11 @@ const MiniSlider = (props) => {
   useEffect(() => {
     if (config.automatic) {
       const interval = setInterval(() => {
-        const controllerButton: HTMLElement = document.querySelector(".mi-sl-b");
-        if (automatic) {
+        const controllerButton = document.querySelector(".mi-sl-b") as HTMLElement;
+        if (automatic && controllerButton) {
           controllerButton.click();
         }
-      }, config.duration * 1000);
+      }, (config.duration || 3) * 1000);
       return () => clearInterval(interval);
     }
   }, [automatic]);

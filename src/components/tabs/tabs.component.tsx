@@ -4,7 +4,11 @@ import { useEffect, useState } from "react";
 import { Tab } from "../../models";
 import styles from "./tabs.module.sass";
 
-const Tabs = ({ tabs }) => {
+interface TabsProps {
+  tabs: Tab[];
+}
+
+const Tabs = ({ tabs }: TabsProps) => {
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const setActiveTab = (index: number) => {
     setActiveTabIndex(index);
@@ -14,7 +18,7 @@ const Tabs = ({ tabs }) => {
     setRenderedComponent(tabs[activeTabIndex].component);
   }, [activeTabIndex]);
 
-  const [renderedComponent, setRenderedComponent] = useState(tabs[0].component);
+  const [renderedComponent, setRenderedComponent] = useState<(props: any) => React.JSX.Element | React.JSX.Element[]>(() => tabs[0].component);
   return (
     <div className={`w-100 position-relative ${styles.tabs}`}>
       <div className="activator position-absolute"></div>
@@ -29,7 +33,7 @@ const Tabs = ({ tabs }) => {
           </div>
         ))}
       </div>
-      <div className="content mt-5">{renderedComponent}</div>
+      <div className="content mt-5">{renderedComponent({})}</div>
     </div>
   );
 };

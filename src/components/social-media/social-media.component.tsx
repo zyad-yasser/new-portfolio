@@ -1,6 +1,6 @@
 import styles from "./social-media.module.sass";
 
-const SocialMedia = (props) => {
+const SocialMedia = () => {
   return <div className={styles.container}>Top</div>;
 };
 

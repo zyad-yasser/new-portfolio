@@ -2,7 +2,7 @@ import { socialMediaAccounts } from "../../statics";
 import SocialMediaIcon from "../social-media-icon/social-media-icon.component";
 import styles from "./contact-social.module.sass";
 
-const ContactSocial = (props) => {
+const ContactSocial = () => {
   return (
     <div
       className={`mt-3 d-flex align-items-center justify-content-center flex-grow-0 w-100 ${styles.contactSocial}`}

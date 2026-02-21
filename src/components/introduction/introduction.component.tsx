@@ -1,6 +1,6 @@
 import styles from "./introduction.module.sass";
 
-const Introduction = (props) => {
+const Introduction = () => {
   return (
     <div
       className={`d-flex align-items-center justify-content-center w-100 ${styles.introduction}`}

@@ -1,6 +1,10 @@
 import { assetsPrefixUrl } from "../../constants";
 
-const TechnologyIcon = ({ technology }) => {
+interface TechnologyIconProps {
+  technology: string;
+}
+
+const TechnologyIcon = ({ technology }: TechnologyIconProps) => {
   return (
     <div className="flex justify-center items-center p-2 bg-card border border-border rounded-lg hover:bg-accent transition-colors group">
       <img

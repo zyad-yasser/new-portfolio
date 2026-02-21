@@ -1,6 +1,6 @@
 import styles from "./from-blog.module.sass";
 
-const FromBlog = (props) => {
+const FromBlog = () => {
   return <div className={styles.container}>Top</div>;
 };
 

@@ -1,12 +1,18 @@
 import { assetsPrefixUrl } from "../../constants";
+import { Project } from "../../models";
 import TechnologyIcon from "../technology-icon/technology-icon.component";
 import styles from "./project-card.module.sass";
 
-const ProjectCard = ({ project, type }) => {
+interface ProjectCardProps {
+  project: Project;
+  type: string;
+}
+
+const ProjectCard = ({ project, type }: ProjectCardProps) => {
   const { link, subProjects, colors, technologies, name, image, description } = project;
   const [name1, name2] = name.split(" ");
   const [mainColor = "#FFF", secondaryColor = "#d34947"] = colors;
-  const projectNavigate = (link) => {
+  const projectNavigate = (link: string) => {
     window.open(link, "_blank");
   };
   return (
@@ -39,11 +45,11 @@ const ProjectCard = ({ project, type }) => {
         {subProjects && subProjects.length && (
           <div className={`${styles.subProjects} text-left mt-4`}>
             {subProjects
-              .sort((a, b) => (a.link > b.link ? 1 : -1))
+              .sort((a, b) => ((a.link || "") > (b.link || "") ? 1 : -1))
               .map(({ name: subName, link }, index) => (
                 <div
                   key={index}
-                  onClick={projectNavigate.bind(null, link)}
+                  onClick={link ? projectNavigate.bind(null, link) : undefined}
                   className={`d-flex align-items-center justify-content-start ${styles.subProject} ${link ? styles["link"] : ""}`}
                 >
                   <div className="dot red mr-1" />

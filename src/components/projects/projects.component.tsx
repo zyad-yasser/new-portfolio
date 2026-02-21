@@ -1,7 +1,7 @@
 import { projectsTabs } from "../../statics";
 import Tabs from "../tabs/tabs.component";
 
-const Projects = (props) => {
+const Projects = () => {
   return (
     <div className="flex items-center justify-center w-full p-4 py-20">
       <div className="flex items-center justify-center w-full">

@@ -3,7 +3,7 @@ import ReactSlider from "../react-slider/react-slider.component";
 import TestimonialCard from "../testimonial-card/testimonial-card.component";
 import styles from "./testimonials-slider.module.sass";
 
-const TestimonialsSlider = (props) => {
+const TestimonialsSlider = () => {
   const config = {
     iconPrefix: "lni",
     elementsPerPage: {

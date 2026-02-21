@@ -2,9 +2,14 @@
 
 import { useState } from "react";
 import { assetsPrefixUrl } from "../../constants";
+import { Partner } from "../../models";
 import styles from "./partner-card.module.sass";
 
-const PartnerCard = ({ partner }) => {
+interface PartnerCardProps {
+  partner: Partner;
+}
+
+const PartnerCard = ({ partner }: PartnerCardProps) => {
   const [hovered, setHovered] = useState(false);
   const toggleHover = (type: boolean) => (event: React.MouseEvent) => {
     event.stopPropagation();
