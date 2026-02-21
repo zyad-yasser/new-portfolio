@@ -1,11 +1,11 @@
 "use client";
 
+import { getFirebaseStorageUrl } from "@/constants";
+import { testimonials } from "@/statics";
 import { motion } from "framer-motion";
 import { Quote } from "lucide-react";
 import Image from "next/image";
 import { Card, CardContent } from "./ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { testimonials } from "@/statics";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -67,15 +67,15 @@ export function ModernTestimonials() {
                     <Quote className="h-8 w-8 text-primary flex-shrink-0" />
                     <Quote className="h-8 w-8 text-primary/30 flex-shrink-0 -ml-4" />
                   </div>
-                  
+
                   <blockquote className="text-lg leading-relaxed text-muted-foreground mb-8">
                     "{testimonial.body}"
                   </blockquote>
-                  
+
                   <div className="flex items-center space-x-4">
                     <div className="relative h-12 w-12 rounded-full overflow-hidden bg-primary/10">
                       <Image
-                        src={testimonial.photo}
+                        src={getFirebaseStorageUrl(testimonial.photo)}
                         alt={testimonial.writer}
                         fill
                         className="object-cover"
@@ -83,12 +83,8 @@ export function ModernTestimonials() {
                       />
                     </div>
                     <div>
-                      <div className="font-semibold text-foreground">
-                        {testimonial.writer}
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        {testimonial.title}
-                      </div>
+                      <div className="font-semibold text-foreground">{testimonial.writer}</div>
+                      <div className="text-sm text-muted-foreground">{testimonial.title}</div>
                     </div>
                   </div>
                 </CardContent>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { assetsPrefixUrl } from "../../constants";
+import { getFirebaseStorageUrl } from "../../constants";
 import { Partner } from "../../models";
 import styles from "./partner-card.module.sass";
 
@@ -23,7 +23,7 @@ const PartnerCard = ({ partner }: PartnerCardProps) => {
       className={`d-flex align-items-center justify-content-center position-relative m-3 ${styles.card}  ${hovered && styles.hovered}`}
     >
       {/* <div className={`d-flex align-items-center justify-content-center position-absolute ${styles.name}`}>{partner.name}</div>
-      <img src={ assetsPrefixUrl + partner.image } width="100px" height="62px"/> */}
+      <img src={getFirebaseStorageUrl(partner.image)} width="100px" height="62px"/> */}
     </div>
   );
 };

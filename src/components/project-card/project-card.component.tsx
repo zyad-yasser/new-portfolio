@@ -1,4 +1,4 @@
-import { assetsPrefixUrl } from "../../constants";
+import { getFirebaseStorageUrl } from "../../constants";
 import { Project } from "../../models";
 import TechnologyIcon from "../technology-icon/technology-icon.component";
 import styles from "./project-card.module.sass";
@@ -61,7 +61,7 @@ const ProjectCard = ({ project, type }: ProjectCardProps) => {
       </div>
       <div
         className={`${styles.image}`}
-        style={{ backgroundImage: `url(${assetsPrefixUrl}${image})` }}
+        style={{ backgroundImage: `url(${getFirebaseStorageUrl(image)})` }}
       />
     </div>
   );

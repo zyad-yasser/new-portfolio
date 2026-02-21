@@ -2,8 +2,10 @@
 
 import { motion } from "framer-motion";
 import { ArrowDown, Github, Linkedin, Mail } from "lucide-react";
-import { Button } from "./ui/button";
+import Image from "next/image";
+import { getFirebaseStorageUrl } from "../constants";
 import { ThemeToggle } from "./theme-toggle";
+import { Button } from "./ui/button";
 
 export function ModernHero() {
   return (
@@ -41,7 +43,13 @@ export function ModernHero() {
           >
             <div className="w-full h-full rounded-full bg-gradient-to-r from-primary to-warning p-1 shadow-2xl">
               <div className="w-full h-full rounded-full bg-card border border-border flex items-center justify-center relative overflow-hidden">
-                <span className="text-4xl font-bold gradient-primary">ZY</span>
+                <Image
+                  src={getFirebaseStorageUrl("/avatars/zyad.jpg")}
+                  alt="Zyad Yasser"
+                  fill
+                  className="object-cover rounded-full"
+                  priority
+                />
                 <div className="absolute inset-0 bg-gradient-to-t from-primary/20 to-transparent rounded-full" />
               </div>
             </div>
@@ -83,10 +91,12 @@ export function ModernHero() {
             transition={{ delay: 0.6, duration: 0.8 }}
             className="flex flex-col sm:flex-row gap-4 justify-center mb-12"
           >
-            <Button 
-              size="lg" 
+            <Button
+              size="lg"
               className="text-lg px-8 py-6 btn-glow"
-              onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
+              onClick={() =>
+                document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })
+              }
             >
               <Mail className="mr-2 h-5 w-5" />
               Get In Touch
@@ -95,7 +105,9 @@ export function ModernHero() {
               variant="outline"
               size="lg"
               className="text-lg px-8 py-6 border-border hover:border-primary/50"
-              onClick={() => document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' })}
+              onClick={() =>
+                document.getElementById("projects")?.scrollIntoView({ behavior: "smooth" })
+              }
             >
               View My Work
             </Button>
@@ -128,7 +140,7 @@ export function ModernHero() {
           >
             <motion.div
               animate={{ y: [0, 10, 0] }}
-              transition={{ repeat: Infinity, duration: 2 }}
+              transition={{ repeat: Number.POSITIVE_INFINITY, duration: 2 }}
               className="flex flex-col items-center text-muted-foreground"
             >
               <span className="text-sm mb-2">Scroll to explore</span>

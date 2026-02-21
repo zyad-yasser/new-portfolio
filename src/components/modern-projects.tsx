@@ -1,13 +1,14 @@
 "use client";
 
+import { getFirebaseStorageUrl } from "@/constants";
+import { productionProjects } from "@/statics";
 import { motion } from "framer-motion";
 import { ExternalLink, Github } from "lucide-react";
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
-import { productionProjects } from "@/statics";
 
 const featuredProjects = productionProjects.slice(0, 4);
 
@@ -94,7 +95,7 @@ export function ModernProjects() {
                   {/* Project image */}
                   {project.image ? (
                     <Image
-                      src={project.image}
+                      src={getFirebaseStorageUrl(project.image)}
                       alt={project.name}
                       fill
                       className="object-cover"
@@ -163,9 +164,7 @@ export function ModernProjects() {
           className="text-center mt-16"
         >
           <Button variant="outline" size="lg" className="text-lg px-8 py-6" asChild>
-            <Link href="/projects">
-              View All Projects
-            </Link>
+            <Link href="/projects">View All Projects</Link>
           </Button>
         </motion.div>
       </div>

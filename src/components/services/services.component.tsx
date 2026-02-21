@@ -3,7 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 import { useEffect } from "react";
-import { assetsPrefixUrl } from "../../constants";
+import { getFirebaseStorageUrl } from "../../constants";
 import { services } from "../../statics";
 import ReactSlider from "../react-slider/react-slider.component";
 
@@ -58,7 +58,7 @@ const Services = () => {
                   <img
                     key={`sl-${index}`}
                     className="h-80 w-full object-contain"
-                    src={assetsPrefixUrl + image}
+                    src={getFirebaseStorageUrl(image)}
                     alt="Service"
                   />
                 ))}

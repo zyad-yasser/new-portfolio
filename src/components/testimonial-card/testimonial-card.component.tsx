@@ -1,4 +1,4 @@
-import { assetsPrefixUrl } from "../../constants";
+import { getFirebaseStorageUrl } from "../../constants";
 import { Testimonial } from "../../models";
 import styles from "./testimonial-card.module.sass";
 
@@ -21,7 +21,7 @@ const TestimonialCard = ({ data }: { data: Testimonial }) => {
       <div
         className={`d-flex align-items-center justify-content-center w-100 mt-4 ${styles.author}`}
       >
-        <img width="50px" height="50px" src={assetsPrefixUrl + data.photo} />
+        <img width="50px" height="50px" src={getFirebaseStorageUrl(data.photo)} alt={data.writer} />
         <div className={`ml-3 ${styles.info}`}>
           <div className={`${styles.writer} text-left`}>{data.writer}</div>
           <div className={`${styles.title} text-left`}>{data.title}</div>

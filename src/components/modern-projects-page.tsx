@@ -1,13 +1,14 @@
 "use client";
 
+import { getFirebaseStorageUrl } from "@/constants";
+import { otherProjects, productionProjects } from "@/statics";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { ExternalLink, Github } from "lucide-react";
 import Image from "next/image";
+import { useState } from "react";
+import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
-import { Badge } from "./ui/badge";
-import { ExternalLink, Github } from "lucide-react";
-import { productionProjects, otherProjects } from "@/statics";
 
 type Tab = "production" | "other";
 
@@ -78,7 +79,7 @@ export function ModernProjectsPage() {
                 {project.image && (
                   <div className="relative h-48 overflow-hidden">
                     <Image
-                      src={project.image}
+                      src={getFirebaseStorageUrl(project.image)}
                       alt={project.name}
                       fill
                       className="object-cover transition-transform duration-300 group-hover:scale-105"
@@ -131,7 +132,10 @@ export function ModernProjectsPage() {
                               <span className="text-muted-foreground">{subProject.name}</span>
                             )}
                             {subProject.description && (
-                              <span className="text-muted-foreground"> - {subProject.description}</span>
+                              <span className="text-muted-foreground">
+                                {" "}
+                                - {subProject.description}
+                              </span>
                             )}
                           </div>
                         ))}

@@ -1,4 +1,4 @@
-import { assetsPrefixUrl } from "../../constants";
+import { getFirebaseStorageUrl } from "../../constants";
 
 interface TechnologyIconProps {
   technology: string;
@@ -8,7 +8,7 @@ const TechnologyIcon = ({ technology }: TechnologyIconProps) => {
   return (
     <div className="flex justify-center items-center p-2 bg-card border border-border rounded-lg hover:bg-accent transition-colors group">
       <img
-        src={`${assetsPrefixUrl}/icons/${technology}.png`}
+        src={getFirebaseStorageUrl(`/icons/${technology}.png`)}
         width="17"
         height="17"
         alt={technology}
