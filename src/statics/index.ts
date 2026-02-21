@@ -354,7 +354,7 @@ const socialMediaAccounts: SocaialMediaAccount[] = [
     name: "github",
     color: "#000",
     icon: "lni-github-original",
-    value: "https://github.com/zyad-yasser/",
+    value: "https://github.com/zyad-yasser",
   },
   {
     name: "behance",

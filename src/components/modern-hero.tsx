@@ -191,14 +191,30 @@ export function ModernHero() {
             transition={{ delay: 0.7, duration: 0.8 }}
             className="flex justify-center gap-4 mb-16"
           >
-            <Button variant="ghost" size="icon" className="h-12 w-12">
-              <Github className="h-6 w-6" />
+            <Button variant="ghost" size="icon" className="h-12 w-12" asChild>
+              <a
+                href="https://github.com/zyad-yasser"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="GitHub"
+              >
+                <Github className="h-6 w-6" />
+              </a>
             </Button>
-            <Button variant="ghost" size="icon" className="h-12 w-12">
-              <Linkedin className="h-6 w-6" />
+            <Button variant="ghost" size="icon" className="h-12 w-12" asChild>
+              <a
+                href="https://www.linkedin.com/in/zyad-yasser-developer/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="LinkedIn"
+              >
+                <Linkedin className="h-6 w-6" />
+              </a>
             </Button>
-            <Button variant="ghost" size="icon" className="h-12 w-12">
-              <Mail className="h-6 w-6" />
+            <Button variant="ghost" size="icon" className="h-12 w-12" asChild>
+              <a href="mailto:zyadyasser6@gmail.com" aria-label="Email">
+                <Mail className="h-6 w-6" />
+              </a>
             </Button>
           </motion.div>
 

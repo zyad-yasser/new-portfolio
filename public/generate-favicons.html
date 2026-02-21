@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Favicon Generator</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #0a0a0a;
+            color: #fff;
+        }
+        h1 { color: #FFC832; }
+        .preview { display: flex; gap: 20px; flex-wrap: wrap; margin: 30px 0; }
+        .preview-item {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        canvas { border: 2px solid #333; border-radius: 4px; }
+        button {
+            background: linear-gradient(135deg, #FFD700 0%, #FFC832 50%, #FFAA32 100%);
+            color: #1a1a1a;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        button:hover { opacity: 0.9; }
+        .status { margin: 20px 0; color: #4ade80; }
+    </style>
+</head>
+<body>
+    <h1>🎨 Favicon Generator</h1>
+    <p>Click the buttons below to generate and download each favicon size:</p>
+
+    <div class="preview" id="preview"></div>
+
+    <div class="status" id="status"></div>
+
+    <script>
+        const sizes = [
+            { size: 16, name: 'favicon-16x16.png' },
+            { size: 32, name: 'favicon-32x32.png' },
+            { size: 180, name: 'apple-touch-icon.png' },
+            { size: 192, name: 'android-chrome-192x192.png' },
+            { size: 512, name: 'android-chrome-512x512.png' },
+        ];
+
+        function roundRect(ctx, x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+        }
+
+        function drawFavicon(canvas, size) {
+            const ctx = canvas.getContext('2d');
+
+            // Create gradient background
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#FFD700');
+            gradient.addColorStop(0.4, '#FFC832');
+            gradient.addColorStop(1, '#FFAA32');
+
+            // Draw rounded rectangle background
+            const radius = size * 0.15625; // 80/512
+            ctx.fillStyle = gradient;
+            roundRect(ctx, 0, 0, size, size, radius);
+            ctx.fill();
+
+            // Inner glow
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+            const glowRadius = size * 0.117; // 60/512
+            roundRect(ctx, size * 0.078, size * 0.078, size * 0.844, size * 0.844, glowRadius);
+            ctx.fill();
+
+            // Draw "ZY" text
+            ctx.fillStyle = '#1a1a1a';
+            ctx.font = `bold ${size * 0.55}px Arial, sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('ZY', size / 2, size / 2 + size * 0.04);
+        }
+
+        function downloadCanvas(canvas, filename) {
+            canvas.toBlob(blob => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+        }
+
+        // Generate previews
+        sizes.forEach(({ size, name }) => {
+            const container = document.createElement('div');
+            container.className = 'preview-item';
+
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            drawFavicon(canvas, size);
+
+            const button = document.createElement('button');
+            button.textContent = `Download ${name}`;
+            button.onclick = () => {
+                downloadCanvas(canvas, name);
+                document.getElementById('status').textContent = `✓ Downloaded ${name}`;
+            };
+
+            container.innerHTML = `<div><strong>${size}x${size}</strong></div>`;
+            container.appendChild(canvas);
+            container.appendChild(document.createElement('br'));
+            container.appendChild(button);
+
+            document.getElementById('preview').appendChild(container);
+        });
+
+        // Add "Download All" button
+        const downloadAllBtn = document.createElement('button');
+        downloadAllBtn.textContent = '⬇️ Download All Favicons';
+        downloadAllBtn.style.fontSize = '18px';
+        downloadAllBtn.style.padding = '16px 32px';
+        downloadAllBtn.onclick = () => {
+            sizes.forEach(({ size, name }, index) => {
+                setTimeout(() => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = size;
+                    canvas.height = size;
+                    drawFavicon(canvas, size);
+                    downloadCanvas(canvas, name);
+
+                    if (index === sizes.length - 1) {
+                        document.getElementById('status').textContent = '✅ All favicons downloaded! Move them to your /public folder.';
+                    }
+                }, index * 500); // Delay each download
+            });
+        };
+        document.body.appendChild(downloadAllBtn);
+
+        // Instructions
+        const instructions = document.createElement('div');
+        instructions.innerHTML = `
+            <h2 style="color: #FFC832; margin-top: 40px;">📝 Instructions:</h2>
+            <ol>
+                <li>Click "Download All Favicons" or download individual sizes</li>
+                <li>Move all downloaded PNG files to your <code>/public</code> folder</li>
+                <li>Replace the old favicon.ico if it exists</li>
+                <li>Refresh your browser to see the new yellowish favicon!</li>
+            </ol>
+        `;
+        document.body.appendChild(instructions);
+    </script>
+</body>
+</html>

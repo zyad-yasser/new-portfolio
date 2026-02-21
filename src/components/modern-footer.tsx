@@ -7,12 +7,12 @@ import { Button } from "./ui/button";
 const socialLinks = [
   {
     icon: Github,
-    href: "https://github.com",
+    href: "https://github.com/zyad-yasser",
     label: "GitHub",
   },
   {
     icon: Linkedin,
-    href: "https://linkedin.com",
+    href: "https://www.linkedin.com/in/zyad-yasser-developer/",
     label: "LinkedIn",
   },
   {
