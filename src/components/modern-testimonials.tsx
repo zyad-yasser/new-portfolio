@@ -28,7 +28,7 @@ const itemVariants = {
 
 export function ModernTestimonials() {
   return (
-    <section className="py-24 px-4 bg-muted/30">
+    <div className="py-24 px-4 bg-muted/30">
       <div className="container mx-auto max-w-7xl">
         <motion.div
           initial="hidden"
@@ -37,7 +37,7 @@ export function ModernTestimonials() {
           variants={containerVariants}
           className="text-center mb-16"
         >
-          <motion.h2 variants={itemVariants} className="text-4xl md:text-5xl font-bold mb-6">
+          <motion.h2 id="testimonials-heading" variants={itemVariants} className="text-4xl md:text-5xl font-bold mb-6">
             Client Testimonials
           </motion.h2>
           <motion.div
@@ -58,12 +58,14 @@ export function ModernTestimonials() {
           viewport={{ once: true, margin: "-50px" }}
           variants={containerVariants}
           className="grid md:grid-cols-2 gap-8"
+          role="list"
+          aria-label="Client testimonials"
         >
           {testimonials.map((testimonial, index) => (
-            <motion.div key={index} variants={itemVariants}>
+            <motion.div key={index} variants={itemVariants} role="listitem">
               <Card className="h-full bg-card border-border card-hover">
                 <CardContent className="p-8">
-                  <div className="flex items-start space-x-1 mb-6">
+                  <div className="flex items-start space-x-1 mb-6" aria-hidden="true">
                     <Quote className="h-8 w-8 text-primary flex-shrink-0" />
                     <Quote className="h-8 w-8 text-primary/30 flex-shrink-0 -ml-4" />
                   </div>
@@ -76,7 +78,7 @@ export function ModernTestimonials() {
                     <div className="relative h-12 w-12 rounded-full overflow-hidden bg-primary/10">
                       <Image
                         src={getFirebaseStorageUrl(testimonial.photo)}
-                        alt={testimonial.writer}
+                        alt={`${testimonial.writer}, ${testimonial.title}`}
                         fill
                         className="object-cover"
                         sizes="48px"
@@ -93,6 +95,6 @@ export function ModernTestimonials() {
           ))}
         </motion.div>
       </div>
-    </section>
+    </div>
   );
 }

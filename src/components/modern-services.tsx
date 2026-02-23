@@ -70,7 +70,7 @@ const itemVariants = {
 
 export function ModernServices() {
   return (
-    <section className="py-24 px-4 bg-muted/20 border-t border-border">
+    <div className="py-24 px-4 bg-muted/20 border-t border-border">
       <div className="container mx-auto max-w-7xl">
         <motion.div
           initial="hidden"
@@ -79,7 +79,7 @@ export function ModernServices() {
           variants={containerVariants}
           className="text-center mb-16"
         >
-          <motion.h2 variants={itemVariants} className="text-4xl md:text-5xl font-bold mb-6">
+          <motion.h2 id="services-heading" variants={itemVariants} className="text-4xl md:text-5xl font-bold mb-6">
             Services
           </motion.h2>
           <motion.div
@@ -101,15 +101,18 @@ export function ModernServices() {
           viewport={{ once: true, margin: "-50px" }}
           variants={containerVariants}
           className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
+          role="list"
+          aria-label="Services offered"
         >
           {services.map((service, index) => (
-            <motion.div key={index} variants={itemVariants}>
+            <motion.div key={index} variants={itemVariants} role="listitem">
               <Card className="h-full group card-hover bg-card">
                 <CardHeader className="text-center pb-6">
                   <motion.div
                     className="w-16 h-16 mx-auto mb-4 bg-primary/10 rounded-2xl flex items-center justify-center group-hover:bg-primary/20 transition-all duration-300 border border-primary/20"
                     whileHover={{ scale: 1.05 }}
                     transition={{ duration: 0.2 }}
+                    aria-hidden="true"
                   >
                     <service.icon className="w-8 h-8 text-primary" />
                   </motion.div>
@@ -138,6 +141,6 @@ export function ModernServices() {
           ))}
         </motion.div>
       </div>
-    </section>
+    </div>
   );
 }

@@ -33,7 +33,7 @@ const itemVariants = {
 
 export function ModernProjects() {
   return (
-    <section className="py-24 px-4">
+    <div className="py-24 px-4">
       <div className="container mx-auto max-w-7xl">
         <motion.div
           initial="hidden"
@@ -42,7 +42,7 @@ export function ModernProjects() {
           variants={containerVariants}
           className="text-center mb-16"
         >
-          <motion.h2 variants={itemVariants} className="text-4xl md:text-5xl font-bold mb-6">
+          <motion.h2 id="projects-heading" variants={itemVariants} className="text-4xl md:text-5xl font-bold mb-6">
             Featured Projects
           </motion.h2>
           <motion.div
@@ -64,9 +64,11 @@ export function ModernProjects() {
           viewport={{ once: true, margin: "-50px" }}
           variants={containerVariants}
           className="grid lg:grid-cols-2 gap-8"
+          role="list"
+          aria-label="Featured projects"
         >
           {featuredProjects.map((project, index) => (
-            <motion.div key={index} variants={itemVariants}>
+            <motion.div key={index} variants={itemVariants} role="listitem">
               <Card className="h-full group card-hover bg-card overflow-hidden">
                 {/* Project Image */}
                 <div className="relative overflow-hidden h-48 bg-gradient-to-br from-primary/10 to-warning/10 border-b border-border">
@@ -81,29 +83,40 @@ export function ModernProjects() {
                       size="icon"
                       variant="secondary"
                       className="h-8 w-8 bg-card/80 border-border hover:bg-accent"
+                      aria-label={`View ${project.name} source code`}
                     >
-                      <Github className="h-4 w-4" />
+                      <Github className="h-4 w-4" aria-hidden="true" />
                     </Button>
-                    <Button
-                      size="icon"
-                      variant="secondary"
-                      className="h-8 w-8 bg-card/80 border-border hover:bg-accent"
-                    >
-                      <ExternalLink className="h-4 w-4" />
-                    </Button>
+                    {project.link && (
+                      <Button
+                        size="icon"
+                        variant="secondary"
+                        className="h-8 w-8 bg-card/80 border-border hover:bg-accent"
+                        asChild
+                      >
+                        <a
+                          href={project.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={`View ${project.name} live demo`}
+                        >
+                          <ExternalLink className="h-4 w-4" aria-hidden="true" />
+                        </a>
+                      </Button>
+                    )}
                   </div>
                   {/* Project image */}
                   {project.image ? (
                     <Image
                       src={getFirebaseStorageUrl(project.image)}
-                      alt={project.name}
+                      alt={`Screenshot of ${project.name} project`}
                       fill
                       className="object-cover"
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     />
                   ) : (
-                    <div className="absolute inset-4 rounded bg-muted/20 flex items-center justify-center">
-                      <div className="text-muted-foreground text-6xl opacity-50">📱</div>
+                    <div className="absolute inset-4 rounded bg-muted/20 flex items-center justify-center" role="img" aria-label="Project placeholder image">
+                      <div className="text-muted-foreground text-6xl opacity-50" aria-hidden="true">📱</div>
                     </div>
                   )}
                 </div>
@@ -137,14 +150,20 @@ export function ModernProjects() {
                       variant="outline"
                       size="sm"
                       className="flex-1 border-border hover:border-primary/50"
+                      aria-label={`View ${project.name} source code`}
                     >
-                      <Github className="mr-2 h-4 w-4" />
+                      <Github className="mr-2 h-4 w-4" aria-hidden="true" />
                       Code
                     </Button>
                     {project.link && (
                       <Button size="sm" className="flex-1 btn-glow" asChild>
-                        <a href={project.link} target="_blank" rel="noopener noreferrer">
-                          <ExternalLink className="mr-2 h-4 w-4" />
+                        <a
+                          href={project.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={`View ${project.name} live demo`}
+                        >
+                          <ExternalLink className="mr-2 h-4 w-4" aria-hidden="true" />
                           Live Demo
                         </a>
                       </Button>
@@ -168,6 +187,6 @@ export function ModernProjects() {
           </Button>
         </motion.div>
       </div>
-    </section>
+    </div>
   );
 }

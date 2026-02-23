@@ -31,7 +31,7 @@ const quickLinks = [
 
 export function ModernFooter() {
   return (
-    <footer className="bg-background border-t border-border">
+    <footer className="bg-background border-t border-border" role="contentinfo">
       <div className="container mx-auto px-4 py-16">
         <div className="grid md:grid-cols-4 gap-8 mb-12">
           {/* Brand section */}
@@ -49,7 +49,7 @@ export function ModernFooter() {
                 Full-stack developer passionate about creating modern, scalable web applications
                 that solve real-world problems and deliver exceptional user experiences.
               </p>
-              <div className="flex space-x-2">
+              <div className="flex space-x-2" role="list" aria-label="Social media links">
                 {socialLinks.map((link, index) => (
                   <motion.div
                     key={index}
@@ -57,16 +57,17 @@ export function ModernFooter() {
                     whileInView={{ opacity: 1, scale: 1 }}
                     transition={{ delay: index * 0.1, duration: 0.3 }}
                     viewport={{ once: true }}
+                    role="listitem"
                   >
                     <Button variant="ghost" size="icon" asChild>
                       <a
                         href={link.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        target={link.href.startsWith("mailto:") ? undefined : "_blank"}
+                        rel={link.href.startsWith("mailto:") ? undefined : "noopener noreferrer"}
                         aria-label={link.label}
                         className="hover:text-primary transition-colors"
                       >
-                        <link.icon className="h-5 w-5" />
+                        <link.icon className="h-5 w-5" aria-hidden="true" />
                       </a>
                     </Button>
                   </motion.div>
@@ -84,7 +85,7 @@ export function ModernFooter() {
               viewport={{ once: true }}
             >
               <h4 className="font-semibold mb-4">Quick Links</h4>
-              <nav className="space-y-3">
+              <nav className="space-y-3" aria-label="Footer navigation">
                 {quickLinks.map((link, index) => (
                   <motion.div
                     key={index}
@@ -95,7 +96,7 @@ export function ModernFooter() {
                   >
                     <a
                       href={link.href}
-                      className="block text-muted-foreground hover:text-primary transition-colors"
+                      className="block text-muted-foreground hover:text-primary transition-colors focus:outline-none focus:text-primary focus:underline"
                     >
                       {link.name}
                     </a>

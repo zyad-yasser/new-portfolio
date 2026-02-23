@@ -9,7 +9,7 @@ import { Button } from "./ui/button";
 
 export function ModernHero() {
   return (
-    <section className="min-h-screen flex items-center justify-center relative overflow-hidden">
+    <section className="min-h-screen flex items-center justify-center relative overflow-hidden" aria-label="Hero section">
       {/* Dark background with subtle grid pattern */}
       <div className="absolute inset-0 bg-background" />
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-warning/5" />
@@ -111,17 +111,19 @@ export function ModernHero() {
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.5 }}
             className="w-32 h-32 mx-auto mb-8 relative"
+            role="img"
+            aria-label="Profile picture"
           >
             <div className="w-full h-full rounded-full bg-gradient-to-r from-primary to-warning p-1 shadow-2xl">
               <div className="w-full h-full rounded-full bg-card border border-border flex items-center justify-center relative overflow-hidden">
                 <Image
                   src={getFirebaseStorageUrl("/avatars/zyad.jpg")}
-                  alt="Zyad Yasser"
+                  alt="Zyad Yasser - Full Stack Developer"
                   fill
                   className="object-cover rounded-full"
                   priority
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-primary/20 to-transparent rounded-full" />
+                <div className="absolute inset-0 bg-gradient-to-t from-primary/20 to-transparent rounded-full" aria-hidden="true" />
               </div>
             </div>
           </motion.div>
@@ -168,8 +170,9 @@ export function ModernHero() {
               onClick={() =>
                 document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })
               }
+              aria-label="Scroll to contact section"
             >
-              <Mail className="mr-2 h-5 w-5" />
+              <Mail className="mr-2 h-5 w-5" aria-hidden="true" />
               Get In Touch
             </Button>
             <Button
@@ -179,6 +182,7 @@ export function ModernHero() {
               onClick={() =>
                 document.getElementById("projects")?.scrollIntoView({ behavior: "smooth" })
               }
+              aria-label="Scroll to projects section"
             >
               View My Work
             </Button>
@@ -190,32 +194,40 @@ export function ModernHero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7, duration: 0.8 }}
             className="flex justify-center gap-4 mb-16"
+            role="list"
+            aria-label="Social media links"
           >
-            <Button variant="ghost" size="icon" className="h-12 w-12" asChild>
-              <a
-                href="https://github.com/zyad-yasser"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="GitHub"
-              >
-                <Github className="h-6 w-6" />
-              </a>
-            </Button>
-            <Button variant="ghost" size="icon" className="h-12 w-12" asChild>
-              <a
-                href="https://www.linkedin.com/in/zyad-yasser-developer/"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="LinkedIn"
-              >
-                <Linkedin className="h-6 w-6" />
-              </a>
-            </Button>
-            <Button variant="ghost" size="icon" className="h-12 w-12" asChild>
-              <a href="mailto:zyadyasser6@gmail.com" aria-label="Email">
-                <Mail className="h-6 w-6" />
-              </a>
-            </Button>
+            <div role="listitem">
+              <Button variant="ghost" size="icon" className="h-12 w-12" asChild>
+                <a
+                  href="https://github.com/zyad-yasser"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Visit my GitHub profile"
+                >
+                  <Github className="h-6 w-6" aria-hidden="true" />
+                </a>
+              </Button>
+            </div>
+            <div role="listitem">
+              <Button variant="ghost" size="icon" className="h-12 w-12" asChild>
+                <a
+                  href="https://www.linkedin.com/in/zyad-yasser-developer/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Visit my LinkedIn profile"
+                >
+                  <Linkedin className="h-6 w-6" aria-hidden="true" />
+                </a>
+              </Button>
+            </div>
+            <div role="listitem">
+              <Button variant="ghost" size="icon" className="h-12 w-12" asChild>
+                <a href="mailto:zyadyasser6@gmail.com" aria-label="Send me an email">
+                  <Mail className="h-6 w-6" aria-hidden="true" />
+                </a>
+              </Button>
+            </div>
           </motion.div>
 
           {/* Scroll indicator */}
@@ -224,6 +236,7 @@ export function ModernHero() {
             animate={{ opacity: 1 }}
             transition={{ delay: 1, duration: 0.8 }}
             className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
+            aria-label="Scroll indicator"
           >
             <motion.div
               animate={{ y: [0, 10, 0] }}
@@ -231,7 +244,7 @@ export function ModernHero() {
               className="flex flex-col items-center text-muted-foreground"
             >
               <span className="text-sm mb-2">Scroll to explore</span>
-              <ArrowDown className="h-5 w-5" />
+              <ArrowDown className="h-5 w-5" aria-hidden="true" />
             </motion.div>
           </motion.div>
         </motion.div>

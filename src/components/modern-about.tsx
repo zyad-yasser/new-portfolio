@@ -44,7 +44,7 @@ const itemVariants = {
 
 export function ModernAbout() {
   return (
-    <section className="py-24 px-4">
+    <div className="py-24 px-4">
       <div className="container mx-auto max-w-6xl">
         <motion.div
           initial="hidden"
@@ -56,7 +56,7 @@ export function ModernAbout() {
           {/* Left side - Text content */}
           <div className="space-y-8">
             <motion.div variants={itemVariants}>
-              <h2 className="text-4xl md:text-5xl font-bold mb-6">About Me</h2>
+              <h2 id="about-heading" className="text-4xl md:text-5xl font-bold mb-6">About Me</h2>
               <div className="w-20 h-1 bg-gradient-to-r from-primary to-secondary mb-8" />
             </motion.div>
 
@@ -109,13 +109,13 @@ export function ModernAbout() {
               </Card>
             </motion.div>
 
-            <motion.div variants={itemVariants} className="grid grid-cols-3 gap-6">
+            <motion.div variants={itemVariants} className="grid grid-cols-3 gap-6" role="list" aria-label="Professional statistics">
               {[
                 { number: "50+", label: "Projects Completed" },
                 { number: "5+", label: "Years Experience" },
                 { number: "100%", label: "Client Satisfaction" },
               ].map((stat, index) => (
-                <Card key={index} className="text-center p-6">
+                <Card key={index} className="text-center p-6" role="listitem">
                   <CardContent className="p-0">
                     <motion.div
                       initial={{ scale: 0.5, opacity: 0 }}
@@ -123,6 +123,7 @@ export function ModernAbout() {
                       transition={{ delay: index * 0.1, duration: 0.5 }}
                       viewport={{ once: true }}
                       className="text-3xl font-bold text-primary mb-2"
+                      aria-label={`${stat.number} ${stat.label}`}
                     >
                       {stat.number}
                     </motion.div>
@@ -134,6 +135,6 @@ export function ModernAbout() {
           </div>
         </motion.div>
       </div>
-    </section>
+    </div>
   );
 }

@@ -5,25 +5,31 @@ import { ModernProjects } from "@/components/modern-projects";
 import { ModernTestimonials } from "@/components/modern-testimonials";
 import { ModernContact } from "@/components/modern-contact";
 import { ModernFooter } from "@/components/modern-footer";
+import { SkipLinks } from "@/components/skip-links";
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen">
-      <ModernHero />
-      <div id="about">
-        <ModernAbout />
-      </div>
-      <div id="services">
-        <ModernServices />
-      </div>
-      <div id="projects">
-        <ModernProjects />
-      </div>
-      <ModernTestimonials />
-      <div id="contact">
-        <ModernContact />
-      </div>
+    <>
+      <SkipLinks />
+      <main id="main-content" className="min-h-screen">
+        <ModernHero />
+        <section id="about" aria-labelledby="about-heading">
+          <ModernAbout />
+        </section>
+        <section id="services" aria-labelledby="services-heading">
+          <ModernServices />
+        </section>
+        <section id="projects" aria-labelledby="projects-heading">
+          <ModernProjects />
+        </section>
+        <section id="testimonials" aria-labelledby="testimonials-heading">
+          <ModernTestimonials />
+        </section>
+        <section id="contact" aria-labelledby="contact-heading">
+          <ModernContact />
+        </section>
+      </main>
       <ModernFooter />
-    </main>
+    </>
   );
 }
