@@ -77,7 +77,6 @@ export function ModernContact() {
         </motion.div>
 
         <div className="grid lg:grid-cols-2 gap-16">
-          {/* Contact Form */}
           <motion.div
             initial="hidden"
             whileInView="visible"
@@ -165,7 +164,6 @@ export function ModernContact() {
             </motion.div>
           </motion.div>
 
-          {/* Contact Information */}
           <motion.div
             initial="hidden"
             whileInView="visible"

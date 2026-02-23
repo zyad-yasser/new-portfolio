@@ -53,7 +53,6 @@ export function ModernAbout() {
           variants={containerVariants}
           className="grid lg:grid-cols-2 gap-16 items-center"
         >
-          {/* Left side - Text content */}
           <div className="space-y-8">
             <motion.div variants={itemVariants}>
               <h2 id="about-heading" className="text-4xl md:text-5xl font-bold mb-6">About Me</h2>
@@ -84,7 +83,6 @@ export function ModernAbout() {
             </motion.div>
           </div>
 
-          {/* Right side - Skills and stats */}
           <div className="space-y-8">
             <motion.div variants={itemVariants}>
               <Card className="p-8">

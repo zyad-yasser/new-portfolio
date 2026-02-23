@@ -13,11 +13,9 @@ interface UiActions {
 export type UiStore = UiState & UiActions;
 
 export const useUiStore = create<UiStore>((set, get) => ({
-  // Initial state
   isOpen: false,
   isHover: false,
 
-  // Actions
   toggleMenu: () => set({ isOpen: !get().isOpen }),
   hoverNavButton: () => {
     const { isOpen, isHover } = get();

@@ -34,7 +34,6 @@ export function ModernFooter() {
     <footer className="bg-background border-t border-border" role="contentinfo">
       <div className="container mx-auto px-4 py-16">
         <div className="grid md:grid-cols-4 gap-8 mb-12">
-          {/* Brand section */}
           <div className="md:col-span-2">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -76,7 +75,6 @@ export function ModernFooter() {
             </motion.div>
           </div>
 
-          {/* Quick Links */}
           <div>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -106,7 +104,6 @@ export function ModernFooter() {
             </motion.div>
           </div>
 
-          {/* Contact Info */}
           <div>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -124,7 +121,6 @@ export function ModernFooter() {
           </div>
         </div>
 
-        {/* Bottom section */}
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}

@@ -10,7 +10,6 @@ import { Button } from "./ui/button";
 export function ModernHero() {
   return (
     <section className="min-h-screen flex items-center justify-center relative overflow-hidden" aria-label="Hero section">
-      {/* Dark background with subtle grid pattern */}
       <div className="absolute inset-0 bg-background" />
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-warning/5" />
       <div
@@ -21,9 +20,7 @@ export function ModernHero() {
         }}
       />
 
-      {/* Animated yellowish lighting effects */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {/* Spotlight 1 - Top left */}
         <motion.div
           className="absolute w-[600px] h-[600px] rounded-full"
           style={{
@@ -45,7 +42,6 @@ export function ModernHero() {
           }}
         />
 
-        {/* Spotlight 2 - Right */}
         <motion.div
           className="absolute w-[500px] h-[500px] rounded-full"
           style={{
@@ -68,7 +64,6 @@ export function ModernHero() {
           }}
         />
 
-        {/* Spotlight 3 - Bottom center */}
         <motion.div
           className="absolute w-[550px] h-[550px] rounded-full"
           style={{
@@ -92,12 +87,10 @@ export function ModernHero() {
         />
       </div>
 
-      {/* Theme toggle */}
       <div className="absolute top-6 right-6 z-10">
         <ThemeToggle />
       </div>
 
-      {/* Main content */}
       <div className="container mx-auto px-4 z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -105,7 +98,6 @@ export function ModernHero() {
           transition={{ duration: 0.8 }}
           className="text-center max-w-4xl mx-auto"
         >
-          {/* Profile image with glow effect */}
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -128,7 +120,6 @@ export function ModernHero() {
             </div>
           </motion.div>
 
-          {/* Name and title */}
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -157,7 +148,6 @@ export function ModernHero() {
             Passionate about building scalable applications that make a difference.
           </motion.p>
 
-          {/* CTA buttons */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -188,7 +178,6 @@ export function ModernHero() {
             </Button>
           </motion.div>
 
-          {/* Social links */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -230,7 +219,6 @@ export function ModernHero() {
             </div>
           </motion.div>
 
-          {/* Scroll indicator */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

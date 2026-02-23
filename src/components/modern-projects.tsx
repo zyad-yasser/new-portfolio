@@ -70,7 +70,6 @@ export function ModernProjects() {
           {featuredProjects.map((project, index) => (
             <motion.div key={index} variants={itemVariants} role="listitem">
               <Card className="h-full group card-hover bg-card overflow-hidden">
-                {/* Project Image */}
                 <div className="relative overflow-hidden h-48 bg-gradient-to-br from-primary/10 to-warning/10 border-b border-border">
                   <div className="absolute inset-0 bg-gradient-to-t from-card/90 to-transparent" />
                   <div className="absolute top-4 left-4">
@@ -105,7 +104,6 @@ export function ModernProjects() {
                       </Button>
                     )}
                   </div>
-                  {/* Project image */}
                   {project.image ? (
                     <Image
                       src={getFirebaseStorageUrl(project.image)}
@@ -131,7 +129,6 @@ export function ModernProjects() {
                 </CardHeader>
 
                 <CardContent className="space-y-4">
-                  {/* Technologies */}
                   <div className="flex flex-wrap gap-2">
                     {project.technologies.map((tech, techIndex) => (
                       <Badge
@@ -144,7 +141,6 @@ export function ModernProjects() {
                     ))}
                   </div>
 
-                  {/* Action buttons */}
                   <div className="flex gap-3 pt-4">
                     <Button
                       variant="outline"

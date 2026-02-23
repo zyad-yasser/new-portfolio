@@ -34,7 +34,6 @@
 }
 
 .light {
-  /* Light mode overrides (minimal, as we prefer dark) */
   --color-background: 0 0% 98%;
   --color-foreground: 0 0% 5%;
   --color-card: 0 0% 100%;
@@ -193,7 +192,6 @@ html {
   ring-offset-color: hsl(var(--color-background));
 }
 
-/* Gradient text effects */
 .gradient-text {
   background: linear-gradient(
     135deg,
@@ -224,7 +222,6 @@ html {
   border-width: 0;
 }
 
-/* Screen reader only but visible on focus (for skip links) */
 .sr-only.focus-within\:not-sr-only:focus-within,
 .sr-only:focus-within {
   position: static;

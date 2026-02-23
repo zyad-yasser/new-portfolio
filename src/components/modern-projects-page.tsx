@@ -20,7 +20,6 @@ export function ModernProjectsPage() {
   return (
     <main className="min-h-screen bg-background py-20">
       <div className="container mx-auto px-4">
-        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -35,7 +34,6 @@ export function ModernProjectsPage() {
           </p>
         </motion.div>
 
-        {/* Tabs */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -60,7 +58,6 @@ export function ModernProjectsPage() {
           </div>
         </motion.div>
 
-        {/* Projects Grid */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -75,7 +72,6 @@ export function ModernProjectsPage() {
               transition={{ duration: 0.6, delay: index * 0.1 }}
             >
               <Card className="h-full bg-card border-border hover:border-primary/50 transition-all duration-300 group overflow-hidden">
-                {/* Project Image */}
                 {project.image && (
                   <div className="relative h-48 overflow-hidden">
                     <Image
@@ -99,7 +95,6 @@ export function ModernProjectsPage() {
                 </CardHeader>
 
                 <CardContent className="pt-0">
-                  {/* Technologies */}
                   <div className="flex flex-wrap gap-2 mb-6">
                     {project.technologies.map((tech, techIndex) => (
                       <Badge
@@ -112,7 +107,6 @@ export function ModernProjectsPage() {
                     ))}
                   </div>
 
-                  {/* Sub-projects */}
                   {project.subProjects && (
                     <div className="mb-4">
                       <h4 className="text-sm font-semibold mb-2 text-foreground">Sub-projects:</h4>
@@ -143,7 +137,6 @@ export function ModernProjectsPage() {
                     </div>
                   )}
 
-                  {/* Actions */}
                   <div className="flex gap-2 mt-auto">
                     {project.link && (
                       <Button size="sm" asChild className="flex-1">
