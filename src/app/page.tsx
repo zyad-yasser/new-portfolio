@@ -12,7 +12,7 @@ export default function HomePage() {
   return (
     <>
       <SkipLinks />
-      <main id="main-content" className="min-h-screen">
+      <main id="main-content" className="min-h-dvh">
         <ModernHero />
         <section id="about" aria-labelledby="about-heading">
           <ModernAbout />

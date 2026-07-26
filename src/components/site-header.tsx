@@ -34,7 +34,7 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-40 glass">
-      <div className="container mx-auto max-w-7xl px-4 h-16 flex items-center justify-between">
+      <div className="container mx-auto max-w-7xl px-5 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         <Link
           href="/"
           className="text-lg font-bold tracking-tight text-foreground"

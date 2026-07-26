@@ -16,7 +16,7 @@ const featuredProjects = productionProjects.slice(0, 4);
 
 export function ModernProjects() {
   return (
-    <div className="py-24 px-4 bg-muted/15 border-t border-border/60">
+    <div className="py-24 px-5 sm:px-6 lg:px-8 bg-muted/15 border-t border-border/60">
       <div className="container mx-auto max-w-7xl">
         <SectionHeader
           id="projects-heading"

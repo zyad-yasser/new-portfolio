@@ -10,7 +10,7 @@ export function ModernHero() {
 
   return (
     <section
-      className="min-h-screen flex items-center justify-center relative overflow-hidden"
+      className="min-h-dvh flex items-center justify-center relative overflow-hidden"
       aria-label="Hero section"
     >
       <div className="absolute inset-0 bg-background" />
@@ -24,7 +24,7 @@ export function ModernHero() {
       />
       <AmbientGradient variant="hero" />
 
-      <div className="container mx-auto px-4 z-10">
+      <div className="container mx-auto px-5 sm:px-6 lg:px-8 z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -48,7 +48,7 @@ export function ModernHero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.8 }}
-            className="text-6xl md:text-7xl lg:text-8xl font-bold mb-6 text-foreground tracking-tight"
+            className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 text-foreground tracking-tight"
           >
             Zyad Yasser
           </motion.h1>
@@ -57,7 +57,7 @@ export function ModernHero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.8 }}
-            className="text-xl md:text-2xl text-muted-foreground mb-8 font-medium"
+            className="text-lg md:text-xl text-muted-foreground mb-8 font-medium"
           >
             Software Engineer — Full-Stack, Systems &amp; AI
           </motion.p>

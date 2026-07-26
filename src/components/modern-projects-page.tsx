@@ -21,16 +21,16 @@ export function ModernProjectsPage() {
   const currentProjects = activeTab === "production" ? productionProjects : otherProjects;
 
   return (
-    <main className="min-h-screen bg-background py-20">
-      <div className="container mx-auto px-4">
+    <main className="min-h-dvh bg-background py-20">
+      <div className="container mx-auto px-5 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 text-gradient-brand">All Projects</h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <h1 className="text-4xl md:text-5xl font-bold mb-6 text-gradient-brand">All Projects</h1>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             A comprehensive showcase of my work across various technologies and industries
           </p>
         </motion.div>

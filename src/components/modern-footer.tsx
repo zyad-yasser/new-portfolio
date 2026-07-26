@@ -32,7 +32,7 @@ const quickLinks = [
 export function ModernFooter() {
   return (
     <footer className="bg-background border-t border-border">
-      <div className="container mx-auto px-4 py-16">
+      <div className="container mx-auto px-5 sm:px-6 lg:px-8 py-16">
         <div className="grid md:grid-cols-4 gap-8 mb-12">
           <div className="md:col-span-2">
             <motion.div
@@ -41,7 +41,9 @@ export function ModernFooter() {
               transition={{ duration: 0.6 }}
               viewport={{ once: true }}
             >
-              <h3 className="text-2xl font-bold mb-4 text-gradient-brand">Zyad Yasser</h3>
+              <h3 className="inline-block text-2xl font-bold mb-4 text-gradient-brand">
+                Zyad Yasser
+              </h3>
               <p className="text-muted-foreground mb-6 max-w-md leading-relaxed">
                 Software engineer building fast, reliable systems across full-stack, backend
                 architecture, and AI — from early-stage products to platforms at scale.
