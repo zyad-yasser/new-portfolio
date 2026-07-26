@@ -10,7 +10,7 @@ export function ModernHero() {
 
   return (
     <section
-      className="min-h-dvh flex items-center justify-center relative overflow-hidden"
+      className="min-h-[calc(100dvh-4rem)] flex items-center justify-center relative overflow-hidden"
       aria-label="Hero section"
     >
       <div className="absolute inset-0 bg-background" />

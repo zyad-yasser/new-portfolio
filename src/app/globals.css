@@ -145,6 +145,12 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Sections are anchor-scroll targets (nav links, hero CTAs) — offset them below
+   the sticky header (h-16 = 4rem) so headings don't land tucked under it. */
+section[id] {
+  scroll-margin-top: 4.5rem;
+}
+
 /* Note: plain single-property color utilities (.bg-primary, .text-muted-foreground, .border-border,
    .ring-ring, etc.) are intentionally NOT hand-written here — Tailwind v4 generates them directly
    from the @theme color tokens above. Only classes below bundle extra behavior beyond a straight
