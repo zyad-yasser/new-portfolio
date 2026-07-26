@@ -5,22 +5,24 @@ import { Badge } from "./ui/badge";
 import { Card, CardContent } from "./ui/card";
 
 const skills = [
+  "TypeScript",
   "React",
   "Next.js",
-  "TypeScript",
+  "Vue / Nuxt",
   "Node.js",
+  "FastAPI",
+  "Django",
   "Python",
+  "GraphQL",
+  "tRPC",
+  "WebSockets",
+  "LangChain / RAG",
   "PostgreSQL",
-  "MongoDB",
+  "Redis",
   "AWS",
   "Docker",
   "Kubernetes",
-  "GraphQL",
-  "REST APIs",
-  "Tailwind CSS",
-  "Framer Motion",
-  "Jest",
-  "Cypress",
+  "Terraform",
 ];
 
 const containerVariants = {
@@ -66,28 +68,30 @@ export function ModernAbout() {
               className="space-y-6 text-lg text-muted-foreground leading-relaxed"
             >
               <p>
-                I'm a passionate full-stack developer with over 5 years of experience building
-                modern web applications. I specialize in creating scalable, user-focused solutions
-                using cutting-edge technologies.
+                I'm a full-stack software engineer with 7+ years of experience across frontend
+                performance, backend systems, and AI-driven applications. I've worked on products
+                from early stages through scale — including platforms serving 100,000+ users,
+                30,000+ businesses, and 40,000+ daily transactions.
               </p>
 
               <p>
-                My expertise spans across frontend frameworks like React and Next.js, backend
-                technologies including Node.js and Python, and cloud platforms such as AWS. I'm
-                passionate about clean code, performance optimization, and delivering exceptional
-                user experiences.
+                Currently building AI-powered EHR systems at Enzo Health, including ambient scribe
+                workflows for real-time medical documentation. Previously led performance and
+                delivery-systems work at Beyond Menu, and built CharacterHub from scratch to
+                100,000+ users at Commaful.
               </p>
 
               <p>
-                When I'm not coding, you'll find me exploring new technologies, contributing to
-                open-source projects, or sharing knowledge with the developer community.
+                My focus is on building fast, reliable systems — obsessing over Core Web Vitals and
+                sub-1s load times as much as event-driven backend architecture and AI pipeline
+                design.
               </p>
             </motion.div>
           </div>
 
           <div className="space-y-8">
             <motion.div variants={itemVariants}>
-              <Card className="p-8">
+              <Card className="glass p-8">
                 <CardContent className="p-0">
                   <h3 className="text-2xl font-semibold mb-6">Skills & Technologies</h3>
                   <div className="flex flex-wrap gap-2">
@@ -115,12 +119,12 @@ export function ModernAbout() {
               aria-label="Professional statistics"
             >
               {[
-                { number: "50+", label: "Projects Completed" },
-                { number: "5+", label: "Years Experience" },
-                { number: "100%", label: "Client Satisfaction" },
+                { number: "100K+", label: "Users Scaled" },
+                { number: "$1M+", label: "Cost Savings Delivered" },
+                { number: "40K+", label: "Daily Transactions Powered" },
               ].map((stat, index) => (
                 <li key={index}>
-                  <Card className="text-center p-6">
+                  <Card className="glass card-hover text-center p-6">
                     <CardContent className="p-0">
                       <motion.div
                         initial={{ scale: 0.5, opacity: 0 }}

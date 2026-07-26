@@ -20,3 +20,12 @@ export interface Testimonial {
   photo: string;
   body: string;
 }
+
+export interface Experience {
+  company: string;
+  role: string;
+  location: string;
+  period: string;
+  current?: boolean;
+  highlights: string[];
+}

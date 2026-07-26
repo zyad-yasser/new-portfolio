@@ -72,7 +72,7 @@ export function ModernProjects() {
         >
           {featuredProjects.map((project, index) => (
             <motion.li key={index} variants={itemVariants}>
-              <Card className="h-full group card-hover bg-card overflow-hidden">
+              <Card className="glass h-full group card-hover overflow-hidden">
                 <div className="relative overflow-hidden h-48 bg-gradient-to-br from-primary/10 to-warning/10 border-b border-border">
                   <div className="absolute inset-0 bg-gradient-to-t from-card/90 to-transparent" />
                   <div className="absolute top-4 left-4">

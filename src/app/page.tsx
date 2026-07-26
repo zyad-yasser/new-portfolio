@@ -1,5 +1,6 @@
 import { ModernAbout } from "@/components/modern-about";
 import { ModernContact } from "@/components/modern-contact";
+import { ModernExperience } from "@/components/modern-experience";
 import { ModernFooter } from "@/components/modern-footer";
 import { ModernHero } from "@/components/modern-hero";
 import { ModernProjects } from "@/components/modern-projects";
@@ -15,6 +16,9 @@ export default function HomePage() {
         <ModernHero />
         <section id="about" aria-labelledby="about-heading">
           <ModernAbout />
+        </section>
+        <section id="experience" aria-labelledby="experience-heading">
+          <ModernExperience />
         </section>
         <section id="services" aria-labelledby="services-heading">
           <ModernServices />

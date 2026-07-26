@@ -1,4 +1,4 @@
-import { Project, Testimonial } from "../models";
+import { Experience, Project, Testimonial } from "../models";
 
 const productionProjects: Project[] = [
   {
@@ -275,4 +275,90 @@ const testimonials: Testimonial[] = [
   },
 ];
 
-export { productionProjects, otherProjects, testimonials };
+const experience: Experience[] = [
+  {
+    company: "Enzo Health",
+    role: "Software Engineer III (AI)",
+    location: "Remote (US)",
+    period: "Oct 2024 — Present",
+    current: true,
+    highlights: [
+      "Contributed to building the platform from early stages through a Series A round exceeding $40M.",
+      "Built AI-powered EHR systems, including ambient scribe workflows for real-time medical documentation.",
+      "Cut scribe pipeline execution time from ~10 minutes to under 1 minute by redesigning around API-based processing and automation.",
+      "Built integrations with external EHR systems and designed data ingestion pipelines for clinical workflows.",
+    ],
+  },
+  {
+    company: "Beyond Menu",
+    role: "Software Engineer III",
+    location: "Remote (US)",
+    period: "Oct 2022 — Nov 2024",
+    highlights: [
+      "Worked on a platform serving 30,000+ restaurants and 40,000+ daily orders.",
+      "Led performance optimization achieving Lighthouse scores above 95 and sub-1s first contentful paint.",
+      "Built a hybrid delivery system with smart matching, contributing to $1M+ in annual cost reductions.",
+      "Migrated delivery workflows from cron-based to event-driven architecture, cutting manual-intervention orders.",
+      "Helped build a server-driven UI system that replaced a legacy platform, and supported the QMenu → BeyondMenu merger.",
+    ],
+  },
+  {
+    company: "Commaful / CharacterHub",
+    role: "Software Engineer",
+    location: "Remote (US)",
+    period: "Jun 2021 — Feb 2024",
+    highlights: [
+      "Built CharacterHub from scratch and scaled it to 100,000+ users with ~20,000 daily active users.",
+      "Built feed systems focused on efficient rendering, smooth scrolling, and low-latency interactions.",
+      "Developed core features: feeds, profiles, customization, and gamification.",
+      "Shipped AI-powered features including story generation and interactive character systems.",
+    ],
+  },
+  {
+    company: "Via Customers",
+    role: "Software Engineer",
+    location: "Remote",
+    period: "Feb 2022 — Oct 2022",
+    highlights: [
+      "Built an automated mobile app generator for Shopify stores.",
+      "Contributed to campaign systems supporting marketing automation workflows.",
+    ],
+  },
+  {
+    company: "Shasha.io",
+    role: "Software Engineer (Contract)",
+    location: "Remote",
+    period: "2022",
+    highlights: [
+      "Built components of an advertising platform, including player functionality and admin tools.",
+    ],
+  },
+  {
+    company: "Moweex",
+    role: "Software Engineer (Contract)",
+    location: "Remote",
+    period: "2021 — 2022",
+    highlights: [
+      "Developed automation systems for telecom services, including subscription and IPTV workflows.",
+      "Built B2B applications for manufacturing and production tracking.",
+    ],
+  },
+  {
+    company: "Money Fellows",
+    role: "Software Engineer",
+    location: "Cairo, Egypt",
+    period: "May 2019 — Jun 2019",
+    highlights: ["Contributed to mobile application development for a fintech platform."],
+  },
+  {
+    company: "OCS",
+    role: "Software Engineer",
+    location: "Cairo, Egypt",
+    period: "Aug 2018 — May 2019",
+    highlights: [
+      "Developed applications across education, healthcare, job platforms, and food delivery.",
+    ],
+  },
+];
+
+export { productionProjects, otherProjects, testimonials, experience };

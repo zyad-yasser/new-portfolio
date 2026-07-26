@@ -25,7 +25,7 @@ const contactInfo = [
   {
     icon: MapPin,
     label: "Location",
-    value: "Port-Said, Egypt / Cairo, Egypt",
+    value: "Cairo, Egypt — Open to Remote",
     href: "#",
   },
 ];
@@ -88,7 +88,7 @@ export function ModernContact() {
             variants={containerVariants}
           >
             <motion.div variants={itemVariants}>
-              <Card className="p-8 bg-card border border-border">
+              <Card className="glass-strong p-8">
                 <CardHeader className="p-0 mb-8">
                   <CardTitle className="text-2xl font-bold text-card-foreground">
                     Send a Message
@@ -202,7 +202,7 @@ export function ModernContact() {
             >
               {contactInfo.map((info, index) => (
                 <li key={index}>
-                  <Card className="p-6 card-hover bg-card border border-border">
+                  <Card className="glass p-6 card-hover">
                     <CardContent className="p-0 flex items-center space-x-4">
                       <div
                         className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center border border-primary/20"

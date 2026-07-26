@@ -146,7 +146,7 @@ export function ModernHero() {
             transition={{ delay: 0.4, duration: 0.8 }}
             className="text-xl md:text-2xl text-muted-foreground mb-8 font-medium"
           >
-            Full Stack Developer & Software Engineer
+            Software Engineer — Full-Stack, Systems &amp; AI
           </motion.p>
 
           <motion.p
@@ -155,8 +155,8 @@ export function ModernHero() {
             transition={{ delay: 0.5, duration: 0.8 }}
             className="text-lg text-muted-foreground mb-12 max-w-2xl mx-auto leading-relaxed"
           >
-            Crafting modern web experiences with React, Next.js, and cutting-edge technologies.
-            Passionate about building scalable applications that make a difference.
+            Building fast, reliable systems — from AI-powered products to platforms serving 100,000+
+            users. Focused on performance, scale, and user experience.
           </motion.p>
 
           <motion.div

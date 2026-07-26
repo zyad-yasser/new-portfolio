@@ -29,6 +29,10 @@
   --color-warning-foreground: 0 0% 2%;
 
   --radius: 0.5rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+
+  --ease-premium: cubic-bezier(0.16, 1, 0.3, 1);
 
   --font-family-sans: var(--font-inter);
 }
@@ -169,19 +173,46 @@ html {
 }
 
 .card-hover {
-  transition: all 0.2s ease-in-out;
+  transition: transform 0.4s var(--ease-premium), box-shadow 0.4s var(--ease-premium), border-color
+    0.4s var(--ease-premium);
   border: 1px solid hsl(var(--color-border));
 }
 
 .card-hover:hover {
-  border-color: hsl(var(--color-primary) / 0.3);
-  box-shadow: 0 4px 20px hsl(var(--color-primary) / 0.1);
-  transform: translateY(-2px);
+  border-color: hsl(var(--color-primary) / 0.35);
+  box-shadow: 0 20px 60px -15px hsl(var(--color-primary) / 0.15), 0 8px 24px -8px hsl(0 0% 0% / 0.4);
+  transform: translateY(-4px);
 }
 
 .btn-glow:hover {
-  box-shadow: 0 0 0 1px hsl(var(--color-primary)), 0 0 20px hsl(var(--color-primary) / 0.3), 0 4px
-    12px hsl(var(--color-primary) / 0.2);
+  box-shadow: 0 0 0 1px hsl(var(--color-primary)), 0 0 30px hsl(var(--color-primary) / 0.35), 0 8px
+    20px hsl(var(--color-primary) / 0.25);
+}
+
+/* Liquid Glass surface treatment — frosted, translucent panels for premium depth */
+.glass {
+  background: hsl(var(--color-card) / 0.6);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid hsl(var(--color-border) / 0.5);
+}
+
+.glass-strong {
+  background: hsl(var(--color-card) / 0.85);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid hsl(var(--color-border) / 0.6);
+}
+
+.glow-ambient {
+  box-shadow: 0 0 60px hsl(var(--color-primary) / 0.12);
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .glass,
+  .glass-strong {
+    background: hsl(var(--color-card) / 0.95);
+  }
 }
 
 .focus-visible\:ring-2:focus-visible {

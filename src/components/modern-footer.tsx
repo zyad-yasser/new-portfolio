@@ -45,8 +45,8 @@ export function ModernFooter() {
                 Zyad Yasser
               </h3>
               <p className="text-muted-foreground mb-6 max-w-md leading-relaxed">
-                Full-stack developer passionate about creating modern, scalable web applications
-                that solve real-world problems and deliver exceptional user experiences.
+                Software engineer building fast, reliable systems across full-stack, backend
+                architecture, and AI — from early-stage products to platforms at scale.
               </p>
               <ul className="flex space-x-2" aria-label="Social media links">
                 {socialLinks.map((link, index) => (
@@ -114,7 +114,7 @@ export function ModernFooter() {
               <div className="space-y-3 text-sm text-muted-foreground">
                 <p>zyadyasser6@gmail.com</p>
                 <p>+201111980284</p>
-                <p>Port-Said, Egypt</p>
+                <p>Cairo, Egypt — Open to Remote</p>
               </div>
             </motion.div>
           </div>

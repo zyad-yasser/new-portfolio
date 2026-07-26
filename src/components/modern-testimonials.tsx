@@ -66,7 +66,7 @@ export function ModernTestimonials() {
         >
           {testimonials.map((testimonial, index) => (
             <motion.li key={index} variants={itemVariants}>
-              <Card className="h-full bg-card border-border card-hover">
+              <Card className="glass h-full card-hover">
                 <CardContent className="p-8">
                   <div className="flex items-start space-x-1 mb-6" aria-hidden="true">
                     <Quote className="h-8 w-8 text-primary flex-shrink-0" />

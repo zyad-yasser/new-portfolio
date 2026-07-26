@@ -12,11 +12,11 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL("https://zyadyasser.com"),
   title: {
-    default: "Zyad Yasser | Full Stack Developer & Software Engineer",
+    default: "Zyad Yasser | Software Engineer — Full-Stack, Systems & AI",
     template: "%s | Zyad Yasser",
   },
   description:
-    "Experienced Full Stack Developer specializing in React, Next.js, Node.js, and modern web technologies. Building scalable, accessible, and high-performance web applications. Based in Port-Said, Egypt.",
+    "Software engineer with 7+ years building fast, reliable systems — from AI-powered EHR products to platforms serving 100,000+ users. Specializing in Next.js, event-driven backends, and LLM/RAG systems. Based in Cairo, Egypt — open to remote.",
   keywords: [
     "Zyad Yasser",
     "Full Stack Developer",
@@ -68,9 +68,9 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: "https://zyadyasser.com",
-    title: "Zyad Yasser | Full Stack Developer & Software Engineer",
+    title: "Zyad Yasser | Software Engineer — Full-Stack, Systems & AI",
     description:
-      "Experienced Full Stack Developer specializing in React, Next.js, Node.js, and modern web technologies. Building scalable, accessible, and high-performance web applications.",
+      "Software engineer with 7+ years building fast, reliable systems — from AI-powered EHR products to platforms serving 100,000+ users. Specializing in Next.js, event-driven backends, and LLM/RAG systems.",
     siteName: "Zyad Yasser Portfolio",
     images: [
       {
@@ -83,9 +83,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Zyad Yasser | Full Stack Developer & Software Engineer",
+    title: "Zyad Yasser | Software Engineer — Full-Stack, Systems & AI",
     description:
-      "Experienced Full Stack Developer specializing in React, Next.js, Node.js, and modern web technologies.",
+      "Software engineer with 7+ years building fast, reliable systems — from AI-powered EHR products to platforms serving 100,000+ users.",
     creator: "@zezoozyad",
     images: ["/og-image.png"],
   },

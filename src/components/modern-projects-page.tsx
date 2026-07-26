@@ -71,7 +71,7 @@ export function ModernProjectsPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
             >
-              <Card className="h-full bg-card border-border hover:border-primary/50 transition-all duration-300 group overflow-hidden">
+              <Card className="glass h-full hover:border-primary/50 transition-all duration-300 group overflow-hidden">
                 {project.image && (
                   <div className="relative h-48 overflow-hidden">
                     <Image
