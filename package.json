@@ -20,50 +20,26 @@
     "format:all": "biome format --write . && biome lint --write .",
     "clean": "rm -rf .next && rm -rf node_modules && rm -rf .turbo && rm -rf .pnpm-store"
   },
-  "husky": {
-    "hooks": {
-      "prepare-commit-msg": "exec < /dev/tty && git cz --hook || true",
-      "pre-commit": "lint-staged",
-      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
-    }
-  },
-  "lint-staged": {
-    "./src/**/*.{ts,js,jsx,tsx}": [
-      "pnpm check:fix"
-    ]
-  },
   "dependencies": {
     "@radix-ui/react-slot": "^1.1.1",
-    "axios": "^1.7.7",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "framer-motion": "^11.12.0",
-    "lodash": "^4.17.21",
     "lucide-react": "^0.469.0",
     "next": "^16.1.6",
     "next-themes": "^0.4.6",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "react-markdown": "^9.0.1",
     "sass": "^1.97.3",
-    "tailwind-merge": "^2.5.5",
-    "tailwindcss-animate": "^1.0.7",
-    "zustand": "^5.0.2"
+    "tailwind-merge": "^2.5.5"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
-    "@commitlint/cli": "^19.6.0",
-    "@commitlint/config-conventional": "^19.6.0",
     "@tailwindcss/postcss": "^4.1.17",
-    "@types/lodash": "^4.17.13",
     "@types/node": "^22.10.2",
     "@types/react": "^19.0.2",
     "@types/react-dom": "^19.0.2",
     "autoprefixer": "^10.4.22",
-    "commitizen": "^4.3.1",
-    "cz-conventional-changelog": "^3.3.0",
-    "husky": "^9.1.7",
-    "lint-staged": "^15.2.11",
     "postcss": "^8.5.6",
     "sharp": "^0.34.5",
     "tailwindcss": "^4.1.17",
