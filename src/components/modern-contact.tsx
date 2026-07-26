@@ -1,5 +1,6 @@
 "use client";
 
+import { containerVariants, itemVariants } from "@/lib/motion";
 import { motion } from "framer-motion";
 import { Mail, MapPin, Phone, Send } from "lucide-react";
 import { Badge } from "./ui/badge";
@@ -7,6 +8,7 @@ import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
+import { SectionHeader } from "./ui/section-header";
 import { Textarea } from "./ui/textarea";
 
 const contactInfo = [
@@ -30,55 +32,16 @@ const contactInfo = [
   },
 ];
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.6 },
-  },
-};
-
 export function ModernContact() {
   return (
-    <div className="py-24 px-4 bg-muted/20 border-t border-border">
+    <div className="py-24 px-4 bg-muted/15 border-t border-border/60">
       <div className="container mx-auto max-w-6xl">
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-          variants={containerVariants}
-          className="text-center mb-16"
-        >
-          <motion.h2
-            id="contact-heading"
-            variants={itemVariants}
-            className="text-4xl md:text-5xl font-bold mb-6"
-          >
-            Let's Work Together
-          </motion.h2>
-          <motion.div
-            variants={itemVariants}
-            className="w-20 h-1 bg-gradient-to-r from-primary to-secondary mx-auto mb-8"
-          />
-          <motion.p
-            variants={itemVariants}
-            className="text-xl text-muted-foreground max-w-3xl mx-auto"
-          >
-            Ready to bring your ideas to life? Get in touch and let's discuss how we can create
-            something amazing together.
-          </motion.p>
-        </motion.div>
+        <SectionHeader
+          id="contact-heading"
+          title="Let's Work Together"
+          subtitle="Ready to bring your ideas to life? Get in touch and let's discuss how we can create something amazing together."
+          align="center"
+        />
 
         <div className="grid lg:grid-cols-2 gap-16">
           <motion.div
@@ -229,12 +192,9 @@ export function ModernContact() {
             <motion.div variants={itemVariants} className="pt-8">
               <h4 className="font-semibold mb-4">Current Availability</h4>
               <div className="flex items-center space-x-3 mb-4">
-                <div
-                  className="w-3 h-3 bg-green-500 rounded-full animate-pulse"
-                  aria-hidden="true"
-                />
+                <div className="w-3 h-3 bg-success rounded-full animate-pulse" aria-hidden="true" />
                 <output>
-                  <Badge variant="outline" className="text-green-600 border-green-200">
+                  <Badge variant="outline" className="text-success border-success/30">
                     Available for new projects
                   </Badge>
                 </output>

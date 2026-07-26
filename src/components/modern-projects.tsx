@@ -1,66 +1,29 @@
 "use client";
 
 import { getFirebaseStorageUrl } from "@/constants";
+import { containerVariants, itemVariants } from "@/lib/motion";
 import { productionProjects } from "@/statics";
 import { motion } from "framer-motion";
-import { ExternalLink, Github } from "lucide-react";
+import { ExternalLink, Github, ImageOff } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import { SectionHeader } from "./ui/section-header";
 
 const featuredProjects = productionProjects.slice(0, 4);
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.6 },
-  },
-};
-
 export function ModernProjects() {
   return (
-    <div className="py-24 px-4">
+    <div className="py-24 px-4 bg-muted/15 border-t border-border/60">
       <div className="container mx-auto max-w-7xl">
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-          variants={containerVariants}
-          className="text-center mb-16"
-        >
-          <motion.h2
-            id="projects-heading"
-            variants={itemVariants}
-            className="text-4xl md:text-5xl font-bold mb-6"
-          >
-            Featured Projects
-          </motion.h2>
-          <motion.div
-            variants={itemVariants}
-            className="w-20 h-1 bg-gradient-to-r from-primary to-secondary mx-auto mb-8"
-          />
-          <motion.p
-            variants={itemVariants}
-            className="text-xl text-muted-foreground max-w-3xl mx-auto"
-          >
-            A showcase of my recent work, featuring modern web applications built with cutting-edge
-            technologies.
-          </motion.p>
-        </motion.div>
+        <SectionHeader
+          id="projects-heading"
+          title="Featured Projects"
+          subtitle="A showcase of my recent work, featuring modern web applications built with cutting-edge technologies."
+          align="left"
+        />
 
         <motion.ul
           initial="hidden"
@@ -76,7 +39,7 @@ export function ModernProjects() {
                 <div className="relative overflow-hidden h-48 bg-gradient-to-br from-primary/10 to-warning/10 border-b border-border">
                   <div className="absolute inset-0 bg-gradient-to-t from-card/90 to-transparent" />
                   <div className="absolute top-4 left-4">
-                    <Badge className="bg-primary text-primary-foreground shadow-lg shadow-primary/20">
+                    <Badge className="border-transparent bg-gradient-brand text-primary-foreground shadow-lg shadow-primary/20">
                       Production
                     </Badge>
                   </div>
@@ -121,9 +84,10 @@ export function ModernProjects() {
                       role="img"
                       aria-label="Project placeholder image"
                     >
-                      <div className="text-muted-foreground text-6xl opacity-50" aria-hidden="true">
-                        📱
-                      </div>
+                      <ImageOff
+                        className="h-12 w-12 text-muted-foreground opacity-50"
+                        aria-hidden="true"
+                      />
                     </div>
                   )}
                 </div>

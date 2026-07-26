@@ -1,8 +1,11 @@
 "use client";
 
+import { getFirebaseStorageUrl } from "@/constants";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import { Badge } from "./ui/badge";
 import { Card, CardContent } from "./ui/card";
+import { SectionHeader } from "./ui/section-header";
 
 const skills = [
   "TypeScript",
@@ -56,12 +59,22 @@ export function ModernAbout() {
           className="grid lg:grid-cols-2 gap-16 items-center"
         >
           <div className="space-y-8">
-            <motion.div variants={itemVariants}>
-              <h2 id="about-heading" className="text-4xl md:text-5xl font-bold mb-6">
-                About Me
-              </h2>
-              <div className="w-20 h-1 bg-gradient-to-r from-primary to-secondary mb-8" />
+            <motion.div
+              variants={itemVariants}
+              className="w-24 h-24 rounded-2xl bg-gradient-brand p-[2px]"
+            >
+              <div className="w-full h-full rounded-2xl overflow-hidden relative bg-card">
+                <Image
+                  src={getFirebaseStorageUrl("/avatars/zyad.jpg")}
+                  alt="Zyad Yasser"
+                  fill
+                  sizes="96px"
+                  className="object-cover"
+                />
+              </div>
             </motion.div>
+
+            <SectionHeader id="about-heading" title="About Me" align="left" className="mb-0" />
 
             <motion.div
               variants={itemVariants}
@@ -103,7 +116,10 @@ export function ModernAbout() {
                         transition={{ delay: index * 0.05, duration: 0.3 }}
                         viewport={{ once: true }}
                       >
-                        <Badge variant="secondary" className="px-3 py-1 text-sm">
+                        <Badge
+                          variant="outline"
+                          className="px-3 py-1 text-sm border-border/60 transition-colors duration-200 hover:border-primary/50 hover:bg-primary/10 hover:text-primary"
+                        >
                           {skill}
                         </Badge>
                       </motion.div>
@@ -131,7 +147,7 @@ export function ModernAbout() {
                         whileInView={{ scale: 1, opacity: 1 }}
                         transition={{ delay: index * 0.1, duration: 0.5 }}
                         viewport={{ once: true }}
-                        className="text-3xl font-bold text-primary mb-2"
+                        className="text-3xl font-bold text-gradient-brand mb-2"
                         aria-label={`${stat.number} ${stat.label}`}
                       >
                         {stat.number}

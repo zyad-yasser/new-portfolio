@@ -1,6 +1,7 @@
 "use client";
 
 import { getFirebaseStorageUrl } from "@/constants";
+import { containerVariants, itemVariants } from "@/lib/motion";
 import { otherProjects, productionProjects } from "@/statics";
 import { motion } from "framer-motion";
 import { ExternalLink, Github } from "lucide-react";
@@ -11,6 +12,8 @@ import { Button } from "./ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 
 type Tab = "production" | "other";
+
+const MAX_VISIBLE_SUBPROJECTS = 3;
 
 export function ModernProjectsPage() {
   const [activeTab, setActiveTab] = useState<Tab>("production");
@@ -26,9 +29,7 @@ export function ModernProjectsPage() {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-            All Projects
-          </h1>
+          <h1 className="text-5xl md:text-6xl font-bold mb-6 text-gradient-brand">All Projects</h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             A comprehensive showcase of my work across various technologies and industries
           </p>
@@ -40,7 +41,7 @@ export function ModernProjectsPage() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="flex justify-center mb-12"
         >
-          <div className="inline-flex bg-card border border-border rounded-lg p-1">
+          <div className="inline-flex glass rounded-lg p-1">
             <Button
               variant={activeTab === "production" ? "default" : "ghost"}
               onClick={() => setActiveTab("production")}
@@ -59,18 +60,14 @@ export function ModernProjectsPage() {
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
+          key={activeTab}
+          initial="hidden"
+          animate="visible"
+          variants={containerVariants}
           className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
         >
           {currentProjects.map((project, index) => (
-            <motion.div
-              key={`${activeTab}-${index}`}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-            >
+            <motion.div key={`${activeTab}-${index}`} variants={itemVariants}>
               <Card className="glass h-full hover:border-primary/50 transition-all duration-300 group overflow-hidden">
                 {project.image && (
                   <div className="relative h-48 overflow-hidden">
@@ -111,28 +108,35 @@ export function ModernProjectsPage() {
                     <div className="mb-4">
                       <h4 className="text-sm font-semibold mb-2 text-foreground">Sub-projects:</h4>
                       <div className="space-y-1">
-                        {project.subProjects.map((subProject, subIndex) => (
-                          <div key={subIndex} className="text-sm">
-                            {subProject.link ? (
-                              <a
-                                href={subProject.link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-primary hover:underline"
-                              >
-                                {subProject.name}
-                              </a>
-                            ) : (
-                              <span className="text-muted-foreground">{subProject.name}</span>
-                            )}
-                            {subProject.description && (
-                              <span className="text-muted-foreground">
-                                {" "}
-                                - {subProject.description}
-                              </span>
-                            )}
-                          </div>
-                        ))}
+                        {project.subProjects
+                          .slice(0, MAX_VISIBLE_SUBPROJECTS)
+                          .map((subProject, subIndex) => (
+                            <div key={subIndex} className="text-sm">
+                              {subProject.link ? (
+                                <a
+                                  href={subProject.link}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-primary hover:underline"
+                                >
+                                  {subProject.name}
+                                </a>
+                              ) : (
+                                <span className="text-muted-foreground">{subProject.name}</span>
+                              )}
+                              {subProject.description && (
+                                <span className="text-muted-foreground">
+                                  {" "}
+                                  - {subProject.description}
+                                </span>
+                              )}
+                            </div>
+                          ))}
+                        {project.subProjects.length > MAX_VISIBLE_SUBPROJECTS && (
+                          <p className="text-sm text-muted-foreground">
+                            +{project.subProjects.length - MAX_VISIBLE_SUBPROJECTS} more
+                          </p>
+                        )}
                       </div>
                     </div>
                   )}

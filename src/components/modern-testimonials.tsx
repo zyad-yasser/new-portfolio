@@ -1,66 +1,30 @@
 "use client";
 
 import { getFirebaseStorageUrl } from "@/constants";
+import { containerVariantsSlow, itemVariants } from "@/lib/motion";
 import { testimonials } from "@/statics";
 import { motion } from "framer-motion";
 import { Quote } from "lucide-react";
 import Image from "next/image";
 import { Card, CardContent } from "./ui/card";
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.2,
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.6 },
-  },
-};
+import { SectionHeader } from "./ui/section-header";
 
 export function ModernTestimonials() {
   return (
-    <div className="py-24 px-4 bg-muted/30">
+    <div className="py-24 px-4">
       <div className="container mx-auto max-w-7xl">
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-          variants={containerVariants}
-          className="text-center mb-16"
-        >
-          <motion.h2
-            id="testimonials-heading"
-            variants={itemVariants}
-            className="text-4xl md:text-5xl font-bold mb-6"
-          >
-            Client Testimonials
-          </motion.h2>
-          <motion.div
-            variants={itemVariants}
-            className="w-20 h-1 bg-gradient-to-r from-primary to-secondary mx-auto mb-8"
-          />
-          <motion.p
-            variants={itemVariants}
-            className="text-xl text-muted-foreground max-w-3xl mx-auto"
-          >
-            What clients and colleagues say about working with me
-          </motion.p>
-        </motion.div>
+        <SectionHeader
+          id="testimonials-heading"
+          title="Client Testimonials"
+          subtitle="What clients and colleagues say about working with me"
+          align="center"
+        />
 
         <motion.ul
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-50px" }}
-          variants={containerVariants}
+          variants={containerVariantsSlow}
           className="grid md:grid-cols-2 gap-8"
           aria-label="Client testimonials"
         >
@@ -78,14 +42,16 @@ export function ModernTestimonials() {
                   </blockquote>
 
                   <div className="flex items-center space-x-4">
-                    <div className="relative h-12 w-12 rounded-full overflow-hidden bg-primary/10">
-                      <Image
-                        src={getFirebaseStorageUrl(testimonial.photo)}
-                        alt={`${testimonial.writer}, ${testimonial.title}`}
-                        fill
-                        className="object-cover"
-                        sizes="48px"
-                      />
+                    <div className="h-12 w-12 rounded-full bg-gradient-brand p-[1.5px] shrink-0">
+                      <div className="relative h-full w-full rounded-full overflow-hidden bg-card">
+                        <Image
+                          src={getFirebaseStorageUrl(testimonial.photo)}
+                          alt={`${testimonial.writer}, ${testimonial.title}`}
+                          fill
+                          className="object-cover"
+                          sizes="48px"
+                        />
+                      </div>
                     </div>
                     <div>
                       <div className="font-semibold text-foreground">{testimonial.writer}</div>

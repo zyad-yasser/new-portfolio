@@ -1,8 +1,10 @@
 "use client";
 
+import { containerVariants, itemVariants } from "@/lib/motion";
 import { motion } from "framer-motion";
 import { Boxes, Brain, Cloud, Gauge, Search, Smartphone } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import { SectionHeader } from "./ui/section-header";
 
 const services = [
   {
@@ -64,55 +66,16 @@ const services = [
   },
 ];
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.6 },
-  },
-};
-
 export function ModernServices() {
   return (
-    <div className="py-24 px-4 bg-muted/20 border-t border-border">
+    <div className="py-24 px-4">
       <div className="container mx-auto max-w-7xl">
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-          variants={containerVariants}
-          className="text-center mb-16"
-        >
-          <motion.h2
-            id="services-heading"
-            variants={itemVariants}
-            className="text-4xl md:text-5xl font-bold mb-6"
-          >
-            Services
-          </motion.h2>
-          <motion.div
-            variants={itemVariants}
-            className="w-20 h-1 bg-gradient-to-r from-primary to-secondary mx-auto mb-8"
-          />
-          <motion.p
-            variants={itemVariants}
-            className="text-xl text-muted-foreground max-w-3xl mx-auto"
-          >
-            Comprehensive development services to bring your ideas to life with modern technologies
-            and best practices.
-          </motion.p>
-        </motion.div>
+        <SectionHeader
+          id="services-heading"
+          title="Services"
+          subtitle="Comprehensive development services to bring your ideas to life with modern technologies and best practices."
+          align="left"
+        />
 
         <motion.ul
           initial="hidden"
@@ -127,12 +90,14 @@ export function ModernServices() {
               <Card className="glass h-full group card-hover">
                 <CardHeader className="text-center pb-6">
                   <motion.div
-                    className="w-16 h-16 mx-auto mb-4 bg-primary/10 rounded-2xl flex items-center justify-center group-hover:bg-primary/20 transition-all duration-300 border border-primary/20"
+                    className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-brand p-[1.5px] transition-transform duration-300"
                     whileHover={{ scale: 1.05 }}
                     transition={{ duration: 0.2 }}
                     aria-hidden="true"
                   >
-                    <service.icon className="w-8 h-8 text-primary" />
+                    <div className="w-full h-full rounded-2xl bg-card flex items-center justify-center group-hover:bg-card/70 transition-colors duration-300">
+                      <service.icon className="w-8 h-8 text-primary" />
+                    </div>
                   </motion.div>
                   <CardTitle className="text-xl font-bold text-card-foreground">
                     {service.title}

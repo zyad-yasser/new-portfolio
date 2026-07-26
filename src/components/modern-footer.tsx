@@ -41,9 +41,7 @@ export function ModernFooter() {
               transition={{ duration: 0.6 }}
               viewport={{ once: true }}
             >
-              <h3 className="text-2xl font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                Zyad Yasser
-              </h3>
+              <h3 className="text-2xl font-bold mb-4 text-gradient-brand">Zyad Yasser</h3>
               <p className="text-muted-foreground mb-6 max-w-md leading-relaxed">
                 Software engineer building fast, reliable systems across full-stack, backend
                 architecture, and AI — from early-stage products to platforms at scale.
@@ -131,7 +129,7 @@ export function ModernFooter() {
             © {new Date().getFullYear()} Zyad Yasser. All rights reserved.
           </p>
           <p className="flex items-center">
-            Made with <Heart className="w-4 h-4 mx-1 text-red-500 fill-current" />
+            Made with <Heart className="w-4 h-4 mx-1 text-primary fill-current" />
           </p>
         </motion.div>
       </div>

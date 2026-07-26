@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { StructuredData } from "../components/seo/structured-data";
+import { SiteHeader } from "../components/site-header";
 import { ThemeProvider } from "../components/theme-provider";
 
 const inter = Inter({
@@ -112,6 +113,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <SiteHeader />
           {children}
         </ThemeProvider>
       </body>
