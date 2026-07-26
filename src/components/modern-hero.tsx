@@ -9,13 +9,17 @@ import { Button } from "./ui/button";
 
 export function ModernHero() {
   return (
-    <section className="min-h-screen flex items-center justify-center relative overflow-hidden" aria-label="Hero section">
+    <section
+      className="min-h-screen flex items-center justify-center relative overflow-hidden"
+      aria-label="Hero section"
+    >
       <div className="absolute inset-0 bg-background" />
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-warning/5" />
       <div
         className="absolute inset-0 opacity-10"
         style={{
-          backgroundImage: `radial-gradient(circle at 1px 1px, hsl(var(--color-border)) 1px, transparent 0)`,
+          backgroundImage:
+            "radial-gradient(circle at 1px 1px, hsl(var(--color-border)) 1px, transparent 0)",
           backgroundSize: "24px 24px",
         }}
       />
@@ -24,7 +28,8 @@ export function ModernHero() {
         <motion.div
           className="absolute w-[600px] h-[600px] rounded-full"
           style={{
-            background: "radial-gradient(circle, rgba(255, 200, 50, 0.25) 0%, rgba(255, 170, 50, 0.15) 40%, transparent 70%)",
+            background:
+              "radial-gradient(circle, rgba(255, 200, 50, 0.25) 0%, rgba(255, 170, 50, 0.15) 40%, transparent 70%)",
             filter: "blur(80px)",
             mixBlendMode: "screen",
             top: "-10%",
@@ -45,7 +50,8 @@ export function ModernHero() {
         <motion.div
           className="absolute w-[500px] h-[500px] rounded-full"
           style={{
-            background: "radial-gradient(circle, rgba(255, 220, 100, 0.2) 0%, rgba(255, 180, 70, 0.1) 40%, transparent 70%)",
+            background:
+              "radial-gradient(circle, rgba(255, 220, 100, 0.2) 0%, rgba(255, 180, 70, 0.1) 40%, transparent 70%)",
             filter: "blur(80px)",
             mixBlendMode: "screen",
             top: "40%",
@@ -67,7 +73,8 @@ export function ModernHero() {
         <motion.div
           className="absolute w-[550px] h-[550px] rounded-full"
           style={{
-            background: "radial-gradient(circle, rgba(255, 190, 80, 0.22) 0%, rgba(255, 160, 60, 0.12) 40%, transparent 70%)",
+            background:
+              "radial-gradient(circle, rgba(255, 190, 80, 0.22) 0%, rgba(255, 160, 60, 0.12) 40%, transparent 70%)",
             filter: "blur(80px)",
             mixBlendMode: "screen",
             bottom: "10%",
@@ -112,10 +119,14 @@ export function ModernHero() {
                   src={getFirebaseStorageUrl("/avatars/zyad.jpg")}
                   alt="Zyad Yasser - Full Stack Developer"
                   fill
+                  sizes="128px"
                   className="object-cover rounded-full"
                   priority
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-primary/20 to-transparent rounded-full" aria-hidden="true" />
+                <div
+                  className="absolute inset-0 bg-gradient-to-t from-primary/20 to-transparent rounded-full"
+                  aria-hidden="true"
+                />
               </div>
             </div>
           </motion.div>
@@ -178,15 +189,14 @@ export function ModernHero() {
             </Button>
           </motion.div>
 
-          <motion.div
+          <motion.ul
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7, duration: 0.8 }}
             className="flex justify-center gap-4 mb-16"
-            role="list"
             aria-label="Social media links"
           >
-            <div role="listitem">
+            <li>
               <Button variant="ghost" size="icon" className="h-12 w-12" asChild>
                 <a
                   href="https://github.com/zyad-yasser"
@@ -197,8 +207,8 @@ export function ModernHero() {
                   <Github className="h-6 w-6" aria-hidden="true" />
                 </a>
               </Button>
-            </div>
-            <div role="listitem">
+            </li>
+            <li>
               <Button variant="ghost" size="icon" className="h-12 w-12" asChild>
                 <a
                   href="https://www.linkedin.com/in/zyad-yasser-developer/"
@@ -209,15 +219,15 @@ export function ModernHero() {
                   <Linkedin className="h-6 w-6" aria-hidden="true" />
                 </a>
               </Button>
-            </div>
-            <div role="listitem">
+            </li>
+            <li>
               <Button variant="ghost" size="icon" className="h-12 w-12" asChild>
                 <a href="mailto:zyadyasser6@gmail.com" aria-label="Send me an email">
                   <Mail className="h-6 w-6" aria-hidden="true" />
                 </a>
               </Button>
-            </div>
-          </motion.div>
+            </li>
+          </motion.ul>
 
           <motion.div
             initial={{ opacity: 0 }}

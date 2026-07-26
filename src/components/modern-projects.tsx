@@ -42,7 +42,11 @@ export function ModernProjects() {
           variants={containerVariants}
           className="text-center mb-16"
         >
-          <motion.h2 id="projects-heading" variants={itemVariants} className="text-4xl md:text-5xl font-bold mb-6">
+          <motion.h2
+            id="projects-heading"
+            variants={itemVariants}
+            className="text-4xl md:text-5xl font-bold mb-6"
+          >
             Featured Projects
           </motion.h2>
           <motion.div
@@ -58,17 +62,16 @@ export function ModernProjects() {
           </motion.p>
         </motion.div>
 
-        <motion.div
+        <motion.ul
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-50px" }}
           variants={containerVariants}
           className="grid lg:grid-cols-2 gap-8"
-          role="list"
           aria-label="Featured projects"
         >
           {featuredProjects.map((project, index) => (
-            <motion.div key={index} variants={itemVariants} role="listitem">
+            <motion.li key={index} variants={itemVariants}>
               <Card className="h-full group card-hover bg-card overflow-hidden">
                 <div className="relative overflow-hidden h-48 bg-gradient-to-br from-primary/10 to-warning/10 border-b border-border">
                   <div className="absolute inset-0 bg-gradient-to-t from-card/90 to-transparent" />
@@ -113,8 +116,14 @@ export function ModernProjects() {
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     />
                   ) : (
-                    <div className="absolute inset-4 rounded bg-muted/20 flex items-center justify-center" role="img" aria-label="Project placeholder image">
-                      <div className="text-muted-foreground text-6xl opacity-50" aria-hidden="true">📱</div>
+                    <div
+                      className="absolute inset-4 rounded bg-muted/20 flex items-center justify-center"
+                      role="img"
+                      aria-label="Project placeholder image"
+                    >
+                      <div className="text-muted-foreground text-6xl opacity-50" aria-hidden="true">
+                        📱
+                      </div>
                     </div>
                   )}
                 </div>
@@ -167,9 +176,9 @@ export function ModernProjects() {
                   </div>
                 </CardContent>
               </Card>
-            </motion.div>
+            </motion.li>
           ))}
-        </motion.div>
+        </motion.ul>
 
         <motion.div
           initial="hidden"

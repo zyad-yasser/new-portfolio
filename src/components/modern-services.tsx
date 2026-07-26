@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Code2, Smartphone, Globe, Database, Cloud, Palette } from "lucide-react";
+import { Cloud, Code2, Database, Globe, Palette, Smartphone } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 
 const services = [
@@ -79,7 +79,11 @@ export function ModernServices() {
           variants={containerVariants}
           className="text-center mb-16"
         >
-          <motion.h2 id="services-heading" variants={itemVariants} className="text-4xl md:text-5xl font-bold mb-6">
+          <motion.h2
+            id="services-heading"
+            variants={itemVariants}
+            className="text-4xl md:text-5xl font-bold mb-6"
+          >
             Services
           </motion.h2>
           <motion.div
@@ -95,17 +99,16 @@ export function ModernServices() {
           </motion.p>
         </motion.div>
 
-        <motion.div
+        <motion.ul
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-50px" }}
           variants={containerVariants}
           className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
-          role="list"
           aria-label="Services offered"
         >
           {services.map((service, index) => (
-            <motion.div key={index} variants={itemVariants} role="listitem">
+            <motion.li key={index} variants={itemVariants}>
               <Card className="h-full group card-hover bg-card">
                 <CardHeader className="text-center pb-6">
                   <motion.div
@@ -137,9 +140,9 @@ export function ModernServices() {
                   </ul>
                 </CardContent>
               </Card>
-            </motion.div>
+            </motion.li>
           ))}
-        </motion.div>
+        </motion.ul>
       </div>
     </div>
   );

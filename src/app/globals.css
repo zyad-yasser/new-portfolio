@@ -186,10 +186,7 @@ html {
 
 .focus-visible\:ring-2:focus-visible {
   outline: none;
-  ring-width: 2px;
-  ring-color: hsl(var(--color-primary));
-  ring-offset-width: 2px;
-  ring-offset-color: hsl(var(--color-background));
+  box-shadow: 0 0 0 2px hsl(var(--color-background)), 0 0 0 4px hsl(var(--color-primary));
 }
 
 .gradient-text {

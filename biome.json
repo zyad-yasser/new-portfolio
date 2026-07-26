@@ -16,7 +16,10 @@
       "public/**",
       "static/**",
       "*.min.js",
-      "*.min.css"
+      "*.min.css",
+      ".agents/**",
+      ".claude/skills/**",
+      "agent/**"
     ]
   },
   "formatter": {

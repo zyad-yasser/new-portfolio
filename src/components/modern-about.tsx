@@ -55,7 +55,9 @@ export function ModernAbout() {
         >
           <div className="space-y-8">
             <motion.div variants={itemVariants}>
-              <h2 id="about-heading" className="text-4xl md:text-5xl font-bold mb-6">About Me</h2>
+              <h2 id="about-heading" className="text-4xl md:text-5xl font-bold mb-6">
+                About Me
+              </h2>
               <div className="w-20 h-1 bg-gradient-to-r from-primary to-secondary mb-8" />
             </motion.div>
 
@@ -107,29 +109,35 @@ export function ModernAbout() {
               </Card>
             </motion.div>
 
-            <motion.div variants={itemVariants} className="grid grid-cols-3 gap-6" role="list" aria-label="Professional statistics">
+            <motion.ul
+              variants={itemVariants}
+              className="grid grid-cols-3 gap-6"
+              aria-label="Professional statistics"
+            >
               {[
                 { number: "50+", label: "Projects Completed" },
                 { number: "5+", label: "Years Experience" },
                 { number: "100%", label: "Client Satisfaction" },
               ].map((stat, index) => (
-                <Card key={index} className="text-center p-6" role="listitem">
-                  <CardContent className="p-0">
-                    <motion.div
-                      initial={{ scale: 0.5, opacity: 0 }}
-                      whileInView={{ scale: 1, opacity: 1 }}
-                      transition={{ delay: index * 0.1, duration: 0.5 }}
-                      viewport={{ once: true }}
-                      className="text-3xl font-bold text-primary mb-2"
-                      aria-label={`${stat.number} ${stat.label}`}
-                    >
-                      {stat.number}
-                    </motion.div>
-                    <p className="text-sm text-muted-foreground">{stat.label}</p>
-                  </CardContent>
-                </Card>
+                <li key={index}>
+                  <Card className="text-center p-6">
+                    <CardContent className="p-0">
+                      <motion.div
+                        initial={{ scale: 0.5, opacity: 0 }}
+                        whileInView={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: index * 0.1, duration: 0.5 }}
+                        viewport={{ once: true }}
+                        className="text-3xl font-bold text-primary mb-2"
+                        aria-label={`${stat.number} ${stat.label}`}
+                      >
+                        {stat.number}
+                      </motion.div>
+                      <p className="text-sm text-muted-foreground">{stat.label}</p>
+                    </CardContent>
+                  </Card>
+                </li>
               ))}
-            </motion.div>
+            </motion.ul>
           </div>
         </motion.div>
       </div>
