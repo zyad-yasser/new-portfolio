@@ -24,6 +24,20 @@ export function ModernHero() {
       />
       <AmbientGradient variant="hero" />
 
+      <div
+        className="absolute inset-0 flex items-center justify-center overflow-hidden pointer-events-none select-none"
+        aria-hidden="true"
+      >
+        <motion.span
+          data-text="Zyad Yasser"
+          className="hero-glitch-name font-black uppercase tracking-tighter whitespace-nowrap text-[clamp(4rem,15vw,13rem)] leading-none"
+          animate={shouldReduceMotion ? {} : { x: [0, -14, 6, 0], y: [0, 6, -4, 0] }}
+          transition={{ duration: 26, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
+        >
+          Zyad Yasser
+        </motion.span>
+      </div>
+
       <div className="container mx-auto px-5 sm:px-6 lg:px-8 z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
