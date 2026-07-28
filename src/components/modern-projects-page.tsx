@@ -6,6 +6,7 @@ import { otherProjects, productionProjects } from "@/statics";
 import { motion } from "framer-motion";
 import { ExternalLink, Github } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
@@ -68,7 +69,11 @@ export function ModernProjectsPage() {
         >
           {currentProjects.map((project, index) => (
             <motion.div key={`${activeTab}-${index}`} variants={itemVariants}>
-              <Card className="glass h-full hover:border-primary/50 transition-all duration-300 group overflow-hidden">
+              <Card
+                className={`glass h-full flex flex-col hover:border-primary/50 transition-all duration-300 group overflow-hidden ${
+                  project.discontinued ? "opacity-60 grayscale-[40%] hover:opacity-80" : ""
+                }`}
+              >
                 {project.image && (
                   <div className="relative h-48 overflow-hidden">
                     <Image
@@ -83,15 +88,35 @@ export function ModernProjectsPage() {
                 )}
 
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
-                    {project.name}
-                  </CardTitle>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <CardTitle className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
+                      {project.name}
+                    </CardTitle>
+                    {project.discontinued && (
+                      <Badge variant="outline" className="text-xs text-muted-foreground">
+                        Discontinued
+                      </Badge>
+                    )}
+                    {project.private && (
+                      <Badge variant="outline" className="text-xs text-muted-foreground">
+                        Private
+                      </Badge>
+                    )}
+                    {project.note && (
+                      <Badge
+                        variant="secondary"
+                        className="text-xs bg-primary/10 text-primary border-primary/20"
+                      >
+                        {project.note}
+                      </Badge>
+                    )}
+                  </div>
                   <CardDescription className="text-muted-foreground line-clamp-3">
                     {project.description}
                   </CardDescription>
                 </CardHeader>
 
-                <CardContent className="pt-0">
+                <CardContent className="pt-0 flex flex-col flex-1">
                   <div className="flex flex-wrap gap-2 mb-6">
                     {project.technologies.map((tech, techIndex) => (
                       <Badge
@@ -142,23 +167,43 @@ export function ModernProjectsPage() {
                   )}
 
                   <div className="flex gap-2 mt-auto">
-                    {project.link && (
-                      <Button size="sm" asChild className="flex-1">
+                    {project.link &&
+                      (project.link.startsWith("/") ? (
+                        <Button size="sm" asChild className="flex-1">
+                          <Link
+                            href={project.link}
+                            className="flex items-center justify-center gap-2"
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                            Preview
+                          </Link>
+                        </Button>
+                      ) : (
+                        <Button size="sm" asChild className="flex-1">
+                          <a
+                            href={project.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center justify-center gap-2"
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                            {activeTab === "production" ? "Go to Site" : "Live Demo"}
+                          </a>
+                        </Button>
+                      ))}
+                    {project.codeLink && (
+                      <Button variant="outline" size="sm" asChild className="flex-1">
                         <a
-                          href={project.link}
+                          href={project.codeLink}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="flex items-center justify-center gap-2"
                         >
-                          <ExternalLink className="h-4 w-4" />
-                          Live Demo
+                          <Github className="h-4 w-4" />
+                          Code
                         </a>
                       </Button>
                     )}
-                    <Button variant="outline" size="sm" className="flex-1">
-                      <Github className="h-4 w-4 mr-2" />
-                      Code
-                    </Button>
                   </div>
                 </CardContent>
               </Card>

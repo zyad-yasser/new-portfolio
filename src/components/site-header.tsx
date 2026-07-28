@@ -13,6 +13,7 @@ const NAV_ITEMS = [
   { id: "experience", label: "Experience", href: "/#experience" },
   { id: "services", label: "Services", href: "/#services" },
   { id: "projects", label: "Work", href: "/#projects" },
+  { id: "open-source", label: "Open Source", href: "/#open-source" },
   { id: "contact", label: "Contact", href: "/#contact" },
 ];
 
@@ -66,7 +67,7 @@ export function SiteHeader() {
           <ThemeToggle />
           <button
             type="button"
-            className="md:hidden flex items-center justify-center h-11 w-11 rounded-md hover:bg-accent transition-colors duration-200"
+            className="md:hidden flex items-center justify-center h-11 w-11 rounded-md hover:bg-accent transition-colors duration-200 cursor-pointer"
             aria-expanded={open}
             aria-controls="mobile-nav"
             aria-label={open ? "Close menu" : "Open menu"}

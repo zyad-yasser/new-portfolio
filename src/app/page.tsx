@@ -3,6 +3,7 @@ import { ModernContact } from "@/components/modern-contact";
 import { ModernExperience } from "@/components/modern-experience";
 import { ModernFooter } from "@/components/modern-footer";
 import { ModernHero } from "@/components/modern-hero";
+import { ModernOpenSource } from "@/components/modern-open-source";
 import { ModernProjects } from "@/components/modern-projects";
 import { ModernServices } from "@/components/modern-services";
 import { ModernTestimonials } from "@/components/modern-testimonials";
@@ -25,6 +26,9 @@ export default function HomePage() {
         </section>
         <section id="projects" aria-labelledby="projects-heading">
           <ModernProjects />
+        </section>
+        <section id="open-source" aria-labelledby="open-source-heading">
+          <ModernOpenSource />
         </section>
         <section id="testimonials" aria-labelledby="testimonials-heading">
           <ModernTestimonials />

@@ -99,10 +99,10 @@ export function ModernServices() {
                       <service.icon className="w-8 h-8 text-primary" />
                     </div>
                   </motion.div>
-                  <CardTitle className="text-xl font-bold text-card-foreground">
+                  <CardTitle className="text-lg sm:text-xl font-bold text-card-foreground">
                     {service.title}
                   </CardTitle>
-                  <CardDescription className="text-base leading-relaxed text-muted-foreground">
+                  <CardDescription className="text-sm sm:text-base leading-relaxed text-muted-foreground">
                     {service.description}
                   </CardDescription>
                 </CardHeader>

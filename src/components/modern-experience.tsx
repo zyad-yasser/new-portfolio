@@ -34,7 +34,7 @@ export function ModernExperience() {
               className="relative pl-10 md:pl-0"
             >
               <div
-                className="absolute left-0 top-3 h-[9px] w-[9px] rounded-full bg-gradient-brand md:left-1/2 md:-translate-x-1/2"
+                className="absolute left-[11px] top-3 h-[9px] w-[9px] -translate-x-1/2 rounded-full bg-gradient-brand md:left-1/2"
                 style={{ boxShadow: "0 0 12px hsl(var(--primary) / 0.6)" }}
                 aria-hidden="true"
               />

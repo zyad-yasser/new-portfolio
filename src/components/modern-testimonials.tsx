@@ -4,7 +4,7 @@ import { getFirebaseStorageUrl } from "@/constants";
 import { containerVariantsSlow, itemVariants } from "@/lib/motion";
 import { testimonials } from "@/statics";
 import { motion } from "framer-motion";
-import { Quote } from "lucide-react";
+import { Quote, User } from "lucide-react";
 import Image from "next/image";
 import { Card, CardContent } from "./ui/card";
 import { SectionHeader } from "./ui/section-header";
@@ -15,7 +15,7 @@ export function ModernTestimonials() {
       <div className="container mx-auto max-w-7xl">
         <SectionHeader
           id="testimonials-heading"
-          title="Client Testimonials"
+          title="Testimonials"
           subtitle="What clients and colleagues say about working with me"
           align="center"
         />
@@ -26,7 +26,7 @@ export function ModernTestimonials() {
           viewport={{ once: true, margin: "-50px" }}
           variants={containerVariantsSlow}
           className="grid md:grid-cols-2 gap-8"
-          aria-label="Client testimonials"
+          aria-label="Testimonials"
         >
           {testimonials.map((testimonial, index) => (
             <motion.li key={index} variants={itemVariants}>
@@ -37,25 +37,40 @@ export function ModernTestimonials() {
                     <Quote className="h-8 w-8 text-primary/30 flex-shrink-0 -ml-4" />
                   </div>
 
-                  <blockquote className="text-lg leading-relaxed text-muted-foreground mb-8">
+                  <blockquote className="text-base sm:text-lg leading-relaxed text-muted-foreground mb-8">
                     "{testimonial.body}"
                   </blockquote>
 
                   <div className="flex items-center space-x-4">
                     <div className="h-12 w-12 rounded-full bg-gradient-brand p-[1.5px] shrink-0">
                       <div className="relative h-full w-full rounded-full overflow-hidden bg-card">
-                        <Image
-                          src={getFirebaseStorageUrl(testimonial.photo)}
-                          alt={`${testimonial.writer}, ${testimonial.title}`}
-                          fill
-                          className="object-cover"
-                          sizes="48px"
-                        />
+                        {testimonial.photo ? (
+                          <Image
+                            src={getFirebaseStorageUrl(testimonial.photo)}
+                            alt={testimonial.writer}
+                            fill
+                            className="object-cover"
+                            sizes="48px"
+                          />
+                        ) : (
+                          <div
+                            className="absolute inset-0 flex items-center justify-center bg-muted/40"
+                            role="img"
+                            aria-label={testimonial.writer}
+                          >
+                            <User
+                              className="h-5 w-5 text-muted-foreground opacity-60"
+                              aria-hidden="true"
+                            />
+                          </div>
+                        )}
                       </div>
                     </div>
                     <div>
                       <div className="font-semibold text-foreground">{testimonial.writer}</div>
-                      <div className="text-sm text-muted-foreground">{testimonial.title}</div>
+                      {testimonial.title && (
+                        <div className="text-sm text-muted-foreground">{testimonial.title}</div>
+                      )}
                     </div>
                   </div>
                 </CardContent>

@@ -2,10 +2,14 @@ export interface Project {
   name: string;
   description: string;
   link?: string;
+  codeLink?: string;
   image: string;
   technologies: string[];
   colors: [string, string];
   subProjects?: SubProject[];
+  discontinued?: boolean;
+  private?: boolean;
+  note?: string;
 }
 
 export interface SubProject {
@@ -28,4 +32,12 @@ export interface Experience {
   period: string;
   current?: boolean;
   highlights: string[];
+}
+
+export interface OpenSourceContribution {
+  name: string;
+  description: string;
+  link: string;
+  type: "npm package" | "GitHub repo" | "OSS contribution";
+  technologies?: string[];
 }

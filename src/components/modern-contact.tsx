@@ -53,7 +53,7 @@ export function ModernContact() {
             <motion.div variants={itemVariants}>
               <Card className="glass-strong p-8">
                 <CardHeader className="p-0 mb-8">
-                  <CardTitle className="text-2xl font-bold text-card-foreground">
+                  <CardTitle className="text-xl sm:text-2xl font-bold text-card-foreground">
                     Send a Message
                   </CardTitle>
                 </CardHeader>
@@ -133,7 +133,11 @@ export function ModernContact() {
                         aria-required="true"
                       />
                     </div>
-                    <Button size="lg" className="w-full text-lg py-6 btn-glow" type="submit">
+                    <Button
+                      size="lg"
+                      className="w-full text-base sm:text-lg py-5 sm:py-6 btn-glow"
+                      type="submit"
+                    >
                       <Send className="mr-2 h-5 w-5" aria-hidden="true" />
                       Send Message
                     </Button>
@@ -151,8 +155,8 @@ export function ModernContact() {
             className="space-y-8"
           >
             <motion.div variants={itemVariants}>
-              <h3 className="text-2xl font-bold mb-6">Get In Touch</h3>
-              <p className="text-lg text-muted-foreground leading-relaxed mb-8">
+              <h3 className="text-xl sm:text-2xl font-bold mb-6">Get In Touch</h3>
+              <p className="text-base sm:text-lg text-muted-foreground leading-relaxed mb-8">
                 I'm always interested in new opportunities and exciting projects. Whether you have a
                 question or just want to say hello, feel free to reach out!
               </p>

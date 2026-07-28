@@ -48,7 +48,7 @@ export function ModernHero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.8 }}
-            className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 text-foreground tracking-tight"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 text-foreground tracking-tight"
           >
             Zyad Yasser
           </motion.h1>
@@ -57,7 +57,7 @@ export function ModernHero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.8 }}
-            className="text-lg md:text-xl text-muted-foreground mb-8 font-medium"
+            className="text-base sm:text-lg md:text-xl text-muted-foreground mb-8 font-medium"
           >
             Software Engineer — Full-Stack, Systems &amp; AI
           </motion.p>
@@ -66,7 +66,7 @@ export function ModernHero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.8 }}
-            className="text-lg text-muted-foreground mb-12 max-w-2xl mx-auto leading-relaxed"
+            className="text-base sm:text-lg text-muted-foreground mb-12 max-w-2xl mx-auto leading-relaxed"
           >
             Building fast, reliable systems — from AI-powered products to platforms serving 100,000+
             users. Focused on performance, scale, and user experience.
@@ -80,7 +80,7 @@ export function ModernHero() {
           >
             <Button
               size="lg"
-              className="text-lg px-8 py-6 btn-glow"
+              className="text-base sm:text-lg px-6 py-5 sm:px-8 sm:py-6 btn-glow"
               onClick={() =>
                 document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })
               }
@@ -91,7 +91,7 @@ export function ModernHero() {
             </Button>
             <button
               type="button"
-              className="text-lg font-medium text-foreground underline decoration-primary/40 underline-offset-4 transition-colors duration-200 hover:decoration-primary"
+              className="text-base sm:text-lg font-medium text-foreground underline decoration-primary/40 underline-offset-4 transition-colors duration-200 hover:decoration-primary cursor-pointer"
               onClick={() =>
                 document.getElementById("projects")?.scrollIntoView({ behavior: "smooth" })
               }
@@ -109,33 +109,33 @@ export function ModernHero() {
             aria-label="Social media links"
           >
             <li>
-              <Button variant="ghost" size="icon" className="h-12 w-12" asChild>
+              <Button variant="ghost" size="icon" className="h-11 w-11 sm:h-12 sm:w-12" asChild>
                 <a
                   href="https://github.com/zyad-yasser"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Visit my GitHub profile"
                 >
-                  <Github className="h-6 w-6" aria-hidden="true" />
+                  <Github className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
                 </a>
               </Button>
             </li>
             <li>
-              <Button variant="ghost" size="icon" className="h-12 w-12" asChild>
+              <Button variant="ghost" size="icon" className="h-11 w-11 sm:h-12 sm:w-12" asChild>
                 <a
                   href="https://www.linkedin.com/in/zyad-yasser-developer/"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Visit my LinkedIn profile"
                 >
-                  <Linkedin className="h-6 w-6" aria-hidden="true" />
+                  <Linkedin className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
                 </a>
               </Button>
             </li>
             <li>
-              <Button variant="ghost" size="icon" className="h-12 w-12" asChild>
+              <Button variant="ghost" size="icon" className="h-11 w-11 sm:h-12 sm:w-12" asChild>
                 <a href="mailto:zyadyasser6@gmail.com" aria-label="Send me an email">
-                  <Mail className="h-6 w-6" aria-hidden="true" />
+                  <Mail className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
                 </a>
               </Button>
             </li>

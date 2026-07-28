@@ -38,6 +38,12 @@ Next.js App Router, TypeScript, Tailwind CSS v4 (via `@tailwindcss/postcss`) + S
 
 Deployment is Vercel (`vercel.json`), auto-deploying `master` via `pnpm build`.
 
+## Git rules for Claude Code
+
+- Never run `git commit` in this repo unless explicitly asked to commit in that specific message.
+- Never open, create, or push a pull request unless explicitly asked to in that specific message.
+- Leaving changes uncommitted/unstaged after finishing a task is the expected default — the user commits manually.
+
 ## Notes from recent history
 
 - SEO/metadata (`layout.tsx`, `sitemap.ts`, `structured-data.tsx`) and accessibility (skip links, `aria-labelledby` sections) are actively maintained — keep these patterns intact when touching `app/page.tsx` or adding sections.

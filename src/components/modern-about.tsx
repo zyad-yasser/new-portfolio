@@ -78,7 +78,7 @@ export function ModernAbout() {
 
             <motion.div
               variants={itemVariants}
-              className="space-y-6 text-lg text-muted-foreground leading-relaxed"
+              className="space-y-6 text-base sm:text-lg text-muted-foreground leading-relaxed"
             >
               <p>
                 I'm a full-stack software engineer with 7+ years of experience across frontend
@@ -106,7 +106,7 @@ export function ModernAbout() {
             <motion.div variants={itemVariants}>
               <Card className="glass p-8">
                 <CardContent className="p-0">
-                  <h3 className="text-2xl font-semibold mb-6">Skills & Technologies</h3>
+                  <h3 className="text-xl sm:text-2xl font-semibold mb-6">Skills & Technologies</h3>
                   <div className="flex flex-wrap gap-2">
                     {skills.map((skill, index) => (
                       <motion.div
@@ -147,7 +147,7 @@ export function ModernAbout() {
                         whileInView={{ scale: 1, opacity: 1 }}
                         transition={{ delay: index * 0.1, duration: 0.5 }}
                         viewport={{ once: true }}
-                        className="text-3xl font-bold text-gradient-brand mb-2"
+                        className="text-2xl sm:text-3xl font-bold text-gradient-brand mb-2"
                         aria-label={`${stat.number} ${stat.label}`}
                       >
                         {stat.number}

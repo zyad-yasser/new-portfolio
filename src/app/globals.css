@@ -206,6 +206,45 @@ section[id] {
   box-shadow: 0 0 60px hsl(var(--primary) / 0.12);
 }
 
+/* Rotating conic-gradient ring around a card — the wrapper's own padding
+   reveals a sliver of the animated gradient behind the card, so no clipping
+   masks are needed. Used for spotlighting cards (open source contributions). */
+@property --border-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes border-spin {
+  to {
+    --border-angle: 360deg;
+  }
+}
+
+.animated-border {
+  position: relative;
+  isolation: isolate;
+  padding: 1.5px;
+}
+
+.animated-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: conic-gradient(
+    from var(--border-angle),
+    hsl(var(--primary)),
+    hsl(var(--magenta)),
+    hsl(var(--violet)),
+    hsl(var(--warning)),
+    hsl(var(--primary))
+  );
+  animation: border-spin 5s linear infinite;
+  pointer-events: none;
+}
+
 @supports not (backdrop-filter: blur(1px)) {
   .glass,
   .glass-strong {

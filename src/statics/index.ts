@@ -1,6 +1,56 @@
-import { Experience, Project, Testimonial } from "../models";
+import { Experience, OpenSourceContribution, Project, Testimonial } from "../models";
 
 const productionProjects: Project[] = [
+  {
+    name: "Enzo Health",
+    description:
+      "AI-native platform unifying EHR, intake, scheduling, and QA for home health agencies, including Enzo Scribe — an ambient AI scribe that turns patient visits into OASIS-ready clinical documentation in real time.",
+    image: "/projects/enzo-health.png",
+    technologies: [
+      "typescript",
+      "AI",
+      "next",
+      "react",
+      "node",
+      "python",
+      "fastapi",
+      "hono",
+      "AWS",
+      "terraform",
+      "k8s",
+      "vitest",
+      "playwright",
+    ],
+    link: "https://www.enzo.health/",
+    colors: ["#00272A", "#DCFF9F"],
+  },
+  {
+    name: "Beyond Menu",
+    description:
+      "Online ordering and POS platform for independent restaurants, serving 30,000+ restaurants and 40,000+ daily orders with a hybrid delivery system and server-driven UI.",
+    image: "/projects/beyond-menu.png",
+    technologies: ["react", "typescript", "next", "node", "AWS", "c#", "vitest", "playwright"],
+    link: "https://get.beyondmenu.com/",
+    colors: ["#EB4700", "#FFF"],
+  },
+  {
+    name: "Listo Global",
+    description:
+      "Global workforce platform for finding, hiring, and paying international talent, including multi-currency contractor payments in 90+ countries.",
+    image: "/projects/listo-global.png",
+    technologies: ["typescript", "react", "next", "node", "AWS", "vitest", "playwright"],
+    link: "https://listoglobal.com/",
+    colors: ["#4F46E5", "#FFF"],
+  },
+  {
+    name: "CharacterHub",
+    description:
+      "Social platform for sharing and creating original characters, built from scratch and scaled to 100,000+ users with feeds, profiles, customization, gamification, and AI-powered story generation.",
+    image: "/projects/characterhub.png",
+    technologies: ["nuxt", "vue", "AWS", "python", "django"],
+    link: "https://characterhub.com/",
+    colors: ["#4a288a", "#FFF"],
+  },
   {
     name: "Shasha.io platform",
     description:
@@ -15,7 +65,7 @@ const productionProjects: Project[] = [
     description: "Mobile stories social media application.",
     image: "/projects/commaful.jpg",
     technologies: ["vue", "ionic", "capacitor"],
-    link: "https://apps.apple.com/us/app/commaful-short-stories-poems/id1244982783",
+    link: "https://commaful.com/",
     colors: ["#FFF", "#00c4c3"],
   },
   {
@@ -27,15 +77,6 @@ const productionProjects: Project[] = [
     colors: ["#FFF", "#FFF"],
   },
   {
-    name: "Clean Tagger app",
-    description:
-      "Admin portal and management app for mobile application managing users/roles/tasks.",
-    image: "/projects/cleantagger.png",
-    technologies: ["react", "typescript", "node", "AWS"],
-    link: "https://cleantagger.com/",
-    colors: ["#1f86d7", "#ffb329"],
-  },
-  {
     name: "Takeda GmbH projects",
     description:
       "A set of projects done for Takeda production lines to help organizeng drugs production",
@@ -43,10 +84,6 @@ const productionProjects: Project[] = [
       {
         name: "Trains board",
         link: "https://takeda.gethuddly.com/huddles/id0300-4020-0101/",
-      },
-      {
-        name: "Base board",
-        link: "",
       },
       {
         name: "Management board",
@@ -80,8 +117,26 @@ const productionProjects: Project[] = [
       "Dashboard application for welding calculator for Voetalpine GmbH, for analytics and managing materials, users, and push notifications.",
     image: "/projects/moneyfellows.png",
     technologies: ["ionic", "angular", "sails", "node", "AWS"],
-    link: "https://play.google.com/store/apps/details?id=com.moneyfellows.mobileapp&hl=en_US",
+    link: "https://moneyfellows.com/",
     colors: ["#FFF", "#536dfe"],
+  },
+  {
+    name: "Via Customers",
+    description:
+      "Automated mobile app generator for Shopify stores, with campaign systems supporting marketing automation workflows.",
+    image: "/projects/via.png",
+    technologies: ["node", "typescript", "react", "graphql", "ionic", "AWS"],
+    colors: ["#334155", "#FFF"],
+    discontinued: true,
+  },
+  {
+    name: "Clean Tagger app",
+    description:
+      "Admin portal and management app for mobile application managing users/roles/tasks.",
+    image: "/projects/cleantagger.png",
+    technologies: ["react", "typescript", "node", "AWS"],
+    colors: ["#1f86d7", "#ffb329"],
+    discontinued: true,
   },
   {
     name: "Kotobex app",
@@ -89,8 +144,8 @@ const productionProjects: Project[] = [
       "Backend for mobile application for books operations (buy/sell/exchange) with all possible features (tracking/ notifications/messages/etc.).",
     image: "/projects/kotobex.png",
     technologies: ["node", "firebase"],
-    link: "",
     colors: ["#0ad0de", "#FFF"],
+    discontinued: true,
   },
   {
     name: "SeQure medical",
@@ -98,8 +153,8 @@ const productionProjects: Project[] = [
       "A medical platform to gather all the info about vendors (Clinics/ Hospitals/ etc.), apply for their services.",
     image: "/projects/sequre.png",
     technologies: ["node", "typescript", "vue"],
-    link: "https://sequre.overcoffees.com/",
     colors: ["#2e8ecd", "#FFF"],
+    discontinued: true,
   },
   {
     name: "Door2 Door",
@@ -107,8 +162,8 @@ const productionProjects: Project[] = [
       "Mobile/Web platform for food ordering, contain all the latest features about ordering, tracking, and reviewing restaurants.",
     image: "/projects/door2door.png",
     technologies: ["node", "vue"],
-    link: "https://doortodoor.overcoffees.com/",
     colors: ["#a1d600", "#FFF"],
+    discontinued: true,
   },
   {
     name: "Badawar app",
@@ -116,8 +171,8 @@ const productionProjects: Project[] = [
       "Mobile/Web application for finding school, know their pros/cons receive latest updates and process about them.",
     image: "/projects/badawar.png",
     technologies: ["node", "jquery"],
-    link: "https://doortodoor.overcoffees.com/",
     colors: ["#fb9652", "#FFF"],
+    discontinued: true,
   },
   {
     name: "Findme videos",
@@ -125,8 +180,8 @@ const productionProjects: Project[] = [
       "A video recruitment platform, its aim is for achieving recruitment with a text free platform, recording real time videos.",
     image: "/projects/findme.png",
     technologies: ["node", "angular"],
-    link: "https://xuuum.overcoffees.com/",
     colors: ["#e32b4d", "#57bfca"],
+    discontinued: true,
   },
 ];
 
@@ -136,7 +191,7 @@ const otherProjects: Project[] = [
     description: "Desktop application to control RGB LED lighting connected via USB.",
     image: "/projects/rgb.png",
     technologies: ["javascript", "arduino", "react", "electron"],
-    link: "https://zyadyasser.com/zezooco",
+    codeLink: "https://github.com/zyad-yasser/electron-react-iot-led-controller",
     colors: ["#FFF", "#FFF"],
   },
   {
@@ -144,7 +199,7 @@ const otherProjects: Project[] = [
     description: "My personal old web site and CMS for hadware reviews.",
     image: "/projects/zezooco.jpg",
     technologies: ["php", "jquery"],
-    link: "https://zyadyasser.com/zezooco",
+    link: "/projects/preview/zezoo-corporation",
     colors: ["#ee0000", "#FFF"],
   },
   {
@@ -152,16 +207,18 @@ const otherProjects: Project[] = [
     description: "Instagram clone.",
     image: "/projects/photocorner.jpg",
     technologies: ["node", "vue"],
-    link: "https://zyadyasser.com/photo-corner",
+    codeLink: "https://github.com/zyad-yasser/Photocorner-app",
     colors: ["#a40227", "#CCC"],
+    note: "Built with 0 years of experience",
   },
   {
     name: "Blogging JS",
     description: "Blog app.",
     image: "/projects/blogging.jpg",
     technologies: ["node", "angular"],
-    link: "https://zyadyasser.com/blogging",
+    codeLink: "https://github.com/zyad-yasser/Blogging-v-1",
     colors: ["#ee0000", "#FFF"],
+    note: "Built with 0 years of experience",
   },
   {
     name: "Titan cooling",
@@ -169,7 +226,9 @@ const otherProjects: Project[] = [
     image: "/projects/titan.jpg",
     technologies: ["php", "jquery", "html", "css"],
     link: "https://zyadyasser.com/titan",
+    codeLink: "https://github.com/zyad-yasser/titan-website",
     colors: ["blue", "#FFF"],
+    note: "Built with 0 years of experience",
   },
   {
     name: "ZIO civil",
@@ -177,7 +236,9 @@ const otherProjects: Project[] = [
     image: "/projects/ziocivil.jpg",
     technologies: ["php", "jquery", "html", "css"],
     link: "https://zyadyasser.com/ziocivil",
+    codeLink: "https://github.com/zyad-yasser/zio-civil-website",
     colors: ["#ee0000", "#FFF"],
+    note: "Built with 0 years of experience",
   },
   {
     name: "2D-Games development",
@@ -231,16 +292,15 @@ const otherProjects: Project[] = [
     image: "/projects/can.jpg",
     technologies: ["php", "jquery"],
     colors: ["#CCC", "#ee0000"],
+    private: true,
     subProjects: [
       {
         name: "Steel design app",
         description: "Design efficient steel sections.",
-        link: "https://zyadyasser.com/steel-designer",
       },
       {
         name: "Supermarket",
         description: "Supermarket app.",
-        link: "https://zyadyasser.com/super-market",
       },
     ],
   },
@@ -250,6 +310,9 @@ const otherProjects: Project[] = [
     image: "/projects/slider.jpg",
     colors: ["#00ccff", "#999"],
     technologies: ["php", "jquery"],
+    link: "/projects/preview/wordpress-slider",
+    codeLink: "https://github.com/zyad-yasser/zad-slider",
+    note: "Built with 0 years of experience",
   },
   {
     name: "First try responsive",
@@ -257,6 +320,9 @@ const otherProjects: Project[] = [
     image: "/projects/responsive.png",
     colors: ["#f64d36", "#CCC"],
     technologies: ["html", "css", "javascript"],
+    link: "/projects/preview/first-try-responsive",
+    codeLink: "https://github.com/zyad-yasser/project-responsive",
+    note: "Built with 0 years of experience",
   },
 ];
 
@@ -272,6 +338,18 @@ const testimonials: Testimonial[] = [
     title: "Co-founder at Commaful",
     photo: "/testimonials/sydney.png",
     body: "Zyad is very professional, always delivers on time, hardworker, and his output quality is impressive.",
+  },
+  {
+    writer: "Zach Newman",
+    title: "CEO & Co-founder at Enzo Health",
+    photo: "/testimonials/zach.png",
+    body: "I'm not sure if Zyad is human or an LLM.",
+  },
+  {
+    writer: "Rodney Cox",
+    title: "President at Beyond Menu",
+    photo: "/testimonials/rodney.png",
+    body: "Wherever I go I want to take you and your team with me.",
   },
 ];
 
@@ -361,4 +439,15 @@ const experience: Experience[] = [
   },
 ];
 
-export { productionProjects, otherProjects, testimonials, experience };
+const openSourceContributions: OpenSourceContribution[] = [
+  {
+    name: "@zcorpo/react-material-symbols",
+    description:
+      "Material Symbols icons as React SVG components — no font loading, full tree shaking.",
+    link: "https://www.npmjs.com/package/@zcorpo/react-material-symbols",
+    type: "npm package",
+    technologies: ["react", "typescript", "svg"],
+  },
+];
+
+export { productionProjects, otherProjects, testimonials, experience, openSourceContributions };

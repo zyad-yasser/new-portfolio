@@ -41,7 +41,7 @@ export function ModernFooter() {
               transition={{ duration: 0.6 }}
               viewport={{ once: true }}
             >
-              <h3 className="inline-block text-2xl font-bold mb-4 text-gradient-brand">
+              <h3 className="inline-block text-xl sm:text-2xl font-bold mb-4 text-gradient-brand">
                 Zyad Yasser
               </h3>
               <p className="text-muted-foreground mb-6 max-w-md leading-relaxed">

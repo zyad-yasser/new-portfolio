@@ -39,7 +39,11 @@ export function SectionHeader({
           {eyebrow}
         </motion.p>
       )}
-      <motion.h2 id={id} variants={itemVariants} className="text-3xl md:text-4xl font-bold mb-6">
+      <motion.h2
+        id={id}
+        variants={itemVariants}
+        className="text-2xl sm:text-3xl md:text-4xl font-bold mb-6"
+      >
         {title}
       </motion.h2>
       <motion.div
@@ -49,7 +53,10 @@ export function SectionHeader({
       {subtitle && (
         <motion.p
           variants={itemVariants}
-          className={cn("text-lg text-muted-foreground max-w-3xl", isCenter && "mx-auto")}
+          className={cn(
+            "text-base sm:text-lg text-muted-foreground max-w-3xl",
+            isCenter && "mx-auto"
+          )}
         >
           {subtitle}
         </motion.p>
