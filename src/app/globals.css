@@ -54,6 +54,7 @@
   );
   --ambient-glow-opacity: 0.12;
   --ambient-glow-blend: screen;
+  --hero-shadow-opacity: 0.5; /* black watermark barely lifts off the near-black canvas */
 }
 
 .light {
@@ -86,6 +87,7 @@
   /* screen-blend disappears on white; switch blend mode and cut opacity further, not just reuse dark's value */
   --ambient-glow-opacity: 0.08;
   --ambient-glow-blend: normal;
+  --hero-shadow-opacity: 0.06; /* same black watermark reads much stronger against a light canvas */
 }
 
 @theme {
@@ -348,34 +350,44 @@ button:focus-visible {
   }
 }
 
-/* Hero background name: a huge, barely-visible "watermark" of the name with an
-   occasional analog-glitch flicker — mostly static, cuts to a color-split offset
-   for a single frame every few seconds via steps(1), never a smooth distortion. */
+/* Hero background name: a huge, dark "shadow" watermark of the name with an
+   occasional analog-glitch flicker — mostly static, cuts to a color-split
+   alternate word for a single frame every few seconds via steps(1), never a
+   smooth distortion. Three independent word-layers (different durations, so
+   they drift out of sync) sit absolutely over the base name and flash their
+   own text briefly instead of just re-showing "Zyad Yasser". */
 .hero-glitch-name {
   position: relative;
   display: inline-block;
-  color: hsl(var(--foreground) / 0.035);
+  color: hsl(0 0% 0% / var(--hero-shadow-opacity));
 }
 
-.hero-glitch-name::before,
-.hero-glitch-name::after {
-  content: attr(data-text);
+.hero-glitch-layer {
   position: absolute;
   inset: 0;
   opacity: 0;
+  white-space: nowrap;
 }
 
-.hero-glitch-name::before {
-  color: hsl(var(--primary) / 0.35);
+.hero-glitch-layer-1 {
+  color: hsl(var(--primary) / 0.4);
+  font-size: 1em;
   animation: hero-glitch-1 9s infinite steps(1);
 }
 
-.hero-glitch-name::after {
-  color: hsl(var(--violet) / 0.35);
-  animation: hero-glitch-2 9s infinite steps(1);
+.hero-glitch-layer-2 {
+  color: hsl(var(--violet) / 0.4);
+  font-size: 0.3em;
+  animation: hero-glitch-2 11s infinite steps(1);
 }
 
-/* Rest at opacity 0 the whole cycle; the glitch layer only becomes visible
+.hero-glitch-layer-3 {
+  color: hsl(var(--magenta) / 0.4);
+  font-size: 0.5em;
+  animation: hero-glitch-3 13s infinite steps(1);
+}
+
+/* Rest at opacity 0 the whole cycle; each glitch layer only becomes visible
    for the few frames of its brief mid-cycle burst, then disappears again. */
 @keyframes hero-glitch-1 {
   0%,
@@ -426,6 +438,32 @@ button:focus-visible {
     opacity: 1;
     transform: translate(3px, 0);
     clip-path: inset(35% 0 35% 0);
+  }
+}
+
+@keyframes hero-glitch-3 {
+  0%,
+  86%,
+  89%,
+  100% {
+    opacity: 0;
+    transform: translate(0, 0);
+    clip-path: inset(0 0 0 0);
+  }
+  86.5% {
+    opacity: 1;
+    transform: translate(4px, 3px);
+    clip-path: inset(20% 0 45% 0);
+  }
+  87.5% {
+    opacity: 1;
+    transform: translate(-5px, -2px);
+    clip-path: inset(55% 0 10% 0);
+  }
+  88.5% {
+    opacity: 1;
+    transform: translate(2px, 0);
+    clip-path: inset(40% 0 30% 0);
   }
 }
 

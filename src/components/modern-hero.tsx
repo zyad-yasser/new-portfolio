@@ -29,12 +29,14 @@ export function ModernHero() {
         aria-hidden="true"
       >
         <motion.span
-          data-text="Zyad Yasser"
-          className="hero-glitch-name font-black uppercase tracking-tighter whitespace-nowrap text-[clamp(4rem,15vw,13rem)] leading-none"
-          animate={shouldReduceMotion ? {} : { x: [0, -14, 6, 0], y: [0, 6, -4, 0] }}
-          transition={{ duration: 26, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
+          className="hero-glitch-name font-black uppercase tracking-tighter whitespace-nowrap text-[clamp(14rem,36vw,44rem)] leading-none"
+          animate={shouldReduceMotion ? {} : { x: ["-45vw", "45vw"] }}
+          transition={{ duration: 70, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
         >
           Zyad Yasser
+          <span className="hero-glitch-layer hero-glitch-layer-1">ZKR</span>
+          <span className="hero-glitch-layer hero-glitch-layer-2">ZEZOO CORPORATION</span>
+          <span className="hero-glitch-layer hero-glitch-layer-3">ZPerformance</span>
         </motion.span>
       </div>
 
