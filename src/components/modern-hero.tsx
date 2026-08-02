@@ -1,97 +1,46 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { ArrowDown, Github, Linkedin, Mail } from "lucide-react";
-import Image from "next/image";
-import { getFirebaseStorageUrl } from "../constants";
-import { ThemeToggle } from "./theme-toggle";
+import { AmbientGradient } from "./ambient-gradient";
 import { Button } from "./ui/button";
 
 export function ModernHero() {
+  const shouldReduceMotion = useReducedMotion();
+
   return (
-    <section className="min-h-screen flex items-center justify-center relative overflow-hidden" aria-label="Hero section">
+    <section
+      className="min-h-[calc(100dvh-4rem)] flex items-center justify-center relative overflow-hidden"
+      aria-label="Hero section"
+    >
       <div className="absolute inset-0 bg-background" />
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-warning/5" />
       <div
         className="absolute inset-0 opacity-10"
         style={{
-          backgroundImage: `radial-gradient(circle at 1px 1px, hsl(var(--color-border)) 1px, transparent 0)`,
+          backgroundImage:
+            "radial-gradient(circle at 1px 1px, hsl(var(--border)) 1px, transparent 0)",
           backgroundSize: "24px 24px",
         }}
       />
+      <AmbientGradient variant="hero" />
 
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <motion.div
-          className="absolute w-[600px] h-[600px] rounded-full"
-          style={{
-            background: "radial-gradient(circle, rgba(255, 200, 50, 0.25) 0%, rgba(255, 170, 50, 0.15) 40%, transparent 70%)",
-            filter: "blur(80px)",
-            mixBlendMode: "screen",
-            top: "-10%",
-            left: "10%",
-          }}
-          animate={{
-            x: [0, 30, -20, 40, 0],
-            y: [0, -40, 30, 20, 0],
-            scale: [1, 1.1, 0.95, 1.05, 1],
-          }}
-          transition={{
-            duration: 20,
-            repeat: Number.POSITIVE_INFINITY,
-            ease: "easeInOut",
-          }}
-        />
-
-        <motion.div
-          className="absolute w-[500px] h-[500px] rounded-full"
-          style={{
-            background: "radial-gradient(circle, rgba(255, 220, 100, 0.2) 0%, rgba(255, 180, 70, 0.1) 40%, transparent 70%)",
-            filter: "blur(80px)",
-            mixBlendMode: "screen",
-            top: "40%",
-            right: "15%",
-          }}
-          animate={{
-            x: [0, -40, 30, -30, 0],
-            y: [0, 30, -30, 0, 0],
-            scale: [1, 1.15, 0.9, 1, 1],
-          }}
-          transition={{
-            duration: 18,
-            repeat: Number.POSITIVE_INFINITY,
-            ease: "easeInOut",
-            delay: 5,
-          }}
-        />
-
-        <motion.div
-          className="absolute w-[550px] h-[550px] rounded-full"
-          style={{
-            background: "radial-gradient(circle, rgba(255, 190, 80, 0.22) 0%, rgba(255, 160, 60, 0.12) 40%, transparent 70%)",
-            filter: "blur(80px)",
-            mixBlendMode: "screen",
-            bottom: "10%",
-            left: "40%",
-          }}
-          animate={{
-            x: [0, 35, -30, 0, 0],
-            y: [0, 40, -35, 0, 0],
-            scale: [1, 1.1, 0.95, 1, 1],
-          }}
-          transition={{
-            duration: 22,
-            repeat: Number.POSITIVE_INFINITY,
-            ease: "easeInOut",
-            delay: 10,
-          }}
-        />
+      <div
+        className="absolute inset-0 flex items-center justify-center overflow-hidden pointer-events-none select-none"
+        aria-hidden="true"
+      >
+        <motion.span
+          className="hero-glitch-name font-black uppercase tracking-tighter whitespace-nowrap text-[clamp(14rem,36vw,44rem)] leading-none"
+          animate={shouldReduceMotion ? {} : { x: ["-45vw", "45vw"] }}
+          transition={{ duration: 70, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+        >
+          Zyad Yasser
+          <span className="hero-glitch-layer hero-glitch-layer-1">ZKR</span>
+          <span className="hero-glitch-layer hero-glitch-layer-2">ZEZOO CORPORATION</span>
+          <span className="hero-glitch-layer hero-glitch-layer-3">ZPerformance</span>
+        </motion.span>
       </div>
 
-      <div className="absolute top-6 right-6 z-10">
-        <ThemeToggle />
-      </div>
-
-      <div className="container mx-auto px-4 z-10">
+      <div className="container mx-auto px-5 sm:px-6 lg:px-8 z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -99,32 +48,23 @@ export function ModernHero() {
           className="text-center max-w-4xl mx-auto"
         >
           <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
-            className="w-32 h-32 mx-auto mb-8 relative"
-            role="img"
-            aria-label="Profile picture"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1, duration: 0.6 }}
+            className="inline-flex items-center gap-2 mb-8 px-4 py-1.5 rounded-full border border-border/60 glass text-sm text-muted-foreground"
           >
-            <div className="w-full h-full rounded-full bg-gradient-to-r from-primary to-warning p-1 shadow-2xl">
-              <div className="w-full h-full rounded-full bg-card border border-border flex items-center justify-center relative overflow-hidden">
-                <Image
-                  src={getFirebaseStorageUrl("/avatars/zyad.jpg")}
-                  alt="Zyad Yasser - Full Stack Developer"
-                  fill
-                  className="object-cover rounded-full"
-                  priority
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-primary/20 to-transparent rounded-full" aria-hidden="true" />
-              </div>
-            </div>
+            <span className="relative flex h-2 w-2" aria-hidden="true">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
+            </span>
+            Available for new opportunities
           </motion.div>
 
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.8 }}
-            className="text-5xl md:text-7xl font-bold mb-6 text-foreground"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 text-foreground tracking-tight"
           >
             Zyad Yasser
           </motion.h1>
@@ -133,30 +73,30 @@ export function ModernHero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.8 }}
-            className="text-xl md:text-2xl text-muted-foreground mb-8 font-medium"
+            className="text-base sm:text-lg md:text-xl text-muted-foreground mb-8 font-medium"
           >
-            Full Stack Developer & Software Engineer
+            Software Engineer — Full-Stack, Systems &amp; AI
           </motion.p>
 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.8 }}
-            className="text-lg text-muted-foreground mb-12 max-w-2xl mx-auto leading-relaxed"
+            className="text-base sm:text-lg text-muted-foreground mb-12 max-w-2xl mx-auto leading-relaxed"
           >
-            Crafting modern web experiences with React, Next.js, and cutting-edge technologies.
-            Passionate about building scalable applications that make a difference.
+            Building fast, reliable systems — from AI-powered products to platforms serving 100,000+
+            users. Focused on performance, scale, and user experience.
           </motion.p>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6, duration: 0.8 }}
-            className="flex flex-col sm:flex-row gap-4 justify-center mb-12"
+            className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12"
           >
             <Button
               size="lg"
-              className="text-lg px-8 py-6 btn-glow"
+              className="text-base sm:text-lg px-6 py-5 sm:px-8 sm:py-6 btn-glow"
               onClick={() =>
                 document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })
               }
@@ -165,59 +105,57 @@ export function ModernHero() {
               <Mail className="mr-2 h-5 w-5" aria-hidden="true" />
               Get In Touch
             </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              className="text-lg px-8 py-6 border-border hover:border-primary/50"
+            <button
+              type="button"
+              className="text-base sm:text-lg font-medium text-foreground underline decoration-primary/40 underline-offset-4 transition-colors duration-200 hover:decoration-primary cursor-pointer"
               onClick={() =>
                 document.getElementById("projects")?.scrollIntoView({ behavior: "smooth" })
               }
               aria-label="Scroll to projects section"
             >
               View My Work
-            </Button>
+            </button>
           </motion.div>
 
-          <motion.div
+          <motion.ul
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7, duration: 0.8 }}
             className="flex justify-center gap-4 mb-16"
-            role="list"
             aria-label="Social media links"
           >
-            <div role="listitem">
-              <Button variant="ghost" size="icon" className="h-12 w-12" asChild>
+            <li>
+              <Button variant="ghost" size="icon" className="h-11 w-11 sm:h-12 sm:w-12" asChild>
                 <a
                   href="https://github.com/zyad-yasser"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Visit my GitHub profile"
                 >
-                  <Github className="h-6 w-6" aria-hidden="true" />
+                  <Github className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
                 </a>
               </Button>
-            </div>
-            <div role="listitem">
-              <Button variant="ghost" size="icon" className="h-12 w-12" asChild>
+            </li>
+            <li>
+              <Button variant="ghost" size="icon" className="h-11 w-11 sm:h-12 sm:w-12" asChild>
                 <a
                   href="https://www.linkedin.com/in/zyad-yasser-developer/"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Visit my LinkedIn profile"
                 >
-                  <Linkedin className="h-6 w-6" aria-hidden="true" />
+                  <Linkedin className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
                 </a>
               </Button>
-            </div>
-            <div role="listitem">
-              <Button variant="ghost" size="icon" className="h-12 w-12" asChild>
+            </li>
+            <li>
+              <Button variant="ghost" size="icon" className="h-11 w-11 sm:h-12 sm:w-12" asChild>
                 <a href="mailto:zyadyasser6@gmail.com" aria-label="Send me an email">
-                  <Mail className="h-6 w-6" aria-hidden="true" />
+                  <Mail className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
                 </a>
               </Button>
-            </div>
-          </motion.div>
+            </li>
+          </motion.ul>
 
           <motion.div
             initial={{ opacity: 0 }}
@@ -227,7 +165,7 @@ export function ModernHero() {
             aria-label="Scroll indicator"
           >
             <motion.div
-              animate={{ y: [0, 10, 0] }}
+              animate={shouldReduceMotion ? {} : { y: [0, 10, 0] }}
               transition={{ repeat: Number.POSITIVE_INFINITY, duration: 2 }}
               className="flex flex-col items-center text-muted-foreground"
             >

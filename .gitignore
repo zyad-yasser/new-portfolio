@@ -26,3 +26,5 @@ yarn-error.log*
 
 # vercel
 .vercel
+.poc3
+next-env.d.ts

@@ -1,26 +1,31 @@
 "use client";
 
+import { getFirebaseStorageUrl } from "@/constants";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import { Badge } from "./ui/badge";
 import { Card, CardContent } from "./ui/card";
+import { SectionHeader } from "./ui/section-header";
 
 const skills = [
+  "TypeScript",
   "React",
   "Next.js",
-  "TypeScript",
+  "Vue / Nuxt",
   "Node.js",
+  "FastAPI",
+  "Django",
   "Python",
+  "GraphQL",
+  "tRPC",
+  "WebSockets",
+  "LangChain / RAG",
   "PostgreSQL",
-  "MongoDB",
+  "Redis",
   "AWS",
   "Docker",
   "Kubernetes",
-  "GraphQL",
-  "REST APIs",
-  "Tailwind CSS",
-  "Framer Motion",
-  "Jest",
-  "Cypress",
+  "Terraform",
 ];
 
 const containerVariants = {
@@ -44,7 +49,7 @@ const itemVariants = {
 
 export function ModernAbout() {
   return (
-    <div className="py-24 px-4">
+    <div className="py-24 px-5 sm:px-6 lg:px-8">
       <div className="container mx-auto max-w-6xl">
         <motion.div
           initial="hidden"
@@ -54,40 +59,54 @@ export function ModernAbout() {
           className="grid lg:grid-cols-2 gap-16 items-center"
         >
           <div className="space-y-8">
-            <motion.div variants={itemVariants}>
-              <h2 id="about-heading" className="text-4xl md:text-5xl font-bold mb-6">About Me</h2>
-              <div className="w-20 h-1 bg-gradient-to-r from-primary to-secondary mb-8" />
+            <motion.div
+              variants={itemVariants}
+              className="w-24 h-24 rounded-2xl bg-gradient-brand p-[2px]"
+            >
+              <div className="w-full h-full rounded-2xl overflow-hidden relative bg-card">
+                <Image
+                  src={getFirebaseStorageUrl("/avatars/zyad.jpg")}
+                  alt="Zyad Yasser"
+                  fill
+                  sizes="96px"
+                  className="object-cover"
+                />
+              </div>
             </motion.div>
+
+            <SectionHeader id="about-heading" title="About Me" align="left" className="mb-0" />
 
             <motion.div
               variants={itemVariants}
-              className="space-y-6 text-lg text-muted-foreground leading-relaxed"
+              className="space-y-6 text-base sm:text-lg text-muted-foreground leading-relaxed"
             >
               <p>
-                I'm a passionate full-stack developer with over 5 years of experience building
-                modern web applications. I specialize in creating scalable, user-focused solutions
-                using cutting-edge technologies.
+                I'm a full-stack software engineer with 7+ years of experience across frontend
+                performance, backend systems, and AI-driven applications. I've worked on products
+                from early stages through scale — including platforms serving 100,000+ users,
+                30,000+ businesses, and 40,000+ daily transactions.
               </p>
 
               <p>
-                My expertise spans across frontend frameworks like React and Next.js, backend
-                technologies including Node.js and Python, and cloud platforms such as AWS. I'm
-                passionate about clean code, performance optimization, and delivering exceptional
-                user experiences.
+                Currently building AI-powered EHR systems at Enzo Health, including ambient scribe
+                workflows for real-time medical documentation. Previously led performance and
+                delivery-systems work at Beyond Menu, and built CharacterHub from scratch to
+                100,000+ users at Commaful.
               </p>
 
               <p>
-                When I'm not coding, you'll find me exploring new technologies, contributing to
-                open-source projects, or sharing knowledge with the developer community.
+                My focus is on building fast, reliable systems — obsessing over Core Web Vitals and
+                sub-1s load times as much as event-driven backend architecture and AI pipeline
+                design.
               </p>
             </motion.div>
           </div>
 
           <div className="space-y-8">
             <motion.div variants={itemVariants}>
-              <Card className="p-8">
+              <Card className="glass p-8">
                 <CardContent className="p-0">
-                  <h3 className="text-2xl font-semibold mb-6">Skills & Technologies</h3>
+                  <h3 className="text-xl sm:text-2xl font-semibold mb-6">Skills & Technologies</h3>
                   <div className="flex flex-wrap gap-2">
                     {skills.map((skill, index) => (
                       <motion.div
@@ -97,7 +116,10 @@ export function ModernAbout() {
                         transition={{ delay: index * 0.05, duration: 0.3 }}
                         viewport={{ once: true }}
                       >
-                        <Badge variant="secondary" className="px-3 py-1 text-sm">
+                        <Badge
+                          variant="outline"
+                          className="px-3 py-1 text-sm border-border/60 transition-colors duration-200 hover:border-primary/50 hover:bg-primary/10 hover:text-primary"
+                        >
                           {skill}
                         </Badge>
                       </motion.div>
@@ -107,29 +129,35 @@ export function ModernAbout() {
               </Card>
             </motion.div>
 
-            <motion.div variants={itemVariants} className="grid grid-cols-3 gap-6" role="list" aria-label="Professional statistics">
+            <motion.ul
+              variants={itemVariants}
+              className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6"
+              aria-label="Professional statistics"
+            >
               {[
-                { number: "50+", label: "Projects Completed" },
-                { number: "5+", label: "Years Experience" },
-                { number: "100%", label: "Client Satisfaction" },
+                { number: "100K+", label: "Users Scaled" },
+                { number: "$1M+", label: "Cost Savings Delivered" },
+                { number: "40K+", label: "Daily Transactions Powered" },
               ].map((stat, index) => (
-                <Card key={index} className="text-center p-6" role="listitem">
-                  <CardContent className="p-0">
-                    <motion.div
-                      initial={{ scale: 0.5, opacity: 0 }}
-                      whileInView={{ scale: 1, opacity: 1 }}
-                      transition={{ delay: index * 0.1, duration: 0.5 }}
-                      viewport={{ once: true }}
-                      className="text-3xl font-bold text-primary mb-2"
-                      aria-label={`${stat.number} ${stat.label}`}
-                    >
-                      {stat.number}
-                    </motion.div>
-                    <p className="text-sm text-muted-foreground">{stat.label}</p>
-                  </CardContent>
-                </Card>
+                <li key={index}>
+                  <Card className="glass card-hover text-center p-6">
+                    <CardContent className="p-0">
+                      <motion.div
+                        initial={{ scale: 0.5, opacity: 0 }}
+                        whileInView={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: index * 0.1, duration: 0.5 }}
+                        viewport={{ once: true }}
+                        className="text-2xl sm:text-3xl font-bold text-gradient-brand mb-2"
+                        aria-label={`${stat.number} ${stat.label}`}
+                      >
+                        {stat.number}
+                      </motion.div>
+                      <p className="text-sm text-muted-foreground">{stat.label}</p>
+                    </CardContent>
+                  </Card>
+                </li>
               ))}
-            </motion.div>
+            </motion.ul>
           </div>
         </motion.div>
       </div>

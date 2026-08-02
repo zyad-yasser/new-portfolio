@@ -31,8 +31,8 @@ const quickLinks = [
 
 export function ModernFooter() {
   return (
-    <footer className="bg-background border-t border-border" role="contentinfo">
-      <div className="container mx-auto px-4 py-16">
+    <footer className="bg-background border-t border-border">
+      <div className="container mx-auto px-5 sm:px-6 lg:px-8 py-16">
         <div className="grid md:grid-cols-4 gap-8 mb-12">
           <div className="md:col-span-2">
             <motion.div
@@ -41,22 +41,21 @@ export function ModernFooter() {
               transition={{ duration: 0.6 }}
               viewport={{ once: true }}
             >
-              <h3 className="text-2xl font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              <h3 className="inline-block text-xl sm:text-2xl font-bold mb-4 text-gradient-brand">
                 Zyad Yasser
               </h3>
               <p className="text-muted-foreground mb-6 max-w-md leading-relaxed">
-                Full-stack developer passionate about creating modern, scalable web applications
-                that solve real-world problems and deliver exceptional user experiences.
+                Software engineer building fast, reliable systems across full-stack, backend
+                architecture, and AI — from early-stage products to platforms at scale.
               </p>
-              <div className="flex space-x-2" role="list" aria-label="Social media links">
+              <ul className="flex space-x-2" aria-label="Social media links">
                 {socialLinks.map((link, index) => (
-                  <motion.div
+                  <motion.li
                     key={index}
                     initial={{ opacity: 0, scale: 0.8 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     transition={{ delay: index * 0.1, duration: 0.3 }}
                     viewport={{ once: true }}
-                    role="listitem"
                   >
                     <Button variant="ghost" size="icon" asChild>
                       <a
@@ -69,9 +68,9 @@ export function ModernFooter() {
                         <link.icon className="h-5 w-5" aria-hidden="true" />
                       </a>
                     </Button>
-                  </motion.div>
+                  </motion.li>
                 ))}
-              </div>
+              </ul>
             </motion.div>
           </div>
 
@@ -115,7 +114,7 @@ export function ModernFooter() {
               <div className="space-y-3 text-sm text-muted-foreground">
                 <p>zyadyasser6@gmail.com</p>
                 <p>+201111980284</p>
-                <p>Port-Said, Egypt</p>
+                <p>Cairo, Egypt — Open to Remote</p>
               </div>
             </motion.div>
           </div>
@@ -132,7 +131,7 @@ export function ModernFooter() {
             © {new Date().getFullYear()} Zyad Yasser. All rights reserved.
           </p>
           <p className="flex items-center">
-            Made with <Heart className="w-4 h-4 mx-1 text-red-500 fill-current" />
+            Made with <Heart className="w-4 h-4 mx-1 text-primary fill-current" />
           </p>
         </motion.div>
       </div>

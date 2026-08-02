@@ -1,125 +1,108 @@
 "use client";
 
+import { containerVariants, itemVariants } from "@/lib/motion";
 import { motion } from "framer-motion";
-import { Code2, Smartphone, Globe, Database, Cloud, Palette } from "lucide-react";
+import { Boxes, Brain, Cloud, Gauge, Search, Smartphone } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import { SectionHeader } from "./ui/section-header";
 
 const services = [
   {
-    icon: Code2,
-    title: "Frontend Development",
+    icon: Gauge,
+    title: "Frontend Performance",
     description:
-      "Modern, responsive web applications using React, Next.js, and TypeScript with pixel-perfect designs.",
-    features: ["React & Next.js", "TypeScript", "Responsive Design", "Performance Optimization"],
+      "Next.js, React, and Vue/Nuxt applications engineered for speed — Core Web Vitals, sub-1s load times, Lighthouse 95+.",
+    features: [
+      "Next.js & React",
+      "Core Web Vitals",
+      "SSR & Predictive Prefetching",
+      "Lighthouse 95+",
+    ],
   },
   {
-    icon: Database,
-    title: "Backend Development",
+    icon: Boxes,
+    title: "Backend & Systems",
     description:
-      "Scalable server-side solutions with Node.js, Python, and robust database architectures.",
-    features: ["API Development", "Database Design", "Authentication", "Real-time Features"],
+      "Event-driven architecture and real-time systems with Node.js, FastAPI, and Django at production scale.",
+    features: ["Node.js & FastAPI", "Event-Driven Architecture", "GraphQL & tRPC", "WebSockets"],
   },
   {
-    icon: Smartphone,
-    title: "Mobile Development",
+    icon: Brain,
+    title: "AI & LLM Systems",
     description:
-      "Cross-platform mobile applications using React Native and modern mobile technologies.",
-    features: ["React Native", "iOS & Android", "Push Notifications", "App Store Deployment"],
+      "LLM integrations and RAG pipelines that ship — from ambient documentation to AI pipeline optimization.",
+    features: [
+      "LLM Integrations",
+      "RAG Pipelines (LangChain)",
+      "AI Pipeline Optimization",
+      "Evaluation",
+    ],
   },
   {
     icon: Cloud,
     title: "Cloud & DevOps",
     description:
-      "Cloud infrastructure, deployment automation, and CI/CD pipeline setup for scalable applications.",
-    features: ["AWS/Azure", "Docker", "CI/CD", "Monitoring"],
+      "Infrastructure and deployment automation for distributed systems that need to stay up.",
+    features: ["AWS & Terraform", "Docker & Kubernetes", "CI/CD Pipelines", "Observability"],
   },
   {
-    icon: Globe,
-    title: "Full-Stack Solutions",
+    icon: Search,
+    title: "SEO & Technical Growth",
     description:
-      "End-to-end web application development from concept to deployment with modern best practices.",
-    features: ["MEAN/MERN Stack", "Microservices", "API Integration", "Testing"],
+      "Structured data, sitemaps, and rendering strategy that turn performance work into organic growth.",
+    features: [
+      "JSON-LD & Structured Data",
+      "Sitemaps & Robots",
+      "Server-Side Rendering",
+      "Caching Strategy",
+    ],
   },
   {
-    icon: Palette,
-    title: "UI/UX Design",
+    icon: Smartphone,
+    title: "Cross-Platform Apps",
     description:
-      "User-centered design approach creating intuitive interfaces with modern design systems.",
-    features: ["Design Systems", "Prototyping", "User Research", "Accessibility"],
+      "Shared-codebase mobile and web applications built for smooth scrolling and low-latency interactions.",
+    features: ["Ionic", "iOS & Android", "Shared Codebase", "Low-Latency UI"],
   },
 ];
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.6 },
-  },
-};
-
 export function ModernServices() {
   return (
-    <div className="py-24 px-4 bg-muted/20 border-t border-border">
+    <div className="py-24 px-5 sm:px-6 lg:px-8">
       <div className="container mx-auto max-w-7xl">
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-          variants={containerVariants}
-          className="text-center mb-16"
-        >
-          <motion.h2 id="services-heading" variants={itemVariants} className="text-4xl md:text-5xl font-bold mb-6">
-            Services
-          </motion.h2>
-          <motion.div
-            variants={itemVariants}
-            className="w-20 h-1 bg-gradient-to-r from-primary to-secondary mx-auto mb-8"
-          />
-          <motion.p
-            variants={itemVariants}
-            className="text-xl text-muted-foreground max-w-3xl mx-auto"
-          >
-            Comprehensive development services to bring your ideas to life with modern technologies
-            and best practices.
-          </motion.p>
-        </motion.div>
+        <SectionHeader
+          id="services-heading"
+          title="Services"
+          subtitle="Comprehensive development services to bring your ideas to life with modern technologies and best practices."
+          align="left"
+        />
 
-        <motion.div
+        <motion.ul
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-50px" }}
           variants={containerVariants}
           className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
-          role="list"
           aria-label="Services offered"
         >
           {services.map((service, index) => (
-            <motion.div key={index} variants={itemVariants} role="listitem">
-              <Card className="h-full group card-hover bg-card">
+            <motion.li key={index} variants={itemVariants}>
+              <Card className="glass h-full group card-hover">
                 <CardHeader className="text-center pb-6">
                   <motion.div
-                    className="w-16 h-16 mx-auto mb-4 bg-primary/10 rounded-2xl flex items-center justify-center group-hover:bg-primary/20 transition-all duration-300 border border-primary/20"
+                    className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-brand p-[1.5px] transition-transform duration-300"
                     whileHover={{ scale: 1.05 }}
                     transition={{ duration: 0.2 }}
                     aria-hidden="true"
                   >
-                    <service.icon className="w-8 h-8 text-primary" />
+                    <div className="w-full h-full rounded-2xl bg-card flex items-center justify-center group-hover:bg-card/70 transition-colors duration-300">
+                      <service.icon className="w-8 h-8 text-primary" />
+                    </div>
                   </motion.div>
-                  <CardTitle className="text-xl font-bold text-card-foreground">
+                  <CardTitle className="text-lg sm:text-xl font-bold text-card-foreground">
                     {service.title}
                   </CardTitle>
-                  <CardDescription className="text-base leading-relaxed text-muted-foreground">
+                  <CardDescription className="text-sm sm:text-base leading-relaxed text-muted-foreground">
                     {service.description}
                   </CardDescription>
                 </CardHeader>
@@ -137,9 +120,9 @@ export function ModernServices() {
                   </ul>
                 </CardContent>
               </Card>
-            </motion.div>
+            </motion.li>
           ))}
-        </motion.div>
+        </motion.ul>
       </div>
     </div>
   );
