@@ -1,0 +1,29 @@
+{
+  "name": "@repo/db",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./schema": "./src/schema/index.ts"
+  },
+  "scripts": {
+    "db:push": "dotenv -e ../../apps/admin/.env -- drizzle-kit push",
+    "db:generate": "dotenv -e ../../apps/admin/.env -- drizzle-kit generate",
+    "seed": "dotenv -e ../../apps/admin/.env -- tsx scripts/seed.ts",
+    "lint": "biome lint .",
+    "check": "biome check .",
+    "type-check": "tsc"
+  },
+  "dependencies": {
+    "better-auth": "^1.6.25",
+    "drizzle-orm": "^0.45.2",
+    "postgres": "^3.4.9"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "dotenv-cli": "^11.0.0",
+    "drizzle-kit": "^0.31.10",
+    "tsx": "^4.23.3",
+    "typescript": "^5.7.2"
+  }
+}
