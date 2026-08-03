@@ -1,0 +1,22 @@
+{
+  "name": "@repo/email",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "biome lint .",
+    "check": "biome check .",
+    "type-check": "tsc"
+  },
+  "dependencies": {
+    "@repo/utils": "workspace:*",
+    "nodemailer": "^7.0.9"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/nodemailer": "^7.0.4",
+    "typescript": "^5.7.2"
+  }
+}

@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ["@repo/ui"],
+  transpilePackages: ["@repo/ui", "@repo/utils", "@repo/email"],
   sassOptions: {
     includePaths: ["./src/styles"],
   },

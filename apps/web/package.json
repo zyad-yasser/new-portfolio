@@ -19,13 +19,18 @@
     "clean": "rm -rf .next && rm -rf node_modules"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.7.1",
+    "@repo/email": "workspace:*",
     "@repo/ui": "workspace:*",
+    "@repo/utils": "workspace:*",
     "framer-motion": "^11.12.0",
     "lucide-react": "^0.469.0",
     "next": "^16.2.11",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "sass": "^1.97.3"
+    "react-hook-form": "^7.84.0",
+    "sass": "^1.97.3",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@playwright/test": "^1.62.1",
