@@ -4,10 +4,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-Turborepo/pnpm monorepo for Zyad Yasser's portfolio (zyadyasser.com):
+Turborepo/pnpm monorepo for Zyad Yasser's portfolio (zyadyasser.net):
 
 - `apps/web` — the public portfolio site. Static/marketing-style Next.js App Router site of landing sections plus a `/projects` page. No backend of its own.
-- `apps/admin` — a private, authenticated admin app (deploys separately to `admin.zyadyasser.com`). Currently auth scaffolding only (login + a protected dashboard shell) — no content-management features yet.
+- `apps/admin` — a private, authenticated admin app (deploys separately to `admin.zyadyasser.net`). Currently auth scaffolding only (login + a protected dashboard shell) — no content-management features yet.
 - `packages/ui` — shared shadcn/ui-style component primitives, `cn()`, theme provider/toggle, and the shared Tailwind v4 theme tokens (`@repo/ui`). Both apps depend on this rather than keeping their own copies.
 - `packages/db` — the Drizzle/Postgres (Neon) layer (`@repo/db`): db client + schema, meant to be consumed by any package/app that needs direct DB access, not just auth.
 - `packages/auth` — shared Better Auth setup (`@repo/auth`): the `auth` server instance and `authClient`, built on `@repo/db`. Only `apps/admin` uses this today.
@@ -69,7 +69,7 @@ Testing: Vitest (`vitest.config.mts`) for unit/component tests, Playwright (`pla
 
 ### `apps/admin`
 
-Next.js App Router, same Tailwind v4 + `@repo/ui` setup. Path alias `@/*` maps to `apps/admin/src/*`. Single-owner admin — there is no public sign-up; one admin account is created via `pnpm --filter admin seed` (delegates to `packages/auth`'s seed script; `pnpm --filter admin db:push` likewise delegates to `@repo/db`).
+Next.js App Router, same Tailwind v4 + `@repo/ui` setup. Path alias `@/*` maps to `apps/admin/src/*`. Single-owner admin — there is no public sign-up; one admin account is created via `pnpm --filter admin seed` (delegates to `@repo/db`'s seed script; `pnpm --filter admin db:push` likewise delegates to `@repo/db`). This is also the app whose `.env` everything else's local dev reads from — see "Local infra" above.
 
 - `src/app/api/auth/[...all]/route.ts` — Better Auth's Next.js route handler, backed by `@repo/auth`.
 - `src/app/api/trpc/[trpc]/route.ts` — mounts `@repo/trpc`'s `appRouter` via `fetchRequestHandler`. Any new API belongs in `packages/trpc/src/routers`, not as a new route handler here.
@@ -79,7 +79,7 @@ Next.js App Router, same Tailwind v4 + `@repo/ui` setup. Path alias `@/*` maps t
 - Root layout wraps children in `@repo/trpc/react`'s `TRPCReactProvider` (React Query + tRPC client) inside `@repo/ui`'s `ThemeProvider`.
 - Metadata sets `robots: { index: false, follow: false }` — this app should never be indexed.
 
-Deployment is a separate Vercel project pointed at `admin.zyadyasser.com` (Root Directory `apps/admin`).
+Deployment is a separate Vercel project pointed at `admin.zyadyasser.net` (Root Directory `apps/admin`).
 
 Testing: Vitest (`vitest.config.mts`) for unit/component tests. No Playwright here yet.
 
@@ -92,14 +92,14 @@ shadcn/ui-style primitives built on Radix + `class-variance-authority` (`cva`) +
 Postgres (local Docker or Neon in production) + Drizzle, meant to be shared by anything that needs the DB — not owned by auth:
 - `src/schema/auth.ts` — Better Auth's required tables (`user`, `session`, `account`, `verification`); `src/schema/index.ts` re-exports it as the schema barrel — add new domain tables as sibling files here
 - `src/index.ts` — the Drizzle client (`drizzle-orm/postgres-js`), reads `DATABASE_URL`
-- `drizzle.config.ts` / `pnpm --filter @repo/db db:push` (or `db:generate`) — schema migrations
+- `drizzle.config.ts` / `pnpm --filter @repo/db db:push` (or `db:generate`) — schema migrations, loads `apps/admin/.env` via `dotenv-cli`
+- `scripts/seed.ts` (`pnpm --filter @repo/db seed`) — creates the single admin account from `ADMIN_NAME`/`ADMIN_EMAIL`/`ADMIN_PASSWORD` in `apps/admin/.env`; this is the only way a user gets created, there is no public registration route. Inserts the `user`/`account` rows directly (hashing the password with `hashPassword` from `better-auth/crypto`) instead of calling `@repo/auth`'s `auth.api.signUpEmail` — `@repo/db` intentionally does not depend on `@repo/auth`, since `@repo/auth` already depends on `@repo/db` and a package.json cycle between them would make Turborepo reject the whole workspace graph. The inserted shape (`providerId: "credential"`, `accountId` set to the user's own `id`) mirrors better-auth's internal `sign-up` route exactly — verified by actually logging in against a seeded account.
 
 ### `packages/auth` (`@repo/auth`)
 
 Better Auth (email+password only, no social providers), built on `@repo/db`:
 - `src/index.ts` — the `auth` server instance (`drizzleAdapter` over `@repo/db`)
 - `src/client.ts` — `authClient` for use in client components
-- `scripts/seed.ts` — creates the single admin account from `ADMIN_EMAIL`/`ADMIN_PASSWORD` env vars; this is the only way a user gets created, there is no public registration route
 
 ### `packages/trpc` (`@repo/trpc`)
 
@@ -119,5 +119,5 @@ Initial tRPC v11 setup — the intended home for all backend API logic:
 ## Notes from recent history
 
 - SEO/metadata (`layout.tsx`, `sitemap.ts`, `structured-data.tsx`) and accessibility (skip links, `aria-labelledby` sections) are actively maintained in `apps/web` — keep these patterns intact when touching `app/page.tsx` or adding sections.
-- The canonical domain is `https://zyadyasser.com` (admin: `https://admin.zyadyasser.com`); keep `metadataBase`/OG/canonical URLs in `apps/web/src/app/layout.tsx` in sync with any routing changes.
+- The canonical domain is `https://zyadyasser.net` (admin: `https://admin.zyadyasser.net`); keep `metadataBase`/OG/canonical URLs in `apps/web/src/app/layout.tsx` in sync with any routing changes.
 - The repo was converted from a single Next.js app at the repo root into this Turborepo monorepo to support the admin app and shared auth — `apps/web`'s behavior/content is unchanged by that move, only its location and how it consumes shared UI.

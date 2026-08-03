@@ -2,7 +2,7 @@
   "name": "web",
   "version": "3.0.0",
   "private": true,
-  "description": "Zyad Yasser's portfolio site (zyadyasser.com), built with Next.js",
+  "description": "Zyad Yasser's portfolio site (zyadyasser.net), built with Next.js",
   "scripts": {
     "dev": "next",
     "build": "next build",

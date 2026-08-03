@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     title: "Projects | Zyad Yasser",
     description:
       "Explore my portfolio of production-ready web applications and projects built with React, Next.js, and modern technologies.",
-    url: "https://zyadyasser.com/projects",
+    url: "https://zyadyasser.net/projects",
     type: "website",
     images: [
       {
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
       "Explore my portfolio of production-ready web applications and projects built with React, Next.js, and modern technologies.",
   },
   alternates: {
-    canonical: "https://zyadyasser.com/projects",
+    canonical: "https://zyadyasser.net/projects",
   },
 };
 

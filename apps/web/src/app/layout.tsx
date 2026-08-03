@@ -11,7 +11,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://zyadyasser.com"),
+  metadataBase: new URL("https://zyadyasser.net"),
   title: {
     default: "Zyad Yasser | Software Engineer — Full-Stack, Systems & AI",
     template: "%s | Zyad Yasser",
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     "Accessibility",
     "Performance Optimization",
   ],
-  authors: [{ name: "Zyad Yasser", url: "https://zyadyasser.com" }],
+  authors: [{ name: "Zyad Yasser", url: "https://zyadyasser.net" }],
   creator: "Zyad Yasser",
   publisher: "Zyad Yasser",
   robots: {
@@ -68,7 +68,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://zyadyasser.com",
+    url: "https://zyadyasser.net",
     title: "Zyad Yasser | Software Engineer — Full-Stack, Systems & AI",
     description:
       "Software engineer with 7+ years building fast, reliable systems — from AI-powered EHR products to platforms serving 100,000+ users. Specializing in Next.js, event-driven backends, and LLM/RAG systems.",
@@ -91,7 +91,7 @@ export const metadata: Metadata = {
     images: ["/og-image.png"],
   },
   alternates: {
-    canonical: "https://zyadyasser.com",
+    canonical: "https://zyadyasser.net",
   },
   category: "technology",
 };

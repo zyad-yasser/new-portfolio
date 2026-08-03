@@ -5,8 +5,8 @@ export function StructuredData() {
     "@context": "https://schema.org",
     "@type": "Person",
     name: "Zyad Yasser",
-    url: "https://zyadyasser.com",
-    image: "https://zyadyasser.com/og-image.png",
+    url: "https://zyadyasser.net",
+    image: "https://zyadyasser.net/og-image.png",
     sameAs: [
       "https://github.com/zyad-yasser",
       "https://www.linkedin.com/in/zyad-yasser-developer/",
@@ -58,7 +58,7 @@ export function StructuredData() {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: "Zyad Yasser Portfolio",
-    url: "https://zyadyasser.com",
+    url: "https://zyadyasser.net",
     description:
       "Professional portfolio of Zyad Yasser, Full Stack Developer specializing in modern web technologies",
     author: {
@@ -72,9 +72,9 @@ export function StructuredData() {
     "@context": "https://schema.org",
     "@type": "ProfessionalService",
     name: "Zyad Yasser - Software Engineering Services",
-    image: "https://zyadyasser.com/og-image.png",
-    "@id": "https://zyadyasser.com",
-    url: "https://zyadyasser.com",
+    image: "https://zyadyasser.net/og-image.png",
+    "@id": "https://zyadyasser.net",
+    url: "https://zyadyasser.net",
     telephone: "+201111980284",
     email: "zyadyasser6@gmail.com",
     address: {
@@ -113,13 +113,13 @@ export function StructuredData() {
         "@type": "ListItem",
         position: 1,
         name: "Home",
-        item: "https://zyadyasser.com",
+        item: "https://zyadyasser.net",
       },
       {
         "@type": "ListItem",
         position: 2,
         name: "Projects",
-        item: "https://zyadyasser.com/projects",
+        item: "https://zyadyasser.net/projects",
       },
     ],
   };
