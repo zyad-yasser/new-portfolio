@@ -33,6 +33,7 @@ async function main() {
     name,
     email,
     emailVerified: false,
+    role: "admin",
   });
 
   await db.insert(account).values({

@@ -4,7 +4,9 @@
   "private": true,
   "exports": {
     ".": "./src/index.ts",
-    "./client": "./src/client.ts"
+    "./client": "./src/client.ts",
+    "./public": "./src/public.ts",
+    "./public-client": "./src/public-client.ts"
   },
   "scripts": {
     "lint": "biome lint .",

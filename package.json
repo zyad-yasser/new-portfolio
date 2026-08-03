@@ -2,7 +2,7 @@
   "name": "new-portfolio",
   "version": "1.0.0",
   "private": true,
-  "description": "Zyad Yasser's portfolio monorepo: public site, admin app, and shared packages",
+  "description": "Zyad Yasser's portfolio monorepo: public site, admin app, reviews app, blog app, and shared packages",
   "engines": {
     "node": ">=22.0.0",
     "pnpm": ">=10.8.0"
@@ -11,6 +11,8 @@
     "dev": "turbo run dev",
     "dev:web": "turbo run dev --filter=web",
     "dev:admin": "turbo run dev --filter=admin",
+    "dev:reviews": "turbo run dev --filter=reviews",
+    "dev:blog": "turbo run dev --filter=blog",
     "build": "turbo run build",
     "type-check": "turbo run type-check",
     "lint": "biome lint .",

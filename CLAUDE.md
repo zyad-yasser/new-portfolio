@@ -7,11 +7,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Turborepo/pnpm monorepo for Zyad Yasser's portfolio (zyadyasser.net):
 
 - `apps/web` — the public portfolio site. Static/marketing-style Next.js App Router site of landing sections plus a `/projects` page. No backend of its own.
-- `apps/admin` — a private, authenticated admin app (deploys separately to `admin.zyadyasser.net`). Currently auth scaffolding only (login + a protected dashboard shell) — no content-management features yet.
-- `packages/ui` — shared shadcn/ui-style component primitives, `cn()`, theme provider/toggle, and the shared Tailwind v4 theme tokens (`@repo/ui`). Both apps depend on this rather than keeping their own copies.
-- `packages/db` — the Drizzle/Postgres (Neon) layer (`@repo/db`): db client + schema, meant to be consumed by any package/app that needs direct DB access, not just auth.
-- `packages/auth` — shared Better Auth setup (`@repo/auth`): the `auth` server instance and `authClient`, built on `@repo/db`. Only `apps/admin` uses this today.
-- `packages/trpc` — the API layer (`@repo/trpc`). All backend APIs go through tRPC procedures here, not ad-hoc Next.js route handlers — an app only needs a thin `fetchRequestHandler` route file to mount it.
+- `apps/admin` — a private, authenticated admin app (deploys separately to `admin.zyadyasser.net`). Single-owner: sign-up is disabled at the auth-instance level (`emailAndPassword.disableSignUp`) and every protected route additionally requires `session.user.role === "admin"` — two independent layers, since `apps/reviews`/`apps/blog` write to the same `user` table via a separate public auth instance. Currently auth scaffolding only (login + a protected dashboard shell) — no content-management features yet.
+- `apps/reviews` — public reviews app (`reviews.zyadyasser.net`). Public sign-up, any signed-in user can leave a review; reviews are publicly listable without an account.
+- `apps/blog` — public blog app (`blog.zyadyasser.net`). Public sign-up, any signed-in user can write/publish posts; published posts are publicly listable without an account. Shares one account system with `apps/reviews` via cross-subdomain cookies — signing up on either app logs you into both.
+- `packages/ui` — shared shadcn/ui-style component primitives, `cn()`, theme provider/toggle, and the shared Tailwind v4 theme tokens (`@repo/ui`). All four apps depend on this rather than keeping their own copies.
+- `packages/db` — the Drizzle/Postgres (Neon) layer (`@repo/db`): db client + schema, meant to be consumed by any package/app that needs direct DB access, not just auth. The `user` table (and its `role` column) is shared by every app's auth instance.
+- `packages/auth` — shared Better Auth setup (`@repo/auth`), built on `@repo/db`, exporting two independent instances: the admin `auth`/`authClient` (sign-up disabled, used only by `apps/admin`) and the public `publicAuth`/`publicAuthClient` (sign-up enabled, used only by `apps/reviews` and `apps/blog`). Different secrets, different Better Auth instances — a session cookie minted by one is never valid against the other, even though both read/write the same Postgres tables.
+- `packages/trpc` — the API layer (`@repo/trpc`). All backend APIs go through tRPC procedures here, not ad-hoc Next.js route handlers — an app only needs a thin `fetchRequestHandler` route file to mount it. Mirrors the two-auth-instance split: the root `init.ts`/`context.ts`/`routers/_app.ts` are admin-only (role-gated `protectedProcedure`), and `public/init.ts`/`public/context.ts`/`public/routers/_app.ts` are the reviews/blog stack (`authedProcedure`, no role restriction).
 
 ## Commands
 
@@ -19,7 +21,7 @@ Package manager is **pnpm** (v10.8.0+, Node >=22) with Turborepo. Do not use npm
 
 Run from the repo root unless noted:
 
-- `pnpm dev` — start all apps' dev servers via Turborepo; `pnpm dev:web` / `pnpm dev:admin` to run just one
+- `pnpm dev` — start all apps' dev servers via Turborepo; `pnpm dev:web` / `pnpm dev:admin` / `pnpm dev:reviews` / `pnpm dev:blog` to run just one (ports 3000/3001/3002/3003 respectively)
 - `pnpm build` — production build of everything (Turborepo, respects the dependency graph)
 - `pnpm type-check` — `tsc` across all packages/apps
 - `pnpm lint` / `pnpm lint:fix` — Biome lint (check / autofix), workspace-wide
@@ -28,7 +30,7 @@ Run from the repo root unless noted:
 
 Or scope to one workspace: `pnpm --filter web <script>`, `pnpm --filter admin <script>`, `pnpm --filter @repo/auth <script>`.
 
-- `pnpm test` — Vitest (`vitest run`) across every package/app that has it (`apps/web`, `apps/admin`); `pnpm --filter web test:watch` / `pnpm --filter admin test:watch` for watch mode
+- `pnpm test` — Vitest (`vitest run`) across every package/app that has it (`apps/web`, `apps/admin`, `apps/reviews`, `apps/blog`); `pnpm --filter <app> test:watch` for watch mode
 - `pnpm test:e2e` — Playwright, `apps/web` only (`pnpm --filter web test:e2e:ui` for the UI runner). Starts `pnpm dev` automatically via `webServer` in `playwright.config.ts` (reuses an already-running dev server) — CI should build first and point `webServer.command` at `pnpm start` instead for a prod-accurate run.
 
 Vitest config per app is `vitest.config.mts` (jsdom environment, `@testing-library/react` + `@testing-library/jest-dom/vitest` wired via `vitest.setup.ts`, native `resolve.tsconfigPaths` for the `@/*` alias). Test files are colocated next to source as `*.test.ts(x)`; Playwright specs live in `apps/web/e2e/*.spec.ts` and are explicitly excluded from Vitest's discovery.
@@ -43,8 +45,8 @@ There are no commit hooks — run `pnpm check:fix` manually before committing.
 
 - `pnpm docker:up` / `pnpm docker:down` — start/stop the stack. A one-shot `minio-createbucket` container auto-creates the `portfolio-uploads` bucket (public-read) on startup and exits — seeing it as "exited (0)" in `docker compose ps` is expected, not a failure.
 - Copy `.env.example` → `.env` at repo root to customize compose credentials/ports (docker compose reads `.env` from the compose file's directory automatically).
-- **`apps/admin/.env` is the only app/package `.env` in the repo** — copy `apps/admin/.env.example` → `apps/admin/.env` and that's it. `packages/db`, `packages/auth`, and `packages/trpc` have no `.env` of their own; they just read `process.env` (populated by whichever app is running, e.g. Next.js auto-loading `apps/admin/.env`). Their standalone CLI commands (`drizzle-kit`, the seed script) explicitly load `apps/admin/.env` via `dotenv-cli` (`dotenv -e ../../apps/admin/.env -- <command>`, see `packages/db/package.json`) since there's no Next.js process to auto-load it for them.
-- Bootstrap: `pnpm docker:up`, then `pnpm db:push` (Drizzle push against local Postgres), then `pnpm seed` (creates the admin account from `ADMIN_EMAIL`/`ADMIN_PASSWORD` in `apps/admin/.env`, idempotent — safe to rerun).
+- `apps/admin`, `apps/reviews`, and `apps/blog` each have their own `.env` (copy from that app's `.env.example`) — `packages/db`, `packages/auth`, and `packages/trpc` have no `.env` of their own; they just read `process.env` (populated by whichever app is running, e.g. Next.js auto-loading its own `.env`). `apps/admin/.env` remains the one CLI commands load: `drizzle-kit` and the seed script load it explicitly via `dotenv-cli` (`dotenv -e ../../apps/admin/.env -- <command>`, see `packages/db/package.json`) since there's no Next.js process to auto-load it for them, and `DATABASE_URL` must be identical across all three app `.env` files since they share one Postgres DB. `apps/reviews/.env` and `apps/blog/.env` must additionally share the exact same `PUBLIC_BETTER_AUTH_SECRET` (and `PUBLIC_COOKIE_DOMAIN` in production) with each other — that's what lets a session from one app validate on the other.
+- Bootstrap: `pnpm docker:up`, then `pnpm db:push` (Drizzle push against local Postgres), then `pnpm seed` (creates the admin account from `ADMIN_EMAIL`/`ADMIN_PASSWORD` in `apps/admin/.env`, idempotent — safe to rerun). Note: `db:push` backfills new columns with their DB default on existing rows — after adding the `role` column, the existing seeded admin row needed a manual `UPDATE "user" SET role = 'admin' WHERE email = '<admin email>'`, since the seed script's idempotency check skips existing users entirely and the column default is `'user'`.
 - `@repo/db` uses `postgres` (postgres.js) + `drizzle-orm/postgres-js`, not Neon's HTTP driver — this is deliberate so the same `DATABASE_URL` works against local Docker Postgres and Neon in production without any driver branching (Neon is wire-compatible with standard Postgres clients).
 - Any script that opens a `@repo/db` connection and is meant to run once and exit (like `packages/db/scripts/seed.ts`) must call `process.exit()` when done — postgres.js keeps its connection open, which otherwise hangs the process forever even after the script's actual work has finished.
 
@@ -69,19 +71,34 @@ Testing: Vitest (`vitest.config.mts`) for unit/component tests, Playwright (`pla
 
 ### `apps/admin`
 
-Next.js App Router, same Tailwind v4 + `@repo/ui` setup. Path alias `@/*` maps to `apps/admin/src/*`. Single-owner admin — there is no public sign-up; one admin account is created via `pnpm --filter admin seed` (delegates to `@repo/db`'s seed script; `pnpm --filter admin db:push` likewise delegates to `@repo/db`). This is also the app whose `.env` everything else's local dev reads from — see "Local infra" above.
+Next.js App Router, same Tailwind v4 + `@repo/ui` setup. Path alias `@/*` maps to `apps/admin/src/*`. Single-owner admin — there is no public sign-up; one admin account is created via `pnpm --filter admin seed` (delegates to `@repo/db`'s seed script, which inserts `role: "admin"`; `pnpm --filter admin db:push` likewise delegates to `@repo/db`). This is also the app whose `.env` everything else's local dev CLI commands read from — see "Local infra" above.
 
-- `src/app/api/auth/[...all]/route.ts` — Better Auth's Next.js route handler, backed by `@repo/auth`.
+- `src/app/api/auth/[...all]/route.ts` — Better Auth's Next.js route handler, backed by `@repo/auth`'s admin `auth` instance (`emailAndPassword.disableSignUp: true`).
 - `src/app/api/trpc/[trpc]/route.ts` — mounts `@repo/trpc`'s `appRouter` via `fetchRequestHandler`. Any new API belongs in `packages/trpc/src/routers`, not as a new route handler here.
-- `src/proxy.ts` — Next 16's renamed `middleware.ts` convention (exports `proxy`, not `middleware`). Optimistic session-cookie redirect to `/login` for unauthenticated page requests (cheap cookie check, no DB hit). Its matcher excludes `/api/*` — API/tRPC routes enforce auth themselves via context and return a proper 401, not an HTML redirect.
+- `src/proxy.ts` — Next 16's renamed `middleware.ts` convention (exports `proxy`, not `middleware`). Optimistic session-cookie redirect to `/login` for unauthenticated page requests (cheap cookie check, no DB hit — it can't check `role` without a DB round-trip). Its matcher excludes `/api/*` — API/tRPC routes enforce auth themselves via context and return a proper 401, not an HTML redirect. The authoritative check is `role === "admin"` in `(dashboard)/layout.tsx` and `protectedProcedure` in `packages/trpc/src/init.ts`, not this proxy.
 - `src/app/login/page.tsx` — email+password sign-in, calls `authClient.signIn.email()`.
-- `src/app/(dashboard)/layout.tsx` — the authoritative auth check (`auth.api.getSession()`, redirects if absent) plus the sidebar/topbar shell.
+- `src/app/(dashboard)/layout.tsx` — the authoritative auth check: `auth.api.getSession()` plus `session.user.role !== "admin"`, redirects if either fails — plus the sidebar/topbar shell.
 - Root layout wraps children in `@repo/trpc/react`'s `TRPCReactProvider` (React Query + tRPC client) inside `@repo/ui`'s `ThemeProvider`.
 - Metadata sets `robots: { index: false, follow: false }` — this app should never be indexed.
 
 Deployment is a separate Vercel project pointed at `admin.zyadyasser.net` (Root Directory `apps/admin`).
 
 Testing: Vitest (`vitest.config.mts`) for unit/component tests. No Playwright here yet.
+
+### `apps/reviews` and `apps/blog`
+
+Structurally identical to each other, both public-signup Next.js App Router apps built on `@repo/auth/public` and `@repo/trpc/public/*` rather than admin's stack:
+
+- `src/app/api/auth/[...all]/route.ts` — mounts `publicAuth` from `@repo/auth/public`.
+- `src/app/api/trpc/[trpc]/route.ts` — mounts `publicAppRouter` from `@repo/trpc/public/routers/_app` with `createPublicTRPCContext`.
+- `src/app/login/page.tsx` / `src/app/signup/page.tsx` — `publicAuthClient.signIn.email()` / `.signUp.email()`.
+- `src/proxy.ts` — public by default, unlike admin. `apps/reviews`' matcher only protects `/submit`; `apps/blog`'s only protects `/new` and `/mine`. Everything else (the list pages) is reachable without a session.
+- `src/app/page.tsx` — public list page (`review.list` / `post.list` tRPC queries), no auth required.
+- `apps/reviews/src/app/(protected)/submit/page.tsx` — leave a review (`review.create`).
+- `apps/blog/src/app/(protected)/new/page.tsx` and `.../mine/page.tsx` — write a post (`post.create`) and manage/toggle-publish your own posts (`post.mine`, `post.setPublished`, ownership-checked server-side via `authorId`).
+- Each app has its own accent palette in `src/app/globals.css` layered on `@repo/ui`'s shared tokens, same pattern as admin's amber theme.
+
+Both deploy as separate Vercel projects (`reviews.zyadyasser.net`, `blog.zyadyasser.net`). Neither is in `apps/web/src/app/sitemap.ts` or linked from `apps/web` yet.
 
 ### `packages/ui` (`@repo/ui`)
 
@@ -90,25 +107,35 @@ shadcn/ui-style primitives built on Radix + `class-variance-authority` (`cva`) +
 ### `packages/db` (`@repo/db`)
 
 Postgres (local Docker or Neon in production) + Drizzle, meant to be shared by anything that needs the DB — not owned by auth:
-- `src/schema/auth.ts` — Better Auth's required tables (`user`, `session`, `account`, `verification`); `src/schema/index.ts` re-exports it as the schema barrel — add new domain tables as sibling files here
+- `src/schema/auth.ts` — Better Auth's required tables (`user`, `session`, `account`, `verification`). `user.role` (`"admin" | "user"`, DB default `"user"`) is the hard boundary between admin's trust domain and reviews/blog's — see `packages/auth`. `src/schema/index.ts` re-exports every schema file as the barrel — add new domain tables as sibling files here.
+- `src/schema/reviews.ts` — `review` table (`userId` FK, `rating`, `title`, `body`).
+- `src/schema/blog.ts` — `post` table (`authorId` FK, `title`, unique `slug`, `content`, `published`).
 - `src/index.ts` — the Drizzle client (`drizzle-orm/postgres-js`), reads `DATABASE_URL`
-- `drizzle.config.ts` / `pnpm --filter @repo/db db:push` (or `db:generate`) — schema migrations, loads `apps/admin/.env` via `dotenv-cli`
-- `scripts/seed.ts` (`pnpm --filter @repo/db seed`) — creates the single admin account from `ADMIN_NAME`/`ADMIN_EMAIL`/`ADMIN_PASSWORD` in `apps/admin/.env`; this is the only way a user gets created, there is no public registration route. Inserts the `user`/`account` rows directly (hashing the password with `hashPassword` from `better-auth/crypto`) instead of calling `@repo/auth`'s `auth.api.signUpEmail` — `@repo/db` intentionally does not depend on `@repo/auth`, since `@repo/auth` already depends on `@repo/db` and a package.json cycle between them would make Turborepo reject the whole workspace graph. The inserted shape (`providerId: "credential"`, `accountId` set to the user's own `id`) mirrors better-auth's internal `sign-up` route exactly — verified by actually logging in against a seeded account.
+- `drizzle.config.ts` / `pnpm --filter @repo/db db:push` (or `db:generate`) — schema migrations, loads `apps/admin/.env` via `dotenv-cli`. New columns with a DB default backfill *all* existing rows with that default, including rows created outside `db:push` (e.g. the seed script) — check whether any existing row needs a manual `UPDATE` after adding one (see the `role` column note under "Local infra").
+- `scripts/seed.ts` (`pnpm --filter @repo/db seed`) — creates the single admin account (`role: "admin"`, explicitly overriding the column default) from `ADMIN_NAME`/`ADMIN_EMAIL`/`ADMIN_PASSWORD` in `apps/admin/.env`; this is the only way an admin account gets created — the admin `auth` instance has sign-up disabled entirely. Inserts the `user`/`account` rows directly (hashing the password with `hashPassword` from `better-auth/crypto`) instead of calling `@repo/auth`'s `auth.api.signUpEmail` — `@repo/db` intentionally does not depend on `@repo/auth`, since `@repo/auth` already depends on `@repo/db` and a package.json cycle between them would make Turborepo reject the whole workspace graph. The inserted shape (`providerId: "credential"`, `accountId` set to the user's own `id`) mirrors better-auth's internal `sign-up` route exactly — verified by actually logging in against a seeded account. Reviews/blog accounts are created through the normal public sign-up flow instead (`publicAuth`), not this script.
 
 ### `packages/auth` (`@repo/auth`)
 
-Better Auth (email+password only, no social providers), built on `@repo/db`:
-- `src/index.ts` — the `auth` server instance (`drizzleAdapter` over `@repo/db`)
-- `src/client.ts` — `authClient` for use in client components
+Better Auth (email+password only, no social providers), built on `@repo/db`, exporting two fully independent instances that both read/write the same `user`/`session`/`account` tables but never trust each other's sessions:
+- `src/index.ts` — the admin `auth` instance (`BETTER_AUTH_SECRET`, `emailAndPassword.disableSignUp: true`). Used only by `apps/admin`.
+- `src/client.ts` — `authClient` for admin's client components.
+- `src/public.ts` — the `publicAuth` instance (`PUBLIC_BETTER_AUTH_SECRET`, sign-up enabled, `advanced.crossSubDomainCookies` so the session cookie is valid on both `apps/reviews` and `apps/blog`). Used only by those two apps — never import this from `apps/admin`.
+- `src/public-client.ts` — `publicAuthClient` for reviews/blog client components.
+- `src/shared.ts` — `roleField`, the `additionalFields.role` config (`input: false`) both instances pass to `user:`, so `role` is readable on `session.user` from either instance but can never be set via a sign-up/update-user request body regardless of which instance receives it.
+- Why two instances instead of one shared one: Better Auth signs the session cookie with the instance's own secret, so even if a `publicAuth` session row and an `auth` session row sat in the exact same DB table, a cookie minted by one is never accepted by the other. `role` is the second, independent layer on top of that (see `packages/db`'s `auth.ts` schema note) — enforced in `apps/admin`'s layout and in `packages/trpc`'s admin `protectedProcedure`.
 
 ### `packages/trpc` (`@repo/trpc`)
 
-Initial tRPC v11 setup — the intended home for all backend API logic:
-- `src/init.ts` — `initTRPC` instance (superjson transformer), `createTRPCRouter`, `publicProcedure`, `protectedProcedure` (throws `TRPCError({code: "UNAUTHORIZED"})` if no session)
-- `src/context.ts` — `createTRPCContext()` pulls the Better Auth session from request headers via `@repo/auth`
-- `src/routers/_app.ts` — the root `appRouter`; add new routers here and merge them in
-- `src/provider.tsx` — exports `api` (`createTRPCReact`) and `TRPCReactProvider` (React Query + tRPC client, points at `/api/trpc`) for client components. Note: this file is intentionally not named `react.tsx` — with `baseUrl: "./src"` in this package's tsconfig, a file named `react.tsx` shadows the bare `"react"` import for every file in the package (TS resolves the bare specifier against baseUrl first). Exported publicly as `@repo/trpc/react` regardless.
-- Consuming app just needs a thin route handler using `fetchRequestHandler` (see `apps/admin/src/app/api/trpc/[trpc]/route.ts`) plus `@repo/trpc` as a dependency; `@trpc/server` must also be a *direct* dependency of that app since the route file itself imports it (per-file node_modules resolution in this workspace).
+tRPC v11, split into two independent stacks that mirror `packages/auth`'s split — do not let admin and public routers/context cross-import:
+- `src/init.ts` / `src/context.ts` / `src/routers/_app.ts` — admin-only. `protectedProcedure` requires both a session *and* `session.user.role === "admin"`, throwing `UNAUTHORIZED` otherwise. `createTRPCContext()` pulls the session from `@repo/auth`'s admin `auth` instance.
+- `src/provider.tsx` — exports `api` (`createTRPCReact`) and `TRPCReactProvider` for admin's client components, published as `@repo/trpc/react`. Intentionally not named `react.tsx` — with `baseUrl: "./src"` in this package's tsconfig, a file named `react.tsx` would shadow the bare `"react"` import for every file in the package.
+- `src/public/init.ts` / `src/public/context.ts` / `src/public/routers/_app.ts` — reviews/blog stack, published as `@repo/trpc/public/init`, `/public/context`, `/public/routers/_app`. `authedProcedure` requires only a session (any signed-up user, no role check) via `@repo/auth`'s `publicAuth`. `routers/review.ts` and `routers/post.ts` hold the actual procedures — `post.setPublished` checks `authorId` ownership server-side before allowing an update.
+- `src/public/provider.tsx` — `publicApi` / `PublicTRPCReactProvider`, published as `@repo/trpc/public/react`.
+- Consuming app just needs a thin route handler using `fetchRequestHandler` (see `apps/admin/src/app/api/trpc/[trpc]/route.ts` or `apps/reviews`'s equivalent) plus `@repo/trpc` as a dependency; `@trpc/server` must also be a *direct* dependency of that app since the route file itself imports it (per-file node_modules resolution in this workspace).
+
+## Code style rules for Claude Code
+
+- Do not write comments in code (this includes `.ts`/`.tsx`/`.js`/`.css` and config files). Code should be self-explanatory through naming and structure; if it needs a comment to be understood, restructure it instead.
 
 ## Git rules for Claude Code
 
