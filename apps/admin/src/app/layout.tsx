@@ -11,7 +11,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "Admin — Zyad Yasser",
-  description: "Private admin dashboard for zyadyasser.com.",
+  description: "Private admin dashboard for zyadyasser.net.",
   robots: {
     index: false,
     follow: false,
