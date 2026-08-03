@@ -1,0 +1,178 @@
+/* Shared brand theme tokens for @repo/ui consumers (apps/web, apps/admin).
+   Two-tier token pattern: bare `--x` vars hold raw "H S% L%" triples (so they can be
+   alpha-blended by hand elsewhere via `hsl(var(--x) / 0.5)`); `--color-x` in @theme wraps
+   them in hsl() so Tailwind's auto-generated utilities (bg-primary, bg-primary/10, ...) get
+   a complete, valid CSS color instead of a bare triple (which `background-color: var(...)`
+   can't render — this is the standard shadcn/Tailwind-v4 HSL convention).
+
+   Note this project inverts the usual shadcn convention: `:root` (no class) IS the dark
+   theme, `.light` is the override — next-themes (attribute="class") sets the <html> class
+   to the literal resolved theme name ("light" or "dark"), so :root styles apply whenever
+   that class is "dark" (or absent), same as before. `dark:` utilities key off an actual
+   ".dark" class rather than the OS media query, matching how next-themes actually toggles. */
+
+@custom-variant dark (&:is(.dark *));
+:root {
+  /* Neutral near-black canvas (Resend/Linear-style restraint) — the warm gradient
+     identity lives in the accent tokens and ambient glow below, not the surface. */
+  --background: 240 6% 4%;
+  --foreground: 30 15% 96%;
+  --card: 240 6% 7%;
+  --card-foreground: 30 10% 94%;
+  --popover: 240 6% 6%;
+  --popover-foreground: 30 10% 94%;
+  --primary: 8 88% 58%; /* vivid coral — brand anchor */
+  --primary-foreground: 0 0% 4%; /* dark text on primary: ~5.9:1, white text on primary fails at ~3.5:1 */
+  --secondary: 240 6% 11%;
+  --secondary-foreground: 30 8% 92%;
+  --muted: 240 6% 9%;
+  --muted-foreground: 240 4% 62%;
+  --accent: 240 6% 13%;
+  --accent-foreground: 30 8% 95%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 240 6% 14%;
+  --input: 240 6% 11%;
+  --ring: 8 88% 58%; /* = primary */
+
+  --success: 152 60% 32%;
+  --success-foreground: 0 0% 100%;
+  --warning: 38 95% 58%; /* gradient's amber waypoint — also used standalone via to-warning */
+  --warning-foreground: 0 0% 6%;
+  --magenta: 322 78% 56%; /* gradient waypoint */
+  --violet: 262 72% 58%; /* gradient waypoint */
+
+  /* Single source of truth for the warm gradient identity — referenced by
+     .bg-gradient-brand/.text-gradient-brand and AmbientGradient, never hardcoded elsewhere. */
+  --gradient-brand: linear-gradient(
+    135deg,
+    hsl(var(--warning)) 0%,
+    hsl(var(--primary)) 34%,
+    hsl(var(--magenta)) 67%,
+    hsl(var(--violet)) 100%
+  );
+  --gradient-brand-radial: radial-gradient(
+    circle at 30% 20%,
+    hsl(var(--warning) / 0.9) 0%,
+    hsl(var(--primary) / 0.55) 30%,
+    hsl(var(--magenta) / 0.35) 55%,
+    hsl(var(--violet) / 0.25) 75%,
+    transparent 100%
+  );
+  --ambient-glow-opacity: 0.12;
+  --ambient-glow-blend: screen;
+  --hero-shadow-opacity: 0.5; /* black watermark barely lifts off the near-black canvas */
+}
+
+.light {
+  --background: 30 25% 97%;
+  --foreground: 256 20% 10%;
+  --card: 0 0% 100%;
+  --card-foreground: 256 20% 10%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 256 20% 10%;
+  --border: 30 15% 88%;
+  --input: 30 15% 93%;
+  --muted: 30 20% 95%;
+  --muted-foreground: 256 10% 40%;
+  --secondary: 30 20% 94%;
+  --secondary-foreground: 256 20% 15%;
+  --accent: 30 25% 92%;
+  --accent-foreground: 256 20% 15%;
+
+  --primary: 8 80% 42%; /* darker/richer than dark mode so it holds contrast on a light canvas */
+  --primary-foreground: 0 0% 100%;
+  --ring: 8 80% 42%;
+
+  --destructive: 0 74% 42%;
+  --success: 152 60% 30%;
+  --warning: 38 85% 38%;
+  --warning-foreground: 0 0% 100%;
+  --magenta: 320 65% 40%;
+  --violet: 262 55% 44%;
+
+  /* screen-blend disappears on white; switch blend mode and cut opacity further, not just reuse dark's value */
+  --ambient-glow-opacity: 0.08;
+  --ambient-glow-blend: normal;
+  --hero-shadow-opacity: 0.06; /* same black watermark reads much stronger against a light canvas */
+}
+
+@theme {
+  --font-inter: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --color-success: hsl(var(--success));
+  --color-success-foreground: hsl(var(--success-foreground));
+  --color-warning: hsl(var(--warning));
+  --color-warning-foreground: hsl(var(--warning-foreground));
+  --color-magenta: hsl(var(--magenta));
+  --color-violet: hsl(var(--violet));
+
+  /* Sidebar (admin shell) aliases existing semantic tokens rather than defining its own
+     palette, so it inherits the dark/light swap for free instead of needing its own
+     :root/.light overrides. */
+  --color-sidebar: hsl(var(--card));
+  --color-sidebar-foreground: hsl(var(--card-foreground));
+  --color-sidebar-primary: hsl(var(--primary));
+  --color-sidebar-primary-foreground: hsl(var(--primary-foreground));
+  --color-sidebar-accent: hsl(var(--accent));
+  --color-sidebar-accent-foreground: hsl(var(--accent-foreground));
+  --color-sidebar-border: hsl(var(--border));
+  --color-sidebar-ring: hsl(var(--ring));
+
+  --radius: 0.5rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+
+  --ease-premium: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --font-family-sans: var(--font-inter);
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+.bg-gradient-brand {
+  background: var(--gradient-brand);
+}
+
+.text-gradient-brand {
+  background: var(--gradient-brand);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}

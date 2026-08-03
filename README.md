@@ -1,6 +1,6 @@
 # Zyad Yasser — Portfolio
 
-Personal portfolio site for Zyad Yasser, built with Next.js. Live at [zyadyasser.com](https://zyadyasser.com).
+Personal portfolio site for Zyad Yasser, built with Next.js. Live at [zyadyasser.net](https://zyadyasser.net).
 
 ## Tech Stack
 

@@ -1,0 +1,51 @@
+@import "tailwindcss";
+@import "@repo/ui/styles/theme.css";
+@source "../../../../packages/ui/src";
+
+:root {
+  --background: 200 20% 5%;
+  --foreground: 160 10% 96%;
+  --card: 200 15% 8%;
+  --card-foreground: 160 8% 94%;
+  --popover: 200 15% 7%;
+  --popover-foreground: 160 8% 94%;
+  --primary: 168 76% 42%;
+  --primary-foreground: 200 20% 6%;
+  --secondary: 200 10% 13%;
+  --secondary-foreground: 160 8% 92%;
+  --muted: 200 10% 11%;
+  --muted-foreground: 190 6% 62%;
+  --accent: 200 10% 15%;
+  --accent-foreground: 160 8% 95%;
+  --destructive: 0 70% 55%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 200 10% 16%;
+  --input: 200 10% 14%;
+  --ring: 168 76% 42%;
+}
+
+.light {
+  --background: 0 0% 100%;
+  --foreground: 200 14% 4%;
+  --card: 0 0% 100%;
+  --card-foreground: 200 14% 4%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 200 14% 4%;
+  --primary: 168 76% 36%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 165 20% 96%;
+  --secondary-foreground: 200 14% 10%;
+  --muted: 165 15% 95%;
+  --muted-foreground: 190 6% 45%;
+  --accent: 165 20% 94%;
+  --accent-foreground: 200 14% 10%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 190 10% 90%;
+  --input: 190 10% 90%;
+  --ring: 168 76% 36%;
+}
+
+body {
+  min-height: 100svh;
+}
