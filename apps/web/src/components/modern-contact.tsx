@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@repo/ui/form";
 import { Input } from "@repo/ui/input";
 import { Textarea } from "@repo/ui/textarea";
+import { Turnstile } from "@repo/ui/turnstile";
 import { type ContactFormValues, contactFormSchema } from "@repo/utils/schemas/contact";
 import { motion } from "framer-motion";
 import { Loader2, Mail, MapPin, Phone, Send } from "lucide-react";
@@ -39,6 +40,8 @@ const contactInfo = [
 export function ModernContact() {
   const [status, setStatus] = useState<"idle" | "success">("idle");
   const [error, setError] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [turnstileKey, setTurnstileKey] = useState(0);
 
   const form = useForm<ContactFormValues>({
     resolver: zodResolver(contactFormSchema),
@@ -47,11 +50,17 @@ export function ModernContact() {
 
   async function onSubmit(values: ContactFormValues) {
     setError(null);
+
+    if (!turnstileToken) {
+      setError("Please complete the verification.");
+      return;
+    }
+
     try {
       const response = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
+        body: JSON.stringify({ ...values, turnstileToken }),
       });
       const data: { ok: boolean; error?: string } = await response.json();
       if (!data.ok) {
@@ -61,6 +70,9 @@ export function ModernContact() {
       setStatus("success");
     } catch {
       setError("Something went wrong. Please try again.");
+    } finally {
+      setTurnstileToken(null);
+      setTurnstileKey((key) => key + 1);
     }
   }
 
@@ -222,6 +234,12 @@ export function ModernContact() {
                             </FormItem>
                           )}
                         />
+                        <Turnstile
+                          key={turnstileKey}
+                          siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? ""}
+                          onVerify={setTurnstileToken}
+                          onExpire={() => setTurnstileToken(null)}
+                        />
                         {error && (
                           <p
                             role="alert"
@@ -234,7 +252,7 @@ export function ModernContact() {
                           size="lg"
                           className="w-full text-base sm:text-lg py-5 sm:py-6 btn-glow"
                           type="submit"
-                          disabled={form.formState.isSubmitting}
+                          disabled={form.formState.isSubmitting || !turnstileToken}
                         >
                           {form.formState.isSubmitting ? (
                             <Loader2 className="mr-2 h-5 w-5 animate-spin" aria-hidden="true" />

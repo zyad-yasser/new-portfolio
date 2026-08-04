@@ -1,3 +1,5 @@
+import { requireEnv } from "@repo/utils";
+import { createRateLimiter, getClientIp } from "@repo/utils/rate-limit";
 import { TRPCError, initTRPC } from "@trpc/server";
 import superjson from "superjson";
 import type { PublicTRPCContext } from "./context";
@@ -6,10 +8,24 @@ const t = initTRPC.context<PublicTRPCContext>().create({
   transformer: superjson,
 });
 
-export const createPublicTRPCRouter = t.router;
-export const publicProcedure = t.procedure;
+const appName = requireEnv("APP_NAME");
+const baseRateLimiter = createRateLimiter({ prefix: `${appName}:trpc`, limit: 60, window: "1 m" });
 
-export const authedProcedure = t.procedure.use(({ ctx, next }) => {
+const rateLimited = t.middleware(async ({ ctx, next }) => {
+  const ip = getClientIp(ctx.headers);
+  const { success } = await baseRateLimiter.limit(ip);
+
+  if (!success) {
+    throw new TRPCError({ code: "TOO_MANY_REQUESTS" });
+  }
+
+  return next();
+});
+
+export const createPublicTRPCRouter = t.router;
+export const publicProcedure = t.procedure.use(rateLimited);
+
+export const authedProcedure = publicProcedure.use(({ ctx, next }) => {
   if (!ctx.session) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
@@ -21,3 +37,26 @@ export const authedProcedure = t.procedure.use(({ ctx, next }) => {
     },
   });
 });
+
+export function strictRateLimit({
+  path,
+  limit,
+  window,
+}: {
+  path: string;
+  limit: number;
+  window: Parameters<typeof createRateLimiter>[0]["window"];
+}) {
+  const limiter = createRateLimiter({ prefix: `${appName}:trpc:${path}`, limit, window });
+
+  return t.middleware(async ({ ctx, next }) => {
+    const ip = getClientIp(ctx.headers);
+    const { success } = await limiter.limit(ip);
+
+    if (!success) {
+      throw new TRPCError({ code: "TOO_MANY_REQUESTS" });
+    }
+
+    return next();
+  });
+}

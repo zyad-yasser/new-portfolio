@@ -3,7 +3,7 @@ import { db } from "@repo/db";
 import { post, user } from "@repo/db/schema";
 import { and, desc, eq } from "drizzle-orm";
 import { z } from "zod";
-import { authedProcedure, createPublicTRPCRouter, publicProcedure } from "../init";
+import { authedProcedure, createPublicTRPCRouter, publicProcedure, strictRateLimit } from "../init";
 
 function slugify(title: string) {
   return `${title
@@ -41,6 +41,7 @@ export const postRouter = createPublicTRPCRouter({
   ),
 
   create: authedProcedure
+    .use(strictRateLimit({ path: "post.create", limit: 5, window: "1 h" }))
     .input(
       z.object({
         title: z.string().trim().min(1).max(150),

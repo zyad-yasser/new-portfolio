@@ -9,3 +9,9 @@ export const contactFormSchema = z.object({
 });
 
 export type ContactFormValues = z.infer<typeof contactFormSchema>;
+
+export const contactRequestSchema = contactFormSchema.extend({
+  turnstileToken: z.string().min(1, "Verification required"),
+});
+
+export type ContactRequestValues = z.infer<typeof contactRequestSchema>;

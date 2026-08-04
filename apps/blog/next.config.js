@@ -4,8 +4,8 @@ const nextConfig = {
   async headers() {
     const isDev = process.env.NODE_ENV !== "production";
     const scriptSrc = isDev
-      ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
-      : "script-src 'self' 'unsafe-inline'";
+      ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com"
+      : "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com";
     return [
       {
         source: "/:path*",
@@ -18,7 +18,10 @@ const nextConfig = {
               scriptSrc,
               "style-src 'self' 'unsafe-inline'",
               "font-src 'self' data:",
-              isDev ? "connect-src 'self' ws:" : "connect-src 'self'",
+              isDev
+                ? "connect-src 'self' ws: https://challenges.cloudflare.com"
+                : "connect-src 'self' https://challenges.cloudflare.com",
+              "frame-src https://challenges.cloudflare.com",
               "form-action 'self'",
               "frame-ancestors 'none'",
               "base-uri 'self'",
