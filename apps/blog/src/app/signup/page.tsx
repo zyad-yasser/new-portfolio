@@ -6,6 +6,7 @@ import { Button } from "@repo/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@repo/ui/form";
 import { Input } from "@repo/ui/input";
+import { Turnstile } from "@repo/ui/turnstile";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -24,6 +25,8 @@ type SignupValues = z.infer<typeof signupSchema>;
 export default function SignupPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [turnstileKey, setTurnstileKey] = useState(0);
 
   const form = useForm<SignupValues>({
     resolver: zodResolver(signupSchema),
@@ -33,7 +36,17 @@ export default function SignupPage() {
   async function onSubmit(values: SignupValues) {
     setError(null);
 
-    const { error: signUpError } = await publicAuthClient.signUp.email(values);
+    if (!turnstileToken) {
+      setError("Please complete the verification.");
+      return;
+    }
+
+    const { error: signUpError } = await publicAuthClient.signUp.email(values, {
+      headers: { "x-captcha-response": turnstileToken },
+    });
+
+    setTurnstileToken(null);
+    setTurnstileKey((key) => key + 1);
 
     if (signUpError) {
       setError(signUpError.message ?? "Couldn't create your account.");
@@ -112,6 +125,12 @@ export default function SignupPage() {
                   </FormItem>
                 )}
               />
+              <Turnstile
+                key={turnstileKey}
+                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? ""}
+                onVerify={setTurnstileToken}
+                onExpire={() => setTurnstileToken(null)}
+              />
               {error && (
                 <p
                   role="alert"
@@ -120,7 +139,11 @@ export default function SignupPage() {
                   {error}
                 </p>
               )}
-              <Button type="submit" className="w-full gap-2" disabled={isSubmitting}>
+              <Button
+                type="submit"
+                className="w-full gap-2"
+                disabled={isSubmitting || !turnstileToken}
+              >
                 {isSubmitting && <Loader2 className="size-4 animate-spin" />}
                 {isSubmitting ? "Creating account..." : "Sign up"}
               </Button>

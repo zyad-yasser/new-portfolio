@@ -1,0 +1,28 @@
+{
+  "name": "@repo/utils",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./schemas/contact": "./src/schemas/contact.ts",
+    "./redis": "./src/redis.ts",
+    "./rate-limit": "./src/rate-limit.ts",
+    "./secondary-storage": "./src/secondary-storage.ts",
+    "./same-origin": "./src/same-origin.ts",
+    "./turnstile": "./src/turnstile.ts"
+  },
+  "scripts": {
+    "lint": "biome lint .",
+    "check": "biome check .",
+    "type-check": "tsc"
+  },
+  "dependencies": {
+    "@upstash/ratelimit": "^2.0.8",
+    "@upstash/redis": "^1.38.1",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
+  }
+}

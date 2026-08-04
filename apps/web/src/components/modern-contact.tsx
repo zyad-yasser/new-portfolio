@@ -1,14 +1,19 @@
 "use client";
 
 import { containerVariants, itemVariants } from "@/lib/motion";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Badge } from "@repo/ui/badge";
 import { Button } from "@repo/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui/card";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@repo/ui/form";
 import { Input } from "@repo/ui/input";
-import { Label } from "@repo/ui/label";
 import { Textarea } from "@repo/ui/textarea";
+import { Turnstile } from "@repo/ui/turnstile";
+import { type ContactFormValues, contactFormSchema } from "@repo/utils/schemas/contact";
 import { motion } from "framer-motion";
-import { Mail, MapPin, Phone, Send } from "lucide-react";
+import { Loader2, Mail, MapPin, Phone, Send } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { SectionHeader } from "./ui/section-header";
 
 const contactInfo = [
@@ -33,6 +38,50 @@ const contactInfo = [
 ];
 
 export function ModernContact() {
+  const [status, setStatus] = useState<"idle" | "success">("idle");
+  const [error, setError] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [turnstileKey, setTurnstileKey] = useState(0);
+
+  const form = useForm<ContactFormValues>({
+    resolver: zodResolver(contactFormSchema),
+    defaultValues: { name: "", email: "", subject: "", message: "", company: "" },
+  });
+
+  async function onSubmit(values: ContactFormValues) {
+    setError(null);
+
+    if (!turnstileToken) {
+      setError("Please complete the verification.");
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...values, turnstileToken }),
+      });
+      const data: { ok: boolean; error?: string } = await response.json();
+      if (!data.ok) {
+        setError(data.error ?? "Something went wrong. Please try again.");
+        return;
+      }
+      setStatus("success");
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setTurnstileToken(null);
+      setTurnstileKey((key) => key + 1);
+    }
+  }
+
+  function handleSendAnother() {
+    form.reset();
+    setStatus("idle");
+    setError(null);
+  }
+
   return (
     <div className="py-24 px-5 sm:px-6 lg:px-8 bg-muted/15 border-t border-border/60">
       <div className="container mx-auto max-w-6xl">
@@ -58,90 +107,163 @@ export function ModernContact() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
-                  <form className="space-y-6" aria-label="Contact form">
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="name" className="mb-2 block">
-                          Name{" "}
-                          <span className="text-destructive" aria-label="required">
-                            *
-                          </span>
-                        </Label>
-                        <Input
-                          id="name"
-                          name="name"
-                          type="text"
-                          placeholder="Your name"
-                          className="h-12"
-                          required
-                          aria-required="true"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="subject" className="mb-2 block">
-                          Subject{" "}
-                          <span className="text-destructive" aria-label="required">
-                            *
-                          </span>
-                        </Label>
-                        <Input
-                          id="subject"
-                          name="subject"
-                          type="text"
-                          placeholder="Project subject"
-                          className="h-12"
-                          required
-                          aria-required="true"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <Label htmlFor="email" className="mb-2 block">
-                        Email{" "}
-                        <span className="text-destructive" aria-label="required">
-                          *
-                        </span>
-                      </Label>
-                      <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        placeholder="your.email@example.com"
-                        className="h-12"
-                        required
-                        aria-required="true"
-                        aria-describedby="email-description"
-                      />
-                      <p id="email-description" className="sr-only">
-                        Enter a valid email address
+                  {status === "success" ? (
+                    <output className="block text-center py-8">
+                      <p className="text-lg font-medium text-card-foreground mb-2">
+                        Thanks for reaching out!
                       </p>
-                    </div>
-                    <div>
-                      <Label htmlFor="message" className="mb-2 block">
-                        Message{" "}
-                        <span className="text-destructive" aria-label="required">
-                          *
-                        </span>
-                      </Label>
-                      <Textarea
-                        id="message"
-                        name="message"
-                        rows={6}
-                        placeholder="Tell me about your project..."
-                        className="resize-y"
-                        required
-                        aria-required="true"
-                      />
-                    </div>
-                    <Button
-                      size="lg"
-                      className="w-full text-base sm:text-lg py-5 sm:py-6 btn-glow"
-                      type="submit"
-                    >
-                      <Send className="mr-2 h-5 w-5" aria-hidden="true" />
-                      Send Message
-                    </Button>
-                  </form>
+                      <p className="text-muted-foreground mb-6">
+                        I'll get back to you as soon as possible.
+                      </p>
+                      <Button variant="outline" onClick={handleSendAnother}>
+                        Send another message
+                      </Button>
+                    </output>
+                  ) : (
+                    <Form {...form}>
+                      <form
+                        className="space-y-6"
+                        aria-label="Contact form"
+                        onSubmit={form.handleSubmit(onSubmit)}
+                        noValidate
+                      >
+                        <div
+                          className="sr-only"
+                          aria-hidden="true"
+                          style={{ position: "absolute", left: "-9999px" }}
+                        >
+                          <label htmlFor="company">Company</label>
+                          <input
+                            id="company"
+                            tabIndex={-1}
+                            autoComplete="off"
+                            {...form.register("company")}
+                          />
+                        </div>
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <FormField
+                            control={form.control}
+                            name="name"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>
+                                  Name{" "}
+                                  <span className="text-destructive" aria-label="required">
+                                    *
+                                  </span>
+                                </FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="text"
+                                    placeholder="Your name"
+                                    className="h-12"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="subject"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>
+                                  Subject{" "}
+                                  <span className="text-destructive" aria-label="required">
+                                    *
+                                  </span>
+                                </FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="text"
+                                    placeholder="Project subject"
+                                    className="h-12"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        <FormField
+                          control={form.control}
+                          name="email"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>
+                                Email{" "}
+                                <span className="text-destructive" aria-label="required">
+                                  *
+                                </span>
+                              </FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="email"
+                                  placeholder="your.email@example.com"
+                                  className="h-12"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="message"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>
+                                Message{" "}
+                                <span className="text-destructive" aria-label="required">
+                                  *
+                                </span>
+                              </FormLabel>
+                              <FormControl>
+                                <Textarea
+                                  rows={6}
+                                  placeholder="Tell me about your project..."
+                                  className="resize-y"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <Turnstile
+                          key={turnstileKey}
+                          siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? ""}
+                          onVerify={setTurnstileToken}
+                          onExpire={() => setTurnstileToken(null)}
+                        />
+                        {error && (
+                          <p
+                            role="alert"
+                            className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+                          >
+                            {error}
+                          </p>
+                        )}
+                        <Button
+                          size="lg"
+                          className="w-full text-base sm:text-lg py-5 sm:py-6 btn-glow"
+                          type="submit"
+                          disabled={form.formState.isSubmitting || !turnstileToken}
+                        >
+                          {form.formState.isSubmitting ? (
+                            <Loader2 className="mr-2 h-5 w-5 animate-spin" aria-hidden="true" />
+                          ) : (
+                            <Send className="mr-2 h-5 w-5" aria-hidden="true" />
+                          )}
+                          {form.formState.isSubmitting ? "Sending..." : "Send Message"}
+                        </Button>
+                      </form>
+                    </Form>
+                  )}
                 </CardContent>
               </Card>
             </motion.div>
