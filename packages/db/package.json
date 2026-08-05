@@ -11,6 +11,7 @@
     "db:generate": "dotenv -e ../../apps/admin/.env -- drizzle-kit generate",
     "db:migrate": "dotenv -e ../../apps/admin/.env -- drizzle-kit migrate",
     "db:baseline": "dotenv -e ../../apps/admin/.env -- tsx scripts/baseline-migrations.ts",
+    "db:backfill-slugs": "dotenv -e ../../apps/admin/.env -- tsx scripts/backfill-slugs.ts",
     "seed": "dotenv -e ../../apps/admin/.env -- tsx scripts/seed.ts",
     "lint": "biome lint .",
     "check": "biome check .",

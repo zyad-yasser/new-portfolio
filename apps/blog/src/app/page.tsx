@@ -7,7 +7,8 @@ import { Skeleton } from "@repo/ui/skeleton";
 import Link from "next/link";
 
 export default function BlogHomePage() {
-  const { data: posts, isLoading } = publicApi.post.list.useQuery();
+  const { data, isLoading } = publicApi.post.list.useQuery();
+  const posts = data?.items;
 
   return (
     <main className="mx-auto flex max-w-3xl flex-col gap-8 p-6 py-16">
@@ -32,22 +33,24 @@ export default function BlogHomePage() {
         )}
 
         {posts?.map((post) => (
-          <Card key={post.id}>
-            <CardHeader>
-              <CardTitle>{post.title}</CardTitle>
-              <p className="text-xs text-muted-foreground">
-                {post.authorName} &middot;{" "}
-                {new Date(post.createdAt).toLocaleDateString(undefined, {
-                  month: "short",
-                  day: "numeric",
-                  year: "numeric",
-                })}
-              </p>
-            </CardHeader>
-            <CardContent>
-              <p className="line-clamp-3 text-sm text-muted-foreground">{post.content}</p>
-            </CardContent>
-          </Card>
+          <Link key={post.id} href={`/post/${post.slug}`}>
+            <Card className="transition-colors hover:bg-accent/50">
+              <CardHeader>
+                <CardTitle>{post.title}</CardTitle>
+                <p className="text-xs text-muted-foreground">
+                  {post.authorName} &middot;{" "}
+                  {new Date(post.createdAt).toLocaleDateString(undefined, {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  })}
+                </p>
+              </CardHeader>
+              <CardContent>
+                <p className="line-clamp-3 text-sm text-muted-foreground">{post.content}</p>
+              </CardContent>
+            </Card>
+          </Link>
         ))}
       </div>
     </main>

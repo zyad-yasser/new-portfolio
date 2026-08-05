@@ -1,4 +1,4 @@
-import { boolean, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { boolean, integer, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { user } from "./auth";
 
 export const post = pgTable("post", {
@@ -10,6 +10,7 @@ export const post = pgTable("post", {
   slug: text("slug").notNull().unique(),
   content: text("content").notNull(),
   published: boolean("published").notNull().default(false),
+  viewCount: integer("view_count").notNull().default(0),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
