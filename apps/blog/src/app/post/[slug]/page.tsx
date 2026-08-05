@@ -1,25 +1,34 @@
 "use client";
 
+import { CommentSection } from "@/components/comments/comment-section";
 import { TiptapContent } from "@/components/editor/tiptap-content";
 import { extractHeadings } from "@/components/editor/toc";
+import { ReactionBar } from "@/components/reactions/reaction-bar";
 import { SiteHeader } from "@/components/site-header";
 import { categoryColorClasses } from "@/lib/category-colors";
+import { publicAuthClient } from "@repo/auth/public-client";
 import { publicApi } from "@repo/trpc/public/react";
 import { Badge } from "@repo/ui/badge";
 import { Button } from "@repo/ui/button";
 import { Card } from "@repo/ui/card";
 import { cn } from "@repo/ui/lib/utils";
 import { Skeleton } from "@repo/ui/skeleton";
-import { Calendar, ChevronRight, Clock, Eye } from "lucide-react";
+import { Calendar, ChevronRight, Clock, Eye, UserX } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useRef } from "react";
 
 export default function PostDetailPage() {
   const { slug } = useParams<{ slug: string }>();
+  const { data: session } = publicAuthClient.useSession();
+  const utils = publicApi.useUtils();
   const { data: post, isLoading, error } = publicApi.post.getBySlug.useQuery({ slug });
   const incrementView = publicApi.post.incrementView.useMutation();
   const hasTrackedView = useRef(false);
+
+  const blockAuthor = publicApi.block.block.useMutation({
+    onSuccess: () => utils.post.list.invalidate(),
+  });
 
   const headings = useMemo(() => (post ? extractHeadings(post.contentJson) : []), [post]);
 
@@ -88,7 +97,21 @@ export default function PostDetailPage() {
           <h1 className="text-3xl font-semibold">{post.title}</h1>
 
           <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm text-muted-foreground">
-            <span>{post.author.name}</span>
+            <span className="flex items-center gap-1">
+              {post.author.name}
+              {session && session.user.id !== post.authorId && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-5 text-muted-foreground"
+                  title={`Block ${post.author.name}`}
+                  disabled={blockAuthor.isPending}
+                  onClick={() => blockAuthor.mutate({ userId: post.authorId })}
+                >
+                  <UserX className="size-3" />
+                </Button>
+              )}
+            </span>
             <span className="flex items-center gap-1.5">
               <Calendar className="size-3.5" />
               {new Date(post.createdAt).toLocaleDateString(undefined, {
@@ -106,6 +129,8 @@ export default function PostDetailPage() {
               {post.viewCount} {post.viewCount === 1 ? "view" : "views"}
             </span>
           </div>
+
+          <ReactionBar postId={post.id} />
         </div>
 
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_280px]">
@@ -152,6 +177,8 @@ export default function PostDetailPage() {
             )}
           </aside>
         </div>
+
+        <CommentSection postId={post.id} postAuthorId={post.authorId} />
       </main>
     </>
   );

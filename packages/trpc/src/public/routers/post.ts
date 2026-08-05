@@ -1,11 +1,11 @@
 import { randomUUID } from "node:crypto";
 import { db } from "@repo/db";
-import { post, postTag, tag } from "@repo/db/schema";
+import { post, postTag, tag, userBlock } from "@repo/db/schema";
 import type { TiptapDoc } from "@repo/db/schema";
 import { requireEnv } from "@repo/utils";
 import { createRateLimiter, getClientIp } from "@repo/utils/rate-limit";
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq, lt, ne, or, sql } from "drizzle-orm";
+import { and, desc, eq, lt, ne, notInArray, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import { authedProcedure, createPublicTRPCRouter, publicProcedure, strictRateLimit } from "../init";
 
@@ -136,20 +136,35 @@ export const postRouter = createPublicTRPCRouter({
         })
         .optional()
     )
-    .query(async ({ input }) => {
+    .query(async ({ ctx, input }) => {
       const cursor = input?.cursor;
       const limit = input?.limit ?? 20;
 
+      const blockedIds = ctx.session
+        ? (
+            await db.query.userBlock.findMany({
+              where: eq(userBlock.blockerId, ctx.session.user.id),
+              columns: { blockedId: true },
+            })
+          ).map((row) => row.blockedId)
+        : [];
+
+      const conditions = [eq(post.published, true)];
+      if (blockedIds.length) {
+        conditions.push(notInArray(post.authorId, blockedIds));
+      }
+      if (cursor) {
+        const cursorCondition = or(
+          lt(post.createdAt, cursor.createdAt),
+          and(eq(post.createdAt, cursor.createdAt), lt(post.id, cursor.id))
+        );
+        if (cursorCondition) {
+          conditions.push(cursorCondition);
+        }
+      }
+
       const rows = await db.query.post.findMany({
-        where: cursor
-          ? and(
-              eq(post.published, true),
-              or(
-                lt(post.createdAt, cursor.createdAt),
-                and(eq(post.createdAt, cursor.createdAt), lt(post.id, cursor.id))
-              )
-            )
-          : eq(post.published, true),
+        where: and(...conditions),
         orderBy: [desc(post.createdAt), desc(post.id)],
         limit: limit + 1,
         with: postWith,
