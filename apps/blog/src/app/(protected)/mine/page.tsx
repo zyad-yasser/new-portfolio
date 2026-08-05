@@ -1,6 +1,7 @@
 "use client";
 
 import { SiteHeader } from "@/components/site-header";
+import { categoryColorClasses } from "@/lib/category-colors";
 import { publicApi } from "@repo/trpc/public/react";
 import {
   AlertDialog,
@@ -75,7 +76,24 @@ export default function MinePostsPage() {
                 </Badge>
               </CardHeader>
               <CardContent className="flex flex-col gap-3">
-                <p className="line-clamp-2 text-sm text-muted-foreground">{post.content}</p>
+                <p className="line-clamp-2 text-sm text-muted-foreground">{post.excerptText}</p>
+                {(post.category || post.tags.length > 0) && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {post.category && (
+                      <Badge
+                        variant="outline"
+                        className={categoryColorClasses(post.category.color).badge}
+                      >
+                        {post.category.name}
+                      </Badge>
+                    )}
+                    {post.tags.map((tag) => (
+                      <Badge key={tag.id} variant="secondary">
+                        {tag.name}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
                 <div className="flex items-center justify-end gap-2">
                   <Button
                     variant="outline"

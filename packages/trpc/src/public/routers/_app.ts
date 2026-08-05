@@ -1,6 +1,8 @@
 import { createPublicTRPCRouter, publicProcedure } from "../init";
+import { categoryRouter } from "./category";
 import { postRouter } from "./post";
 import { reviewRouter } from "./review";
+import { tagRouter } from "./tag";
 
 export const publicAppRouter = createPublicTRPCRouter({
   health: publicProcedure.query(() => ({
@@ -9,6 +11,8 @@ export const publicAppRouter = createPublicTRPCRouter({
   })),
   review: reviewRouter,
   post: postRouter,
+  category: categoryRouter,
+  tag: tagRouter,
 });
 
 export type PublicAppRouter = typeof publicAppRouter;

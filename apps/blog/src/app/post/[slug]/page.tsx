@@ -1,28 +1,27 @@
 "use client";
 
+import { TiptapContent } from "@/components/editor/tiptap-content";
+import { extractHeadings } from "@/components/editor/toc";
 import { SiteHeader } from "@/components/site-header";
+import { categoryColorClasses } from "@/lib/category-colors";
 import { publicApi } from "@repo/trpc/public/react";
 import { Badge } from "@repo/ui/badge";
 import { Button } from "@repo/ui/button";
 import { Card } from "@repo/ui/card";
+import { cn } from "@repo/ui/lib/utils";
 import { Skeleton } from "@repo/ui/skeleton";
 import { Calendar, ChevronRight, Clock, Eye } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useEffect, useRef } from "react";
-
-const WORDS_PER_MINUTE = 200;
-
-function readingTime(content: string) {
-  const words = content.trim().split(/\s+/).filter(Boolean).length;
-  return Math.max(1, Math.round(words / WORDS_PER_MINUTE));
-}
+import { useEffect, useMemo, useRef } from "react";
 
 export default function PostDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const { data: post, isLoading, error } = publicApi.post.getBySlug.useQuery({ slug });
   const incrementView = publicApi.post.incrementView.useMutation();
   const hasTrackedView = useRef(false);
+
+  const headings = useMemo(() => (post ? extractHeadings(post.contentJson) : []), [post]);
 
   useEffect(() => {
     if (post && !hasTrackedView.current) {
@@ -60,6 +59,8 @@ export default function PostDetailPage() {
     );
   }
 
+  const colors = categoryColorClasses(post.category?.color);
+
   return (
     <>
       <SiteHeader />
@@ -76,7 +77,14 @@ export default function PostDetailPage() {
         </nav>
 
         <div className="flex flex-col gap-3">
-          {!post.published && <Badge variant="outline">Draft</Badge>}
+          <div className="flex flex-wrap items-center gap-2">
+            {!post.published && <Badge variant="outline">Draft</Badge>}
+            {post.category && (
+              <Badge variant="outline" className={colors.badge}>
+                {post.category.name}
+              </Badge>
+            )}
+          </div>
           <h1 className="text-3xl font-semibold">{post.title}</h1>
 
           <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm text-muted-foreground">
@@ -91,7 +99,7 @@ export default function PostDetailPage() {
             </span>
             <span className="flex items-center gap-1.5">
               <Clock className="size-3.5" />
-              {readingTime(post.content)} min read
+              {post.readingMinutes} min read
             </span>
             <span className="flex items-center gap-1.5">
               <Eye className="size-3.5" />
@@ -101,16 +109,47 @@ export default function PostDetailPage() {
         </div>
 
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_280px]">
-          <div className="min-w-0 whitespace-pre-wrap text-base leading-relaxed">
-            {post.content}
+          <div className="min-w-0">
+            <TiptapContent json={post.contentJson} />
           </div>
 
           <aside className="flex flex-col gap-4">
-            <Card className="flex flex-col gap-3 border-border/60 p-4">
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-16 w-full" />
-              <Skeleton className="h-4 w-32" />
-            </Card>
+            {post.tags.length > 0 && (
+              <Card className="flex flex-col gap-2 border-border/60 p-4">
+                <span className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                  Tags
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {post.tags.map((tag) => (
+                    <Badge key={tag.id} variant="secondary">
+                      {tag.name}
+                    </Badge>
+                  ))}
+                </div>
+              </Card>
+            )}
+
+            {headings.length >= 2 && (
+              <Card className="flex flex-col gap-2 border-border/60 p-4">
+                <span className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                  On this page
+                </span>
+                <nav className="flex flex-col gap-1.5 text-sm">
+                  {headings.map((heading) => (
+                    <a
+                      key={heading.id}
+                      href={`#${heading.id}`}
+                      className={cn(
+                        "text-muted-foreground hover:text-foreground hover:underline",
+                        heading.level === 3 && "pl-3"
+                      )}
+                    >
+                      {heading.text}
+                    </a>
+                  ))}
+                </nav>
+              </Card>
+            )}
           </aside>
         </div>
       </main>

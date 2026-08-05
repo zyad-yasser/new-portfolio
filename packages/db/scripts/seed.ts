@@ -2,23 +2,35 @@ import { randomUUID } from "node:crypto";
 import { hashPassword } from "better-auth/crypto";
 import { eq } from "drizzle-orm";
 import { db } from "../src";
-import { account, post, user } from "../src/schema";
+import { account, category, post, postTag, tag, user } from "../src/schema";
+
+const blogSeedCategories = [
+  { name: "Engineering", color: "blue", description: "Software engineering notes and write-ups" },
+  { name: "Career", color: "amber", description: "Career reflections and lessons" },
+  { name: "Notes", color: "slate", description: "Short-form notes and updates" },
+];
 
 const blogSeedPosts = [
   {
     title: "Welcome to the Blog",
-    content:
+    excerptText:
       "This is the first post on this blog. More posts about software engineering, side projects, and lessons learned are coming soon.",
+    categorySlug: "notes",
+    tagNames: [] as string[],
   },
   {
     title: "Building a Monorepo with Turborepo and pnpm",
-    content:
+    excerptText:
       "Notes on structuring a multi-app Turborepo workspace: shared UI, shared auth, and a shared database layer consumed by several independent Next.js apps.",
+    categorySlug: "engineering",
+    tagNames: ["typescript", "nextjs", "monorepo"],
   },
   {
     title: "Two Better Auth Instances, One Database",
-    content:
+    excerptText:
       "Why splitting authentication into an admin instance and a public instance, each with its own secret, is a clean way to keep a single-owner admin app and a public multi-user app on the same Postgres tables without trusting each other's sessions.",
+    categorySlug: "engineering",
+    tagNames: ["typescript", "postgres"],
   },
 ];
 
@@ -41,6 +53,82 @@ async function uniqueSlug(title: string) {
   }
 
   return candidate;
+}
+
+async function findOrCreateTag(name: string) {
+  const slug = slugifyBase(name) || "tag";
+  const existing = await db.query.tag.findFirst({ where: eq(tag.slug, slug) });
+
+  if (existing) {
+    return existing;
+  }
+
+  const id = randomUUID();
+  await db.insert(tag).values({ id, name, slug });
+  return { id, name, slug };
+}
+
+async function seedCategories() {
+  for (const seedCategory of blogSeedCategories) {
+    const slug = slugifyBase(seedCategory.name);
+    const existing = await db.query.category.findFirst({ where: eq(category.slug, slug) });
+
+    if (existing) {
+      console.log(`Category already exists: ${seedCategory.name}`);
+      continue;
+    }
+
+    await db.insert(category).values({
+      id: randomUUID(),
+      name: seedCategory.name,
+      slug,
+      description: seedCategory.description,
+      color: seedCategory.color,
+    });
+
+    console.log(`Created category: ${seedCategory.name}`);
+  }
+}
+
+async function seedBlogPosts(adminId: string) {
+  for (const seedPost of blogSeedPosts) {
+    const existingPost = await db.query.post.findFirst({
+      where: eq(post.title, seedPost.title),
+    });
+
+    if (existingPost) {
+      console.log(`Blog post already exists: ${seedPost.title}`);
+      continue;
+    }
+
+    const postCategory = await db.query.category.findFirst({
+      where: eq(category.slug, seedPost.categorySlug),
+    });
+
+    const slug = await uniqueSlug(seedPost.title);
+    const postId = randomUUID();
+
+    await db.insert(post).values({
+      id: postId,
+      authorId: adminId,
+      categoryId: postCategory?.id ?? null,
+      title: seedPost.title,
+      slug,
+      excerptText: seedPost.excerptText,
+      contentJson: {
+        type: "doc",
+        content: [{ type: "paragraph", content: [{ type: "text", text: seedPost.excerptText }] }],
+      },
+      published: true,
+    });
+
+    if (seedPost.tagNames.length) {
+      const tags = await Promise.all(seedPost.tagNames.map(findOrCreateTag));
+      await db.insert(postTag).values(tags.map((t) => ({ postId, tagId: t.id })));
+    }
+
+    console.log(`Created blog post: ${seedPost.title}`);
+  }
 }
 
 // Inserts directly rather than calling @repo/auth's `auth.api.signUpEmail` so this package
@@ -87,29 +175,8 @@ async function main() {
     console.log(`Created admin account: ${email}`);
   }
 
-  for (const seedPost of blogSeedPosts) {
-    const existingPost = await db.query.post.findFirst({
-      where: eq(post.title, seedPost.title),
-    });
-
-    if (existingPost) {
-      console.log(`Blog post already exists: ${seedPost.title}`);
-      continue;
-    }
-
-    const slug = await uniqueSlug(seedPost.title);
-
-    await db.insert(post).values({
-      id: randomUUID(),
-      authorId: adminId,
-      title: seedPost.title,
-      slug,
-      content: seedPost.content,
-      published: true,
-    });
-
-    console.log(`Created blog post: ${seedPost.title}`);
-  }
+  await seedCategories();
+  await seedBlogPosts(adminId);
 }
 
 main()

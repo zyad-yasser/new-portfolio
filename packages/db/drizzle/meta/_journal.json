@@ -15,6 +15,20 @@
       "when": 1785936943987,
       "tag": "0001_tranquil_la_nuit",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1785948981078,
+      "tag": "0002_blog-categories-tags",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1785949048013,
+      "tag": "0003_blog-tighten-content-json",
+      "breakpoints": true
     }
   ]
 }
