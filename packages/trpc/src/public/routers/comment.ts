@@ -6,8 +6,10 @@ import { and, asc, eq, isNull, notInArray } from "drizzle-orm";
 import { z } from "zod";
 import { authedProcedure, createPublicTRPCRouter, publicProcedure, strictRateLimit } from "../init";
 import { assertNotBlocked } from "./block";
+import { ensureUserProfile } from "./profile";
 
 const authorColumns = { id: true, name: true, image: true } as const;
+const authorWith = { profile: { columns: { username: true } } } as const;
 
 export const commentRouter = createPublicTRPCRouter({
   listByPost: publicProcedure
@@ -31,11 +33,11 @@ export const commentRouter = createPublicTRPCRouter({
         where: and(...baseWhere),
         orderBy: asc(comment.createdAt),
         with: {
-          author: { columns: authorColumns },
+          author: { columns: authorColumns, with: authorWith },
           replies: {
             where: blockedIds.length ? notInArray(comment.authorId, blockedIds) : undefined,
             orderBy: asc(comment.createdAt),
-            with: { author: { columns: authorColumns } },
+            with: { author: { columns: authorColumns, with: authorWith } },
           },
         },
       });
@@ -51,6 +53,7 @@ export const commentRouter = createPublicTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      await ensureUserProfile(ctx.session.user.id);
       const targetPost = await db.query.post.findFirst({ where: eq(post.id, input.postId) });
 
       if (!targetPost) {

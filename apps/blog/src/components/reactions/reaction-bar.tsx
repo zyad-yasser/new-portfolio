@@ -33,7 +33,7 @@ function ReactionButton({
       onClick={onReact}
       title={REACTION_LABEL[type]}
       className={cn(
-        "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors",
+        "flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors",
         active
           ? "border-primary bg-primary/10 text-primary"
           : "border-border/60 text-muted-foreground hover:border-border hover:text-foreground",

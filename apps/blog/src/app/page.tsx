@@ -1,149 +1,151 @@
 "use client";
 
+import { PostCard } from "@/components/posts/post-card";
 import { SiteHeader } from "@/components/site-header";
 import { categoryColorClasses } from "@/lib/category-colors";
+import { publicAuthClient } from "@repo/auth/public-client";
 import { publicApi } from "@repo/trpc/public/react";
-import { Avatar, AvatarFallback, AvatarImage } from "@repo/ui/avatar";
 import { Badge } from "@repo/ui/badge";
 import { Button } from "@repo/ui/button";
 import { Card } from "@repo/ui/card";
 import { cn } from "@repo/ui/lib/utils";
 import { Skeleton } from "@repo/ui/skeleton";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@repo/ui/tooltip";
-import { Bookmark, Eye, Share2 } from "lucide-react";
+import { TooltipProvider } from "@repo/ui/tooltip";
+import { PenLine } from "lucide-react";
 import Link from "next/link";
-
-function formatDate(date: Date | string) {
-  return new Date(date).toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-}
-
-function initialsFor(name: string) {
-  return name
-    .split(" ")
-    .map((part) => part[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
-}
-
-function sharePost(slug: string, title: string) {
-  const url = `${window.location.origin}/post/${slug}`;
-
-  if (navigator.share) {
-    navigator.share({ title, url }).catch(() => {});
-    return;
-  }
-
-  navigator.clipboard.writeText(url);
-}
+import { useMemo, useState } from "react";
 
 export default function BlogHomePage() {
+  const { data: session } = publicAuthClient.useSession();
   const { data, isLoading } = publicApi.post.list.useQuery();
+  const { data: categories } = publicApi.category.list.useQuery();
+  const { data: tags } = publicApi.tag.list.useQuery();
+
+  const [categorySlug, setCategorySlug] = useState<string | null>(null);
+  const [tagSlug, setTagSlug] = useState<string | null>(null);
+
   const posts = data?.items;
+  const filteredPosts = useMemo(() => {
+    if (!posts) {
+      return posts;
+    }
+    return posts.filter((post) => {
+      if (categorySlug && post.category?.slug !== categorySlug) {
+        return false;
+      }
+      if (tagSlug && !post.tags.some((tag) => tag.slug === tagSlug)) {
+        return false;
+      }
+      return true;
+    });
+  }, [posts, categorySlug, tagSlug]);
 
   return (
     <>
       <SiteHeader />
-      <main className="mx-auto flex max-w-5xl flex-col gap-8 px-6 py-16">
+      <main className="mx-auto flex max-w-6xl flex-col gap-8 px-6 py-16">
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-semibold">Blog</h1>
-          <p className="text-muted-foreground">Writing from Zyad Yasser.</p>
+          <p className="text-muted-foreground">A space for everyone to write.</p>
         </div>
 
-        <TooltipProvider>
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {isLoading &&
-              Array.from({ length: 6 }).map((_, i) => (
-                <Skeleton key={i} className="h-52 w-full rounded-xl" />
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[200px_1fr] xl:grid-cols-[200px_1fr_240px]">
+          <aside className="flex flex-col gap-1">
+            <span className="mb-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+              Categories
+            </span>
+            <button
+              type="button"
+              onClick={() => setCategorySlug(null)}
+              className={cn(
+                "cursor-pointer rounded-md px-2 py-1.5 text-left text-sm hover:bg-accent",
+                !categorySlug && "bg-accent font-medium"
+              )}
+            >
+              All posts
+            </button>
+            {categories?.map((category) => (
+              <button
+                key={category.id}
+                type="button"
+                onClick={() =>
+                  setCategorySlug(category.slug === categorySlug ? null : category.slug)
+                }
+                className={cn(
+                  "flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-accent",
+                  categorySlug === category.slug && "bg-accent font-medium"
+                )}
+              >
+                <span
+                  className={cn("size-2 rounded-full", categoryColorClasses(category.color).dot)}
+                />
+                {category.name}
+              </button>
+            ))}
+          </aside>
+
+          <TooltipProvider>
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+              {isLoading &&
+                Array.from({ length: 6 }).map((_, i) => (
+                  <Skeleton key={i} className="h-52 w-full rounded-xl" />
+                ))}
+
+              {!isLoading && filteredPosts?.length === 0 && (
+                <p className="col-span-full text-center text-muted-foreground">
+                  {posts?.length === 0
+                    ? "No posts yet - be the first."
+                    : "No posts match this filter."}
+                </p>
+              )}
+
+              {filteredPosts?.map((post) => (
+                <PostCard key={post.id} post={post} />
               ))}
+            </div>
+          </TooltipProvider>
 
-            {!isLoading && posts?.length === 0 && (
-              <p className="col-span-full text-center text-muted-foreground">
-                No posts yet - be the first.
+          <aside className="hidden flex-col gap-4 xl:flex">
+            <Card className="flex flex-col gap-3 border-border/60 p-4">
+              <span className="text-sm font-medium">
+                {session ? "Have something to say?" : "Join the conversation"}
+              </span>
+              <p className="text-sm text-muted-foreground">
+                {session
+                  ? "Share your thoughts with the community."
+                  : "Sign up to write, comment, and react to posts."}
               </p>
+              <Button asChild size="sm" className="gap-2">
+                <Link href={session ? "/new" : "/signup"}>
+                  <PenLine className="size-4" />
+                  {session ? "Write a post" : "Sign up"}
+                </Link>
+              </Button>
+            </Card>
+
+            {tags && tags.length > 0 && (
+              <Card className="flex flex-col gap-2 border-border/60 p-4">
+                <span className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                  Tags
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {tags.map((tag) => (
+                    <button
+                      key={tag.id}
+                      type="button"
+                      className="cursor-pointer"
+                      onClick={() => setTagSlug(tag.slug === tagSlug ? null : tag.slug)}
+                    >
+                      <Badge variant={tagSlug === tag.slug ? "default" : "secondary"}>
+                        {tag.name}
+                      </Badge>
+                    </button>
+                  ))}
+                </div>
+              </Card>
             )}
-
-            {posts?.map((post) => {
-              const colors = categoryColorClasses(post.category?.color);
-
-              return (
-                <Card
-                  key={post.id}
-                  className="group relative flex flex-col gap-3 overflow-hidden rounded-xl border-border/60 p-5"
-                >
-                  <span className={cn("absolute inset-y-0 left-0 w-1", colors.bar)} aria-hidden />
-
-                  <div className="flex items-start justify-between gap-2">
-                    <span className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-                      {post.category ? post.category.name : "Post"}
-                    </span>
-                    <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button variant="ghost" size="icon" className="size-7" disabled>
-                            <Bookmark className="size-3.5" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>Sign in to save</TooltipContent>
-                      </Tooltip>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="size-7"
-                        onClick={(event) => {
-                          event.preventDefault();
-                          sharePost(post.slug, post.title);
-                        }}
-                      >
-                        <Share2 className="size-3.5" />
-                      </Button>
-                    </div>
-                  </div>
-
-                  <Link href={`/post/${post.slug}`} className="flex flex-1 flex-col gap-2">
-                    <h2 className="text-lg leading-snug font-semibold group-hover:underline">
-                      {post.title}
-                    </h2>
-                    <p className="line-clamp-3 flex-1 text-sm text-muted-foreground">
-                      {post.excerptText}
-                    </p>
-                  </Link>
-
-                  {post.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5">
-                      {post.tags.slice(0, 3).map((tag) => (
-                        <Badge key={tag.id} variant="secondary" className="text-[10px]">
-                          {tag.name}
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
-
-                  <div className="flex items-center justify-between gap-3 border-t border-border/60 pt-3 text-xs text-muted-foreground">
-                    <div className="flex items-center gap-2">
-                      <Avatar size="sm">
-                        <AvatarImage src={post.author.image ?? undefined} alt={post.author.name} />
-                        <AvatarFallback>{initialsFor(post.author.name)}</AvatarFallback>
-                      </Avatar>
-                      <span>{post.author.name}</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span>{formatDate(post.createdAt)}</span>
-                      <span className="flex items-center gap-1">
-                        <Eye className="size-3.5" />
-                        {post.viewCount}
-                      </span>
-                    </div>
-                  </div>
-                </Card>
-              );
-            })}
-          </div>
-        </TooltipProvider>
+          </aside>
+        </div>
       </main>
     </>
   );

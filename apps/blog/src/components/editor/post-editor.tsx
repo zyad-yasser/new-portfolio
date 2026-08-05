@@ -75,7 +75,7 @@ function TagPicker({
             type="button"
             aria-label={`Remove tag ${name}`}
             onClick={() => onRemove(name)}
-            className="rounded-full hover:bg-muted-foreground/20"
+            className="cursor-pointer rounded-full hover:bg-muted-foreground/20"
           >
             <X className="size-3" />
           </button>
@@ -102,7 +102,7 @@ function TagPicker({
                   {query.trim() && (
                     <button
                       type="button"
-                      className="flex w-full items-center gap-2 px-2 py-1.5 text-left text-sm hover:bg-accent"
+                      className="flex w-full cursor-pointer items-center gap-2 px-2 py-1.5 text-left text-sm hover:bg-accent"
                       onClick={() => {
                         onAdd(query);
                         setQuery("");

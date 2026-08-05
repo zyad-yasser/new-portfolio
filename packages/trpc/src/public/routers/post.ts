@@ -8,6 +8,7 @@ import { TRPCError } from "@trpc/server";
 import { and, desc, eq, lt, ne, notInArray, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import { authedProcedure, createPublicTRPCRouter, publicProcedure, strictRateLimit } from "../init";
+import { ensureUserProfile } from "./profile";
 
 const appName = requireEnv("APP_NAME");
 const viewRateLimiter = createRateLimiter({
@@ -112,13 +113,13 @@ async function syncPostTags(tx: Tx, postId: string, tagNames: string[]) {
 }
 
 const authorColumns = { id: true, name: true, image: true } as const;
-const postWith = {
-  author: { columns: authorColumns },
+export const postWith = {
+  author: { columns: authorColumns, with: { profile: { columns: { username: true } } } },
   category: true,
   postTags: { with: { tag: true } },
 } as const;
 
-function formatPost<T extends { postTags: Array<{ tag: unknown }> }>(row: T) {
+export function formatPost<T extends { postTags: Array<{ tag: unknown }> }>(row: T) {
   const { postTags, ...rest } = row;
   type Tag = T["postTags"][number]["tag"];
   return { ...rest, tags: postTags.map((postTag) => postTag.tag) as Tag[] };
@@ -222,6 +223,7 @@ export const postRouter = createPublicTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      await ensureUserProfile(ctx.session.user.id);
       const slug = await uniqueSlug(input.title);
 
       return db.transaction(async (tx) => {

@@ -26,7 +26,12 @@ import { Loader2, MoreHorizontal, UserX } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
-type CommentAuthor = { id: string; name: string; image: string | null };
+type CommentAuthor = {
+  id: string;
+  name: string;
+  image: string | null;
+  profile: { username: string } | null;
+};
 
 type CommentData = {
   id: string;
@@ -175,7 +180,16 @@ function CommentItem({
         <div className="flex-1">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-baseline gap-2 text-sm">
-              <span className="font-medium">{comment.author.name}</span>
+              {comment.author.profile ? (
+                <Link
+                  href={`/u/${comment.author.profile.username}`}
+                  className="font-medium hover:underline"
+                >
+                  {comment.author.name}
+                </Link>
+              ) : (
+                <span className="font-medium">{comment.author.name}</span>
+              )}
               <span className="text-xs text-muted-foreground">{formatDate(comment.createdAt)}</span>
             </div>
 
@@ -223,7 +237,7 @@ function CommentItem({
           {!isReply && !isDeleted && viewerId && (
             <button
               type="button"
-              className="mt-1 text-xs font-medium text-muted-foreground hover:text-foreground"
+              className="mt-1 cursor-pointer text-xs font-medium text-muted-foreground hover:text-foreground"
               onClick={onToggleReply}
             >
               {replyOpen ? "Cancel" : "Reply"}

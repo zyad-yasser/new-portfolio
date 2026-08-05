@@ -36,6 +36,20 @@
       "when": 1785951243266,
       "tag": "0004_blog-comments-reactions-blocks",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1785955015109,
+      "tag": "0005_blog-profiles-follows-bookmarks",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1785955140695,
+      "tag": "0006_blog-username-not-null",
+      "breakpoints": true
     }
   ]
 }

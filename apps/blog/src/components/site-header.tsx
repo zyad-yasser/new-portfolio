@@ -1,6 +1,7 @@
 "use client";
 
 import { publicAuthClient } from "@repo/auth/public-client";
+import { publicApi } from "@repo/trpc/public/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@repo/ui/avatar";
 import { Button } from "@repo/ui/button";
 import { CommandDialog, CommandEmpty, CommandInput, CommandList } from "@repo/ui/command";
@@ -19,6 +20,7 @@ import { useEffect, useState } from "react";
 export function SiteHeader() {
   const router = useRouter();
   const { data: session, isPending } = publicAuthClient.useSession();
+  const { data: myProfile } = publicApi.profile.mine.useQuery(undefined, { enabled: !!session });
   const [searchOpen, setSearchOpen] = useState(false);
 
   useEffect(() => {
@@ -87,8 +89,22 @@ export function SiteHeader() {
                     </Avatar>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
+                    {myProfile && (
+                      <DropdownMenuItem asChild>
+                        <Link href={`/u/${myProfile.username}`}>My profile</Link>
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuItem asChild>
                       <Link href="/mine">My posts</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/saved">Saved posts</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/settings/profile">Edit profile</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/settings/blocked">Blocked users</Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleSignOut}>Sign out</DropdownMenuItem>

@@ -1,6 +1,17 @@
 import { relations } from "drizzle-orm";
 import { user } from "./auth";
-import { category, comment, post, postReaction, postTag, tag, userBlock } from "./blog";
+import {
+  category,
+  comment,
+  post,
+  postBookmark,
+  postReaction,
+  postTag,
+  tag,
+  userBlock,
+  userFollow,
+  userProfile,
+} from "./blog";
 
 export const postRelations = relations(post, ({ one, many }) => ({
   author: one(user, {
@@ -16,8 +27,12 @@ export const postRelations = relations(post, ({ one, many }) => ({
   reactions: many(postReaction),
 }));
 
-export const userRelations = relations(user, ({ many }) => ({
+export const userRelations = relations(user, ({ many, one }) => ({
   posts: many(post),
+  profile: one(userProfile),
+  following: many(userFollow, { relationName: "followingList" }),
+  followers: many(userFollow, { relationName: "followerList" }),
+  bookmarks: many(postBookmark),
 }));
 
 export const categoryRelations = relations(category, ({ many }) => ({
@@ -77,5 +92,36 @@ export const postReactionRelations = relations(postReaction, ({ one }) => ({
   user: one(user, {
     fields: [postReaction.userId],
     references: [user.id],
+  }),
+}));
+
+export const userProfileRelations = relations(userProfile, ({ one }) => ({
+  user: one(user, {
+    fields: [userProfile.userId],
+    references: [user.id],
+  }),
+}));
+
+export const userFollowRelations = relations(userFollow, ({ one }) => ({
+  follower: one(user, {
+    fields: [userFollow.followerId],
+    references: [user.id],
+    relationName: "followingList",
+  }),
+  following: one(user, {
+    fields: [userFollow.followingId],
+    references: [user.id],
+    relationName: "followerList",
+  }),
+}));
+
+export const postBookmarkRelations = relations(postBookmark, ({ one }) => ({
+  user: one(user, {
+    fields: [postBookmark.userId],
+    references: [user.id],
+  }),
+  post: one(post, {
+    fields: [postBookmark.postId],
+    references: [post.id],
   }),
 }));

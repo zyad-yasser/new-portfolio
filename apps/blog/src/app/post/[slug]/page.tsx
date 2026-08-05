@@ -3,6 +3,7 @@
 import { CommentSection } from "@/components/comments/comment-section";
 import { TiptapContent } from "@/components/editor/tiptap-content";
 import { extractHeadings } from "@/components/editor/toc";
+import { AuthorCard } from "@/components/profile/author-card";
 import { ReactionBar } from "@/components/reactions/reaction-bar";
 import { SiteHeader } from "@/components/site-header";
 import { categoryColorClasses } from "@/lib/category-colors";
@@ -98,7 +99,16 @@ export default function PostDetailPage() {
 
           <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm text-muted-foreground">
             <span className="flex items-center gap-1">
-              {post.author.name}
+              {post.author.profile ? (
+                <Link
+                  href={`/u/${post.author.profile.username}`}
+                  className="font-medium text-foreground hover:underline"
+                >
+                  {post.author.name}
+                </Link>
+              ) : (
+                post.author.name
+              )}
               {session && session.user.id !== post.authorId && (
                 <Button
                   variant="ghost"
@@ -139,6 +149,8 @@ export default function PostDetailPage() {
           </div>
 
           <aside className="flex flex-col gap-4">
+            {post.author.profile && <AuthorCard username={post.author.profile.username} />}
+
             {post.tags.length > 0 && (
               <Card className="flex flex-col gap-2 border-border/60 p-4">
                 <span className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
