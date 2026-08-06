@@ -3,7 +3,7 @@ import { db } from "@repo/db";
 import { post, postTag, tag, userBlock } from "@repo/db/schema";
 import type { TiptapDoc } from "@repo/db/schema";
 import { requireEnv } from "@repo/utils";
-import { createRateLimiter, getClientIp } from "@repo/utils/rate-limit";
+import { createRateLimiter, getClientIp, safeLimit } from "@repo/utils/rate-limit";
 import { TRPCError } from "@trpc/server";
 import { and, desc, eq, lt, ne, notInArray, or, sql } from "drizzle-orm";
 import { z } from "zod";
@@ -331,7 +331,7 @@ export const postRouter = createPublicTRPCRouter({
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const ip = getClientIp(ctx.headers);
-      const { success } = await viewRateLimiter.limit(`${ip}:${input.id}`);
+      const { success } = await safeLimit(viewRateLimiter, `${ip}:${input.id}`);
 
       if (!success) {
         return { counted: false };

@@ -10,7 +10,7 @@ import { useParams } from "next/navigation";
 
 export default function EditPostPage() {
   const { slug } = useParams<{ slug: string }>();
-  const { data: posts, isLoading } = publicApi.post.mine.useQuery();
+  const { data: posts, isLoading, error, refetch } = publicApi.post.mine.useQuery();
   const post = posts?.find((p) => p.slug === slug);
 
   if (isLoading) {
@@ -20,6 +20,21 @@ export default function EditPostPage() {
         <main className="mx-auto flex max-w-3xl flex-col gap-6 px-6 py-16">
           <Skeleton className="h-9 w-1/2" />
           <Skeleton className="h-64 w-full" />
+        </main>
+      </>
+    );
+  }
+
+  if (error) {
+    return (
+      <>
+        <SiteHeader />
+        <main className="mx-auto flex max-w-3xl flex-col items-center gap-4 px-6 py-24 text-center">
+          <h1 className="text-2xl font-semibold">Couldn't load this post</h1>
+          <p className="text-muted-foreground">{error.message}</p>
+          <Button variant="outline" onClick={() => refetch()}>
+            Try again
+          </Button>
         </main>
       </>
     );

@@ -18,6 +18,18 @@ export function createRateLimiter({
   });
 }
 
+// Fails open: if the rate limiter's own Redis/Upstash backend is unreachable or errors, that's an
+// infra problem, not the caller's fault — every request should not start failing just because the
+// rate limiter can't be reached. Errors are logged so the outage is still visible.
+export async function safeLimit(limiter: Ratelimit, key: string) {
+  try {
+    return await limiter.limit(key);
+  } catch (error) {
+    console.error("Rate limiter unavailable, failing open:", error);
+    return { success: true };
+  }
+}
+
 const LOCAL_DEV_IP = "127.0.0.1";
 
 export function getClientIp(headers: Headers) {

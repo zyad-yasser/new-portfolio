@@ -13,7 +13,7 @@ import { useEffect, useState } from "react";
 
 export default function ProfileSettingsPage() {
   const utils = publicApi.useUtils();
-  const { data: profile, isLoading } = publicApi.profile.mine.useQuery();
+  const { data: profile, isLoading, error: loadError, refetch } = publicApi.profile.mine.useQuery();
 
   const [username, setUsername] = useState("");
   const [bio, setBio] = useState("");
@@ -56,6 +56,22 @@ export default function ProfileSettingsPage() {
         <SiteHeader />
         <main className="mx-auto flex max-w-xl flex-col gap-6 px-6 py-16">
           <Skeleton className="h-64 w-full" />
+        </main>
+      </>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <>
+        <SiteHeader />
+        <main className="mx-auto flex max-w-xl flex-col gap-6 px-6 py-16">
+          <div className="flex flex-col items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
+            <p>Couldn't load your profile. {loadError.message}</p>
+            <Button variant="outline" size="sm" onClick={() => refetch()}>
+              Try again
+            </Button>
+          </div>
         </main>
       </>
     );

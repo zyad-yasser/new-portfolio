@@ -23,7 +23,7 @@ import Link from "next/link";
 
 export default function MinePostsPage() {
   const utils = publicApi.useUtils();
-  const { data: posts, isLoading } = publicApi.post.mine.useQuery();
+  const { data: posts, isLoading, error, refetch } = publicApi.post.mine.useQuery();
 
   const setPublished = publicApi.post.setPublished.useMutation({
     onSuccess: async () => {
@@ -51,7 +51,16 @@ export default function MinePostsPage() {
               <Skeleton key={i} className="h-24 w-full rounded-lg" />
             ))}
 
-          {!isLoading && posts?.length === 0 && (
+          {error && (
+            <div className="flex flex-col items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
+              <p>Couldn't load your posts. {error.message}</p>
+              <Button variant="outline" size="sm" onClick={() => refetch()}>
+                Try again
+              </Button>
+            </div>
+          )}
+
+          {!isLoading && !error && posts?.length === 0 && (
             <p className="text-muted-foreground">
               You haven't written anything yet.{" "}
               <Link
@@ -111,7 +120,12 @@ export default function MinePostsPage() {
                   </Button>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="outline" size="sm" className="gap-1 text-destructive">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-1 text-destructive"
+                        aria-label={`Delete "${post.title}"`}
+                      >
                         <Trash2 className="size-3.5" />
                         Delete
                       </Button>

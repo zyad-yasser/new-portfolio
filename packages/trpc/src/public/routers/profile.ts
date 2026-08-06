@@ -130,7 +130,9 @@ export const profileRouter = createPublicTRPCRouter({
           .regex(/^[a-z0-9-]+$/, "Lowercase letters, numbers, and hyphens only")
           .optional(),
         bio: z.string().trim().max(280).optional(),
-        websiteUrl: z.union([z.string().trim().max(200).url(), z.literal("")]).optional(),
+        websiteUrl: z
+          .union([z.string().trim().max(200).url({ protocol: /^https?$/ }), z.literal("")])
+          .optional(),
         location: z.string().trim().max(100).optional(),
       })
     )

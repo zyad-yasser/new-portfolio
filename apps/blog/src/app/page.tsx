@@ -17,7 +17,7 @@ import { useMemo, useState } from "react";
 
 export default function BlogHomePage() {
   const { data: session } = publicAuthClient.useSession();
-  const { data, isLoading } = publicApi.post.list.useQuery();
+  const { data, isLoading, error, refetch } = publicApi.post.list.useQuery();
   const { data: categories } = publicApi.category.list.useQuery();
   const { data: tags } = publicApi.tag.list.useQuery();
 
@@ -91,7 +91,16 @@ export default function BlogHomePage() {
                   <Skeleton key={i} className="h-52 w-full rounded-xl" />
                 ))}
 
-              {!isLoading && filteredPosts?.length === 0 && (
+              {error && (
+                <div className="col-span-full flex flex-col items-center gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-center text-sm text-destructive">
+                  <p>Couldn't load posts. {error.message}</p>
+                  <Button variant="outline" size="sm" onClick={() => refetch()}>
+                    Try again
+                  </Button>
+                </div>
+              )}
+
+              {!isLoading && !error && filteredPosts?.length === 0 && (
                 <p className="col-span-full text-center text-muted-foreground">
                   {posts?.length === 0
                     ? "No posts yet - be the first."

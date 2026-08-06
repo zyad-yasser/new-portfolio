@@ -32,6 +32,8 @@ function ReactionButton({
       disabled={disabled}
       onClick={onReact}
       title={REACTION_LABEL[type]}
+      aria-label={REACTION_LABEL[type]}
+      aria-pressed={active}
       className={cn(
         "flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors",
         active

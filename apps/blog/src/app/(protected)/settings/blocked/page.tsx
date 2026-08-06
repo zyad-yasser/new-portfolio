@@ -18,7 +18,7 @@ function initialsFor(name: string) {
 
 export default function BlockedUsersPage() {
   const utils = publicApi.useUtils();
-  const { data: blocked, isLoading } = publicApi.block.list.useQuery();
+  const { data: blocked, isLoading, error, refetch } = publicApi.block.list.useQuery();
 
   const unblock = publicApi.block.unblock.useMutation({
     onSuccess: () => utils.block.list.invalidate(),
@@ -31,7 +31,15 @@ export default function BlockedUsersPage() {
         <h1 className="text-2xl font-semibold">Blocked users</h1>
 
         {isLoading && <Skeleton className="h-24 w-full" />}
-        {!isLoading && blocked?.length === 0 && (
+        {error && (
+          <div className="flex flex-col items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
+            <p>Couldn't load blocked users. {error.message}</p>
+            <Button variant="outline" size="sm" onClick={() => refetch()}>
+              Try again
+            </Button>
+          </div>
+        )}
+        {!isLoading && !error && blocked?.length === 0 && (
           <p className="text-muted-foreground">You haven't blocked anyone.</p>
         )}
 

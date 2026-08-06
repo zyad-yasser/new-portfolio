@@ -115,6 +115,7 @@ export default function PostDetailPage() {
                   size="icon"
                   className="size-5 text-muted-foreground"
                   title={`Block ${post.author.name}`}
+                  aria-label={`Block ${post.author.name}`}
                   disabled={blockAuthor.isPending}
                   onClick={() => blockAuthor.mutate({ userId: post.authorId })}
                 >

@@ -87,6 +87,7 @@ function CommentActions({
         size="icon"
         className="size-7 text-muted-foreground"
         title={`Block ${comment.author.name}`}
+        aria-label={`Block ${comment.author.name}`}
         disabled={blockUser.isPending}
         onClick={() => blockUser.mutate({ userId: comment.authorId })}
       >
@@ -98,7 +99,12 @@ function CommentActions({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="size-7 text-muted-foreground">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-7 text-muted-foreground"
+          aria-label="Comment actions"
+        >
           <MoreHorizontal className="size-3.5" />
         </Button>
       </DropdownMenuTrigger>

@@ -71,7 +71,7 @@ function BookmarkButton({ postId }: { postId: string }) {
     return (
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button variant="ghost" size="icon" className="size-7" disabled>
+          <Button variant="ghost" size="icon" className="size-7" disabled aria-label="Save post">
             <Bookmark className="size-3.5" />
           </Button>
         </TooltipTrigger>
@@ -86,6 +86,8 @@ function BookmarkButton({ postId }: { postId: string }) {
       size="icon"
       className="size-7"
       disabled={toggle.isPending}
+      aria-label={bookmarked ? "Remove bookmark" : "Save post"}
+      aria-pressed={!!bookmarked}
       onClick={(event) => {
         event.preventDefault();
         toggle.mutate({ postId });
@@ -114,6 +116,7 @@ export function PostCard({ post }: { post: PostCardData }) {
             variant="ghost"
             size="icon"
             className="size-7"
+            aria-label="Share post"
             onClick={(event) => {
               event.preventDefault();
               sharePost(post.slug, post.title);

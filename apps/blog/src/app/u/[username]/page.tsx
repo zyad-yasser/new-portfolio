@@ -2,6 +2,7 @@
 
 import { PostCard } from "@/components/posts/post-card";
 import { SiteHeader } from "@/components/site-header";
+import { isSafeHttpUrl } from "@/lib/safe-url";
 import { publicAuthClient } from "@repo/auth/public-client";
 import { publicApi } from "@repo/trpc/public/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@repo/ui/avatar";
@@ -170,7 +171,7 @@ export default function ProfilePage() {
                 {profile.location}
               </span>
             )}
-            {profile.websiteUrl && (
+            {profile.websiteUrl && isSafeHttpUrl(profile.websiteUrl) && (
               <a
                 href={profile.websiteUrl}
                 target="_blank"
