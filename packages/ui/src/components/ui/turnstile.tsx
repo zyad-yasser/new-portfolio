@@ -37,6 +37,13 @@ export function Turnstile({
 }) {
   const containerId = useId().replace(/:/g, "");
   const widgetIdRef = useRef<string | null>(null);
+  const onVerifyRef = useRef(onVerify);
+  const onExpireRef = useRef(onExpire);
+
+  useEffect(() => {
+    onVerifyRef.current = onVerify;
+    onExpireRef.current = onExpire;
+  });
 
   useEffect(() => {
     let cancelled = false;
@@ -48,8 +55,8 @@ export function Turnstile({
       }
       widgetIdRef.current = window.turnstile.render(`#${containerId}`, {
         sitekey: siteKey,
-        callback: onVerify,
-        "expired-callback": onExpire,
+        callback: (token: string) => onVerifyRef.current(token),
+        "expired-callback": () => onExpireRef.current?.(),
       });
     }
 
@@ -72,7 +79,7 @@ export function Turnstile({
         window.turnstile.remove(widgetIdRef.current);
       }
     };
-  }, [siteKey, onVerify, onExpire, containerId]);
+  }, [siteKey, containerId]);
 
   return <div id={containerId} />;
 }
