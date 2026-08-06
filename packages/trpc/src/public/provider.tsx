@@ -9,8 +9,22 @@ import type { PublicAppRouter } from "./routers/_app";
 
 export const publicApi = createTRPCReact<PublicAppRouter>();
 
+const FIVE_MINUTES = 5 * 60 * 1000;
+const THIRTY_SECONDS = 30 * 1000;
+
 export function PublicTRPCReactProvider({ children }: { children: React.ReactNode }) {
-  const [queryClient] = useState(() => new QueryClient());
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: THIRTY_SECONDS,
+            gcTime: FIVE_MINUTES,
+            retry: 1,
+          },
+        },
+      })
+  );
   const [trpcClient] = useState(() =>
     publicApi.createClient({
       links: [

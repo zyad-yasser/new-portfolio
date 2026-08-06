@@ -22,7 +22,7 @@
     "check": "biome check .",
     "check:fix": "biome check --write .",
     "test": "turbo run test",
-    "test:e2e": "turbo run test:e2e --filter=web",
+    "test:e2e": "turbo run test:e2e",
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down",
     "db:push": "pnpm --filter @repo/db db:push",

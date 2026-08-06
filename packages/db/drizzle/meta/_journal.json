@@ -8,6 +8,48 @@
       "when": 1785803794013,
       "tag": "0000_puzzling_nuke",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1785936943987,
+      "tag": "0001_tranquil_la_nuit",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1785948981078,
+      "tag": "0002_blog-categories-tags",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1785949048013,
+      "tag": "0003_blog-tighten-content-json",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1785951243266,
+      "tag": "0004_blog-comments-reactions-blocks",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1785955015109,
+      "tag": "0005_blog-profiles-follows-bookmarks",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1785955140695,
+      "tag": "0006_blog-username-not-null",
+      "breakpoints": true
     }
   ]
 }

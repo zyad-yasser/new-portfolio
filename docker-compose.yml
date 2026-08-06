@@ -31,6 +31,29 @@ services:
     volumes:
       - minio_data:/data
 
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+
+  # Upstash's Redis client speaks REST, not the native Redis protocol - this shim exposes
+  # the redis service above over Upstash's REST API so @upstash/redis/ratelimit work
+  # locally without a real Upstash account. Point UPSTASH_REDIS_REST_URL/TOKEN at it.
+  redis-http:
+    image: hiett/serverless-redis-http:latest
+    restart: unless-stopped
+    environment:
+      SRH_MODE: env
+      SRH_TOKEN: ${SRH_TOKEN:-local_dev_token}
+      SRH_CONNECTION_STRING: redis://redis:6379
+    ports:
+      - "${SRH_PORT:-8079}:80"
+    depends_on:
+      - redis
+
   # One-shot init container: waits for minio, then creates the app's bucket and makes
   # objects in it publicly readable (so uploaded files can be linked to directly). Exits
   # once done - `docker compose up` will show it as "exited (0)", that's expected.
@@ -52,3 +75,4 @@ services:
 volumes:
   postgres_data:
   minio_data:
+  redis_data:

@@ -1,5 +1,5 @@
 import { requireEnv } from "@repo/utils";
-import { createRateLimiter, getClientIp } from "@repo/utils/rate-limit";
+import { createRateLimiter, getClientIp, safeLimit } from "@repo/utils/rate-limit";
 import { TRPCError, initTRPC } from "@trpc/server";
 import superjson from "superjson";
 import type { PublicTRPCContext } from "./context";
@@ -13,7 +13,7 @@ const baseRateLimiter = createRateLimiter({ prefix: `${appName}:trpc`, limit: 60
 
 const rateLimited = t.middleware(async ({ ctx, next }) => {
   const ip = getClientIp(ctx.headers);
-  const { success } = await baseRateLimiter.limit(ip);
+  const { success } = await safeLimit(baseRateLimiter, ip);
 
   if (!success) {
     throw new TRPCError({ code: "TOO_MANY_REQUESTS" });
@@ -51,7 +51,7 @@ export function strictRateLimit({
 
   return t.middleware(async ({ ctx, next }) => {
     const ip = getClientIp(ctx.headers);
-    const { success } = await limiter.limit(ip);
+    const { success } = await safeLimit(limiter, ip);
 
     if (!success) {
       throw new TRPCError({ code: "TOO_MANY_REQUESTS" });

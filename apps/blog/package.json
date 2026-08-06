@@ -14,13 +14,21 @@
     "check:fix": "biome check --write .",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
     "clean": "rm -rf .next && rm -rf node_modules"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.7.1",
     "@repo/auth": "workspace:*",
+    "@repo/db": "workspace:*",
     "@repo/trpc": "workspace:^",
     "@repo/ui": "workspace:*",
+    "@tiptap/extension-character-count": "^3.29.2",
+    "@tiptap/extension-placeholder": "^3.29.2",
+    "@tiptap/pm": "^3.29.2",
+    "@tiptap/react": "^3.29.2",
+    "@tiptap/starter-kit": "^3.29.2",
     "@trpc/server": "^11.18.0",
     "better-auth": "^1.6.25",
     "lucide-react": "^0.469.0",
@@ -31,7 +39,9 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "@tailwindcss/postcss": "^4.1.17",
+    "@tailwindcss/typography": "^0.5.20",
     "@testing-library/jest-dom": "^7.0.0",
     "@testing-library/react": "^16.3.2",
     "@types/node": "^22.10.2",
