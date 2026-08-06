@@ -99,8 +99,13 @@ function BookmarkButton({ postId }: { postId: string }) {
 }
 
 export function PostCard({ post }: { post: PostCardData }) {
+  const utils = publicApi.useUtils();
   const colors = categoryColorClasses(post.category?.color);
   const authorHref = post.author.profile ? `/u/${post.author.profile.username}` : undefined;
+
+  function prefetchPost() {
+    utils.post.getBySlug.prefetch({ slug: post.slug });
+  }
 
   return (
     <Card className="group relative flex flex-col gap-3 overflow-hidden rounded-xl border-border/60 p-5">
@@ -127,7 +132,12 @@ export function PostCard({ post }: { post: PostCardData }) {
         </div>
       </div>
 
-      <Link href={`/post/${post.slug}`} className="flex flex-1 flex-col gap-2">
+      <Link
+        href={`/post/${post.slug}`}
+        className="flex flex-1 flex-col gap-2"
+        onMouseEnter={prefetchPost}
+        onFocus={prefetchPost}
+      >
         <h2 className="text-lg leading-snug font-semibold group-hover:underline">{post.title}</h2>
         <p className="line-clamp-3 flex-1 text-sm text-muted-foreground">{post.excerptText}</p>
       </Link>

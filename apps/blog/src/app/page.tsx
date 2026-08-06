@@ -18,8 +18,10 @@ import { useMemo, useState } from "react";
 export default function BlogHomePage() {
   const { data: session } = publicAuthClient.useSession();
   const { data, isLoading, error, refetch } = publicApi.post.list.useQuery();
-  const { data: categories } = publicApi.category.list.useQuery();
-  const { data: tags } = publicApi.tag.list.useQuery();
+  const { data: categories } = publicApi.category.list.useQuery(undefined, {
+    staleTime: 10 * 60 * 1000,
+  });
+  const { data: tags } = publicApi.tag.list.useQuery(undefined, { staleTime: 5 * 60 * 1000 });
 
   const [categorySlug, setCategorySlug] = useState<string | null>(null);
   const [tagSlug, setTagSlug] = useState<string | null>(null);

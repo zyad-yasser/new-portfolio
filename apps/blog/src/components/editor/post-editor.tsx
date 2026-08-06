@@ -163,7 +163,9 @@ export function PostEditor({
   const [categoryId, setCategoryId] = useState<string | null>(initialCategoryId ?? null);
   const [tagNames, setTagNames] = useState<string[]>(initialTagNames ?? []);
 
-  const { data: categories } = publicApi.category.list.useQuery();
+  const { data: categories } = publicApi.category.list.useQuery(undefined, {
+    staleTime: 10 * 60 * 1000,
+  });
   const autosave = useAutosavePost(existingPostId);
 
   const skipNextAutosave = useRef(true);
