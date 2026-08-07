@@ -7,9 +7,10 @@ function parseUrl(urlString) {
 }
 
 const isDev = process.env.NODE_ENV !== "production";
+const storageProvider = process.env.STORAGE_PROVIDER === "firebase" ? "firebase" : "s3";
+
 const s3PublicUrl = parseUrl(process.env.S3_PUBLIC_URL);
 const s3Endpoint = parseUrl(process.env.S3_ENDPOINT);
-
 const s3RemotePattern = s3PublicUrl
   ? {
       protocol: s3PublicUrl.protocol.replace(":", ""),
@@ -18,26 +19,40 @@ const s3RemotePattern = s3PublicUrl
       pathname: `${s3PublicUrl.pathname.replace(/\/$/, "")}/**`,
     }
   : undefined;
-
 const s3ConnectOrigins = [...new Set([s3PublicUrl?.origin, s3Endpoint?.origin].filter(Boolean))];
+
+const firebaseBucket = process.env.FIREBASE_STORAGE_BUCKET;
+const firebaseRemotePattern = firebaseBucket
+  ? {
+      protocol: "https",
+      hostname: "storage.googleapis.com",
+      pathname: `/${firebaseBucket}/**`,
+    }
+  : undefined;
+const firebaseConnectOrigins = firebaseBucket ? ["https://storage.googleapis.com"] : [];
+
+const storageRemotePattern =
+  storageProvider === "firebase" ? firebaseRemotePattern : s3RemotePattern;
+const storageConnectOrigins =
+  storageProvider === "firebase" ? firebaseConnectOrigins : s3ConnectOrigins;
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   transpilePackages: ["@repo/ui", "@repo/auth", "@repo/trpc"],
   images: {
-    remotePatterns: s3RemotePattern ? [s3RemotePattern] : [],
+    remotePatterns: storageRemotePattern ? [storageRemotePattern] : [],
     dangerouslyAllowLocalIP: isDev,
   },
   async headers() {
     const scriptSrc = isDev
       ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com"
       : "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com";
-    const imgSrc = ["img-src 'self' data:", ...s3ConnectOrigins].join(" ");
+    const imgSrc = ["img-src 'self' data:", ...storageConnectOrigins].join(" ");
     const connectSrc = [
       "connect-src 'self'",
       ...(isDev ? ["ws:"] : []),
       "https://challenges.cloudflare.com",
-      ...s3ConnectOrigins,
+      ...storageConnectOrigins,
     ].join(" ");
     return [
       {

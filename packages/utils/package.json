@@ -10,7 +10,9 @@
     "./secondary-storage": "./src/secondary-storage.ts",
     "./same-origin": "./src/same-origin.ts",
     "./turnstile": "./src/turnstile.ts",
-    "./s3": "./src/s3.ts"
+    "./s3": "./src/s3.ts",
+    "./firebase-storage": "./src/firebase-storage.ts",
+    "./storage": "./src/storage.ts"
   },
   "scripts": {
     "lint": "biome lint .",
@@ -22,6 +24,7 @@
     "@aws-sdk/s3-request-presigner": "^3.691.0",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.38.1",
+    "firebase-admin": "^14.2.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {

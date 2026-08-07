@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { db } from "@repo/db";
 import { media } from "@repo/db/schema";
-import { createPresignedUploadUrl, deleteObject } from "@repo/utils/s3";
+import { createPresignedUploadUrl, deleteObject } from "@repo/utils/storage";
 import { TRPCError } from "@trpc/server";
 import { and, desc, eq } from "drizzle-orm";
 import { z } from "zod";
