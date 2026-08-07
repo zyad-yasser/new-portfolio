@@ -9,6 +9,8 @@ import { postRouter } from "./post";
 import { profileRouter } from "./profile";
 import { reactionRouter } from "./reaction";
 import { reviewRouter } from "./review";
+import { searchRouter } from "./search";
+import { seriesRouter } from "./series";
 import { tagRouter } from "./tag";
 
 export const publicAppRouter = createPublicTRPCRouter({
@@ -27,6 +29,8 @@ export const publicAppRouter = createPublicTRPCRouter({
   follow: followRouter,
   bookmark: bookmarkRouter,
   media: mediaRouter,
+  search: searchRouter,
+  series: seriesRouter,
 });
 
 export type PublicAppRouter = typeof publicAppRouter;

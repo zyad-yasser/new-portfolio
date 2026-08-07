@@ -9,7 +9,7 @@ import { Button } from "@repo/ui/button";
 import { Card } from "@repo/ui/card";
 import { cn } from "@repo/ui/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@repo/ui/tooltip";
-import { Bookmark, Eye, Share2 } from "lucide-react";
+import { Bookmark, Eye, Library, Share2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -22,6 +22,7 @@ export type PostCardData = {
   viewCount: number;
   coverImageUrl: string | null;
   category: { name: string; color: string } | null;
+  series: { title: string; slug: string } | null;
   tags: { id: string; name: string }[];
   author: { name: string; image: string | null; profile: { username: string } | null };
 };
@@ -155,6 +156,17 @@ export function PostCard({ post }: { post: PostCardData }) {
         <h2 className="text-lg leading-snug font-semibold group-hover:underline">{post.title}</h2>
         <p className="line-clamp-3 flex-1 text-sm text-muted-foreground">{post.excerptText}</p>
       </Link>
+
+      {post.series && (
+        <Link
+          href={`/series/${post.series.slug}`}
+          onClick={(event) => event.stopPropagation()}
+          className="flex w-fit items-center gap-1 text-xs text-muted-foreground hover:text-foreground hover:underline"
+        >
+          <Library className="size-3.5" />
+          {post.series.title}
+        </Link>
+      )}
 
       {post.tags.length > 0 && (
         <div className="flex flex-wrap gap-1.5">

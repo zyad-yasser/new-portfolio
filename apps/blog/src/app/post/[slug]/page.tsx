@@ -14,7 +14,7 @@ import { Button } from "@repo/ui/button";
 import { Card } from "@repo/ui/card";
 import { cn } from "@repo/ui/lib/utils";
 import { Skeleton } from "@repo/ui/skeleton";
-import { Calendar, ChevronRight, Clock, Eye, UserX } from "lucide-react";
+import { Calendar, ChevronLeft, ChevronRight, Clock, Eye, Library, UserX } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -165,6 +165,49 @@ export default function PostDetailPage() {
 
           <aside className="flex flex-col gap-4">
             {post.author.profile && <AuthorCard username={post.author.profile.username} />}
+
+            {post.series && post.seriesContext && (
+              <Card className="flex flex-col gap-3 border-border/60 p-4">
+                <Link
+                  href={`/series/${post.series.slug}`}
+                  className="flex items-center gap-2 text-sm font-medium hover:underline"
+                >
+                  <Library className="size-4 shrink-0 text-muted-foreground" />
+                  {post.series.title}
+                </Link>
+                <span className="text-xs text-muted-foreground">
+                  Part {post.seriesContext.position} of {post.seriesContext.total}
+                </span>
+                <div className="flex items-center justify-between gap-2">
+                  {post.seriesContext.prevSlug ? (
+                    <Button asChild variant="outline" size="sm" className="gap-1">
+                      <Link href={`/post/${post.seriesContext.prevSlug}`}>
+                        <ChevronLeft className="size-3.5" />
+                        Prev
+                      </Link>
+                    </Button>
+                  ) : (
+                    <Button variant="outline" size="sm" className="gap-1" disabled>
+                      <ChevronLeft className="size-3.5" />
+                      Prev
+                    </Button>
+                  )}
+                  {post.seriesContext.nextSlug ? (
+                    <Button asChild variant="outline" size="sm" className="gap-1">
+                      <Link href={`/post/${post.seriesContext.nextSlug}`}>
+                        Next
+                        <ChevronRight className="size-3.5" />
+                      </Link>
+                    </Button>
+                  ) : (
+                    <Button variant="outline" size="sm" className="gap-1" disabled>
+                      Next
+                      <ChevronRight className="size-3.5" />
+                    </Button>
+                  )}
+                </div>
+              </Card>
+            )}
 
             {post.tags.length > 0 && (
               <Card className="flex flex-col gap-2 border-border/60 p-4">

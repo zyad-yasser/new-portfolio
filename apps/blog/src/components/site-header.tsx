@@ -4,7 +4,14 @@ import { publicAuthClient } from "@repo/auth/public-client";
 import { publicApi } from "@repo/trpc/public/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@repo/ui/avatar";
 import { Button } from "@repo/ui/button";
-import { CommandDialog, CommandEmpty, CommandInput, CommandList } from "@repo/ui/command";
+import {
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@repo/ui/command";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,11 +24,26 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+const SEARCH_DEBOUNCE_MS = 250;
+
 export function SiteHeader() {
   const router = useRouter();
   const { data: session, isPending } = publicAuthClient.useSession();
   const { data: myProfile } = publicApi.profile.mine.useQuery(undefined, { enabled: !!session });
   const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setDebouncedQuery(searchQuery), SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(timeout);
+  }, [searchQuery]);
+
+  const trimmedQuery = debouncedQuery.trim();
+  const { data: searchResults, isFetching: isSearching } = publicApi.search.posts.useQuery(
+    { query: trimmedQuery, limit: 8 },
+    { enabled: trimmedQuery.length >= 2 }
+  );
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -34,6 +56,12 @@ export function SiteHeader() {
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
+
+  function goToPost(slug: string) {
+    setSearchOpen(false);
+    setSearchQuery("");
+    router.push(`/post/${slug}`);
+  }
 
   async function handleSignOut() {
     await publicAuthClient.signOut();
@@ -60,6 +88,10 @@ export function SiteHeader() {
           </Link>
 
           <div className="flex items-center gap-2">
+            <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
+              <Link href="/series">Series</Link>
+            </Button>
+
             <Button
               variant="outline"
               size="sm"
@@ -98,6 +130,9 @@ export function SiteHeader() {
                       <Link href="/mine">My posts</Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
+                      <Link href="/series/mine">My series</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
                       <Link href="/saved">Saved posts</Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
@@ -129,13 +164,45 @@ export function SiteHeader() {
 
       <CommandDialog
         open={searchOpen}
-        onOpenChange={setSearchOpen}
+        onOpenChange={(open) => {
+          setSearchOpen(open);
+          if (!open) {
+            setSearchQuery("");
+          }
+        }}
         title="Search posts"
-        description="Search is coming soon"
+        description="Search posts by title and content"
+        shouldFilter={false}
       >
-        <CommandInput placeholder="Search posts..." />
+        <CommandInput
+          placeholder="Search posts..."
+          value={searchQuery}
+          onValueChange={setSearchQuery}
+        />
         <CommandList>
-          <CommandEmpty>Search is coming soon.</CommandEmpty>
+          {trimmedQuery.length < 2 && (
+            <CommandEmpty>Type at least 2 characters to search.</CommandEmpty>
+          )}
+          {trimmedQuery.length >= 2 && !isSearching && searchResults?.items.length === 0 && (
+            <CommandEmpty>No posts found.</CommandEmpty>
+          )}
+          {searchResults && searchResults.items.length > 0 && (
+            <CommandGroup heading="Posts">
+              {searchResults.items.map((result) => (
+                <CommandItem
+                  key={result.id}
+                  value={result.id}
+                  onSelect={() => goToPost(result.slug)}
+                  className="flex flex-col items-start gap-0.5"
+                >
+                  <span className="font-medium">{result.title}</span>
+                  <span className="line-clamp-1 text-xs text-muted-foreground">
+                    {result.excerptText}
+                  </span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          )}
         </CommandList>
       </CommandDialog>
     </>

@@ -1,11 +1,12 @@
 import { randomUUID } from "node:crypto";
 import { db } from "@repo/db";
-import { post, postTag, tag, userBlock } from "@repo/db/schema";
+import { post, postTag, series, tag, userBlock } from "@repo/db/schema";
 import type { TiptapDoc } from "@repo/db/schema";
 import { requireEnv } from "@repo/utils";
 import { createRateLimiter, getClientIp, safeLimit } from "@repo/utils/rate-limit";
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq, lt, ne, notInArray, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, lt, ne, notInArray, or, sql } from "drizzle-orm";
+import type { PgUpdateSetSource } from "drizzle-orm/pg-core";
 import { z } from "zod";
 import { authedProcedure, createPublicTRPCRouter, publicProcedure, strictRateLimit } from "../init";
 import { ensureUserProfile } from "./profile";
@@ -75,14 +76,30 @@ function extractPlainText(doc: TiptapDoc): string {
   return parts.join(" ").replace(/\s+/g, " ").trim();
 }
 
-function buildExcerpt(doc: TiptapDoc) {
-  const text = extractPlainText(doc);
-  return text.length > 300 ? `${text.slice(0, 300).trimEnd()}…` : text;
+function buildExcerpt(plainText: string) {
+  return plainText.length > 300 ? `${plainText.slice(0, 300).trimEnd()}…` : plainText;
+}
+
+function buildSearchVector(title: string, plainText: string) {
+  return sql`setweight(to_tsvector('english', ${title}), 'A') || setweight(to_tsvector('english', ${plainText}), 'B')`;
 }
 
 function estimateReadingMinutes(text: string) {
   const words = text.split(/\s+/).filter(Boolean).length;
   return Math.max(1, Math.round(words / WORDS_PER_MINUTE));
+}
+
+async function computeAppendOrder(seriesId: string, authorId: string) {
+  const owning = await db.query.series.findFirst({ where: eq(series.id, seriesId) });
+  if (!owning || owning.authorId !== authorId) {
+    throw new TRPCError({ code: "FORBIDDEN" });
+  }
+
+  const existing = await db.query.post.findMany({
+    where: eq(post.seriesId, seriesId),
+    columns: { id: true },
+  });
+  return existing.length;
 }
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
@@ -116,6 +133,7 @@ const authorColumns = { id: true, name: true, image: true } as const;
 export const postWith = {
   author: { columns: authorColumns, with: { profile: { columns: { username: true } } } },
   category: true,
+  series: true,
   postTags: { with: { tag: true } },
 } as const;
 
@@ -205,9 +223,34 @@ export const postRouter = createPublicTRPCRouter({
         throw new TRPCError({ code: "NOT_FOUND" });
       }
 
+      let seriesContext: {
+        position: number;
+        total: number;
+        prevSlug: string | null;
+        nextSlug: string | null;
+      } | null = null;
+
+      if (found.seriesId) {
+        const siblings = await db.query.post.findMany({
+          where: and(eq(post.seriesId, found.seriesId), eq(post.published, true)),
+          orderBy: asc(post.seriesOrder),
+          columns: { id: true, slug: true },
+        });
+        const index = siblings.findIndex((sibling) => sibling.id === found.id);
+        if (index !== -1) {
+          seriesContext = {
+            position: index + 1,
+            total: siblings.length,
+            prevSlug: index > 0 ? (siblings[index - 1]?.slug ?? null) : null,
+            nextSlug: index < siblings.length - 1 ? (siblings[index + 1]?.slug ?? null) : null,
+          };
+        }
+      }
+
       return {
         ...formatPost(found),
         readingMinutes: estimateReadingMinutes(extractPlainText(found.contentJson)),
+        seriesContext,
       };
     }),
 
@@ -218,6 +261,7 @@ export const postRouter = createPublicTRPCRouter({
         title: z.string().trim().min(1).max(150),
         contentJson: tiptapNodeSchema,
         categoryId: z.string().nullable().optional(),
+        seriesId: z.string().nullable().optional(),
         tagNames: z.array(z.string().trim().min(1).max(30)).max(MAX_TAGS).optional(),
         coverImageUrl: z.string().url().nullable().optional(),
         published: z.boolean().default(false),
@@ -226,6 +270,10 @@ export const postRouter = createPublicTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       await ensureUserProfile(ctx.session.user.id);
       const slug = await uniqueSlug(input.title);
+      const plainText = extractPlainText(input.contentJson);
+      const seriesOrder = input.seriesId
+        ? await computeAppendOrder(input.seriesId, ctx.session.user.id)
+        : null;
 
       return db.transaction(async (tx) => {
         const rows = await tx
@@ -234,11 +282,14 @@ export const postRouter = createPublicTRPCRouter({
             id: randomUUID(),
             authorId: ctx.session.user.id,
             categoryId: input.categoryId ?? null,
+            seriesId: input.seriesId ?? null,
+            seriesOrder,
             title: input.title,
             slug,
-            excerptText: buildExcerpt(input.contentJson),
+            excerptText: buildExcerpt(plainText),
             contentJson: input.contentJson,
             coverImageUrl: input.coverImageUrl ?? null,
+            searchVector: buildSearchVector(input.title, plainText),
             published: input.published,
           })
           .returning();
@@ -264,28 +315,51 @@ export const postRouter = createPublicTRPCRouter({
         title: z.string().trim().min(1).max(150).optional(),
         contentJson: tiptapNodeSchema.optional(),
         categoryId: z.string().nullable().optional(),
+        seriesId: z.string().nullable().optional(),
         tagNames: z.array(z.string().trim().min(1).max(30)).max(MAX_TAGS).optional(),
         coverImageUrl: z.string().url().nullable().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      return db.transaction(async (tx) => {
-        const patch: Partial<typeof post.$inferInsert> = { updatedAt: new Date() };
+      const current = await db.query.post.findFirst({
+        where: and(eq(post.id, input.id), eq(post.authorId, ctx.session.user.id)),
+        columns: { title: true, contentJson: true, seriesId: true },
+      });
 
-        if (input.title !== undefined) {
-          patch.title = input.title;
-        }
+      if (!current) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
+      const patch: PgUpdateSetSource<typeof post> = { updatedAt: new Date() };
+
+      if (input.title !== undefined) {
+        patch.title = input.title;
+      }
+      if (input.contentJson !== undefined) {
+        patch.contentJson = input.contentJson;
+      }
+      if (input.title !== undefined || input.contentJson !== undefined) {
+        const title = input.title ?? current.title;
+        const plainText = extractPlainText(input.contentJson ?? current.contentJson);
         if (input.contentJson !== undefined) {
-          patch.contentJson = input.contentJson;
-          patch.excerptText = buildExcerpt(input.contentJson);
+          patch.excerptText = buildExcerpt(plainText);
         }
-        if (input.categoryId !== undefined) {
-          patch.categoryId = input.categoryId;
-        }
-        if (input.coverImageUrl !== undefined) {
-          patch.coverImageUrl = input.coverImageUrl;
-        }
+        patch.searchVector = buildSearchVector(title, plainText);
+      }
+      if (input.categoryId !== undefined) {
+        patch.categoryId = input.categoryId;
+      }
+      if (input.coverImageUrl !== undefined) {
+        patch.coverImageUrl = input.coverImageUrl;
+      }
+      if (input.seriesId !== undefined && input.seriesId !== current.seriesId) {
+        patch.seriesId = input.seriesId;
+        patch.seriesOrder = input.seriesId
+          ? await computeAppendOrder(input.seriesId, ctx.session.user.id)
+          : null;
+      }
 
+      return db.transaction(async (tx) => {
         const rows = await tx
           .update(post)
           .set(patch)

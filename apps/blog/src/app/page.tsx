@@ -11,13 +11,17 @@ import { Card } from "@repo/ui/card";
 import { cn } from "@repo/ui/lib/utils";
 import { Skeleton } from "@repo/ui/skeleton";
 import { TooltipProvider } from "@repo/ui/tooltip";
-import { PenLine } from "lucide-react";
+import { Loader2, PenLine } from "lucide-react";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 export default function BlogHomePage() {
   const { data: session } = publicAuthClient.useSession();
-  const { data, isLoading, error, refetch } = publicApi.post.list.useQuery();
+  const { data, isLoading, error, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    publicApi.post.list.useInfiniteQuery(
+      {},
+      { getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined }
+    );
   const { data: categories } = publicApi.category.list.useQuery(undefined, {
     staleTime: 10 * 60 * 1000,
   });
@@ -26,7 +30,7 @@ export default function BlogHomePage() {
   const [categorySlug, setCategorySlug] = useState<string | null>(null);
   const [tagSlug, setTagSlug] = useState<string | null>(null);
 
-  const posts = data?.items;
+  const posts = useMemo(() => data?.pages.flatMap((page) => page.items), [data]);
   const filteredPosts = useMemo(() => {
     if (!posts) {
       return posts;
@@ -41,6 +45,27 @@ export default function BlogHomePage() {
       return true;
     });
   }, [posts, categorySlug, tagSlug]);
+
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const sentinel = loadMoreRef.current;
+    if (!sentinel || !hasNextPage) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: "400px" }
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasNextPage, fetchNextPage]);
 
   return (
     <>
@@ -114,6 +139,21 @@ export default function BlogHomePage() {
                 <PostCard key={post.id} post={post} />
               ))}
             </div>
+
+            {hasNextPage && (
+              <div ref={loadMoreRef} className="flex justify-center py-6">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={isFetchingNextPage}
+                  onClick={() => fetchNextPage()}
+                  className="gap-2"
+                >
+                  {isFetchingNextPage && <Loader2 className="size-4 animate-spin" />}
+                  {isFetchingNextPage ? "Loading…" : "Load more"}
+                </Button>
+              </div>
+            )}
           </TooltipProvider>
 
           <aside className="hidden flex-col gap-4 xl:flex">

@@ -57,6 +57,13 @@
       "when": 1786028128193,
       "tag": "0007_shiny_human_torch",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1786108519853,
+      "tag": "0008_strange_korath",
+      "breakpoints": true
     }
   ]
 }

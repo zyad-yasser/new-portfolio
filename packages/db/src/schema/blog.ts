@@ -1,6 +1,7 @@
 import {
   type AnyPgColumn,
   boolean,
+  customType,
   index,
   integer,
   jsonb,
@@ -11,6 +12,12 @@ import {
   unique,
 } from "drizzle-orm/pg-core";
 import { user } from "./auth";
+
+const tsvector = customType<{ data: string }>({
+  dataType() {
+    return "tsvector";
+  },
+});
 
 export const REACTION_TYPES = ["like", "unicorn", "mindblown", "raised_hands", "fire"] as const;
 export type ReactionType = (typeof REACTION_TYPES)[number];
@@ -39,22 +46,44 @@ export const tag = pgTable("tag", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
-export const post = pgTable("post", {
+export const series = pgTable("series", {
   id: text("id").primaryKey(),
   authorId: text("author_id")
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
-  categoryId: text("category_id").references(() => category.id, { onDelete: "set null" }),
   title: text("title").notNull(),
   slug: text("slug").notNull().unique(),
-  excerptText: text("excerpt_text").notNull(),
-  contentJson: jsonb("content_json").$type<TiptapDoc>().notNull(),
-  coverImageUrl: text("cover_image_url"),
-  published: boolean("published").notNull().default(false),
-  viewCount: integer("view_count").notNull().default(0),
+  description: text("description"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
+
+export const post = pgTable(
+  "post",
+  {
+    id: text("id").primaryKey(),
+    authorId: text("author_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    categoryId: text("category_id").references(() => category.id, { onDelete: "set null" }),
+    seriesId: text("series_id").references(() => series.id, { onDelete: "set null" }),
+    seriesOrder: integer("series_order"),
+    title: text("title").notNull(),
+    slug: text("slug").notNull().unique(),
+    excerptText: text("excerpt_text").notNull(),
+    contentJson: jsonb("content_json").$type<TiptapDoc>().notNull(),
+    coverImageUrl: text("cover_image_url"),
+    searchVector: tsvector("search_vector"),
+    published: boolean("published").notNull().default(false),
+    viewCount: integer("view_count").notNull().default(0),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (table) => [
+    index("post_series_id_idx").on(table.seriesId),
+    index("post_search_vector_idx").using("gin", table.searchVector),
+  ]
+);
 
 export const postTag = pgTable(
   "post_tag",

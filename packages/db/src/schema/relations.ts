@@ -8,6 +8,7 @@ import {
   postBookmark,
   postReaction,
   postTag,
+  series,
   tag,
   userBlock,
   userFollow,
@@ -23,6 +24,10 @@ export const postRelations = relations(post, ({ one, many }) => ({
     fields: [post.categoryId],
     references: [category.id],
   }),
+  series: one(series, {
+    fields: [post.seriesId],
+    references: [series.id],
+  }),
   postTags: many(postTag),
   comments: many(comment),
   reactions: many(postReaction),
@@ -35,6 +40,15 @@ export const userRelations = relations(user, ({ many, one }) => ({
   followers: many(userFollow, { relationName: "followerList" }),
   bookmarks: many(postBookmark),
   media: many(media),
+  series: many(series),
+}));
+
+export const seriesRelations = relations(series, ({ one, many }) => ({
+  author: one(user, {
+    fields: [series.authorId],
+    references: [user.id],
+  }),
+  posts: many(post),
 }));
 
 export const categoryRelations = relations(category, ({ many }) => ({

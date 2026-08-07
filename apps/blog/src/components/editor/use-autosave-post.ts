@@ -10,6 +10,7 @@ type PendingSave = {
   title: string;
   contentJson: TiptapDoc;
   categoryId: string | null;
+  seriesId: string | null;
   tagNames: string[];
   coverImageUrl: string | null;
 };
@@ -50,6 +51,7 @@ export function useAutosavePost(initialPostId?: string) {
             title: pending.title,
             contentJson: pending.contentJson,
             categoryId: pending.categoryId,
+            seriesId: pending.seriesId,
             tagNames: pending.tagNames,
             coverImageUrl: pending.coverImageUrl,
             published: false,
@@ -63,6 +65,7 @@ export function useAutosavePost(initialPostId?: string) {
             title: pending.title,
             contentJson: pending.contentJson,
             categoryId: pending.categoryId,
+            seriesId: pending.seriesId,
             tagNames: pending.tagNames,
             coverImageUrl: pending.coverImageUrl,
           });

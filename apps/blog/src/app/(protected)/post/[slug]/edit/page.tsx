@@ -65,6 +65,7 @@ export default function EditPostPage() {
           initialTitle={post.title}
           initialContentJson={post.contentJson}
           initialCategoryId={post.categoryId}
+          initialSeriesId={post.seriesId}
           initialTagNames={post.tags.map((t) => t.name)}
           initialCoverImageUrl={post.coverImageUrl}
           doneHref={`/post/${post.slug}`}
