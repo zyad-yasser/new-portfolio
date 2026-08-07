@@ -10,6 +10,7 @@ import { Card } from "@repo/ui/card";
 import { cn } from "@repo/ui/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@repo/ui/tooltip";
 import { Bookmark, Eye, Share2 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 
 export type PostCardData = {
@@ -19,6 +20,7 @@ export type PostCardData = {
   excerptText: string;
   createdAt: string | Date;
   viewCount: number;
+  coverImageUrl: string | null;
   category: { name: string; color: string } | null;
   tags: { id: string; name: string }[];
   author: { name: string; image: string | null; profile: { username: string } | null };
@@ -110,6 +112,18 @@ export function PostCard({ post }: { post: PostCardData }) {
   return (
     <Card className="group relative flex flex-col gap-3 overflow-hidden rounded-xl border-border/60 p-5">
       <span className={cn("absolute inset-y-0 left-0 w-1", colors.bar)} aria-hidden />
+
+      {post.coverImageUrl && (
+        <div className="relative -mx-5 -mt-5 aspect-[2/1] w-[calc(100%+2.5rem)] overflow-hidden">
+          <Image
+            src={post.coverImageUrl}
+            alt=""
+            fill
+            sizes="(min-width: 768px) 380px, 100vw"
+            className="object-cover"
+          />
+        </div>
+      )}
 
       <div className="flex items-start justify-between gap-2">
         <span className="text-xs font-medium tracking-wide text-muted-foreground uppercase">

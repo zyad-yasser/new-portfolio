@@ -15,6 +15,7 @@ import { Card } from "@repo/ui/card";
 import { cn } from "@repo/ui/lib/utils";
 import { Skeleton } from "@repo/ui/skeleton";
 import { Calendar, ChevronRight, Clock, Eye, UserX } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useRef } from "react";
@@ -85,6 +86,19 @@ export default function PostDetailPage() {
           <ChevronRight className="size-3.5" />
           <span className="truncate text-foreground">{post.title}</span>
         </nav>
+
+        {post.coverImageUrl && (
+          <div className="relative aspect-[3/1] w-full overflow-hidden rounded-xl">
+            <Image
+              src={post.coverImageUrl}
+              alt=""
+              fill
+              sizes="(min-width: 1024px) 960px, 100vw"
+              className="object-cover"
+              priority
+            />
+          </div>
+        )}
 
         <div className="flex flex-col gap-3">
           <div className="flex flex-wrap items-center gap-2">

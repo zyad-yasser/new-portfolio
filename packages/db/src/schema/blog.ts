@@ -49,6 +49,7 @@ export const post = pgTable("post", {
   slug: text("slug").notNull().unique(),
   excerptText: text("excerpt_text").notNull(),
   contentJson: jsonb("content_json").$type<TiptapDoc>().notNull(),
+  coverImageUrl: text("cover_image_url"),
   published: boolean("published").notNull().default(false),
   viewCount: integer("view_count").notNull().default(0),
   createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -175,4 +176,23 @@ export const postBookmark = pgTable(
     primaryKey({ columns: [table.userId, table.postId] }),
     index("post_bookmark_post_id_idx").on(table.postId),
   ]
+);
+
+export const media = pgTable(
+  "media",
+  {
+    id: text("id").primaryKey(),
+    ownerId: text("owner_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    storageKey: text("storage_key").notNull().unique(),
+    url: text("url").notNull(),
+    originalName: text("original_name").notNull(),
+    mimeType: text("mime_type").notNull(),
+    size: integer("size").notNull(),
+    width: integer("width"),
+    height: integer("height"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (table) => [index("media_owner_id_idx").on(table.ownerId)]
 );

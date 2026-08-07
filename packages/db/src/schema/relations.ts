@@ -3,6 +3,7 @@ import { user } from "./auth";
 import {
   category,
   comment,
+  media,
   post,
   postBookmark,
   postReaction,
@@ -33,6 +34,7 @@ export const userRelations = relations(user, ({ many, one }) => ({
   following: many(userFollow, { relationName: "followingList" }),
   followers: many(userFollow, { relationName: "followerList" }),
   bookmarks: many(postBookmark),
+  media: many(media),
 }));
 
 export const categoryRelations = relations(category, ({ many }) => ({
@@ -123,5 +125,12 @@ export const postBookmarkRelations = relations(postBookmark, ({ one }) => ({
   post: one(post, {
     fields: [postBookmark.postId],
     references: [post.id],
+  }),
+}));
+
+export const mediaRelations = relations(media, ({ one }) => ({
+  owner: one(user, {
+    fields: [media.ownerId],
+    references: [user.id],
   }),
 }));

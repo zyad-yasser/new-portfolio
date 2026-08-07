@@ -50,6 +50,13 @@
       "when": 1785955140695,
       "tag": "0006_blog-username-not-null",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1786028128193,
+      "tag": "0007_shiny_human_torch",
+      "breakpoints": true
     }
   ]
 }

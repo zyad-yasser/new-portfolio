@@ -11,6 +11,7 @@ type PendingSave = {
   contentJson: TiptapDoc;
   categoryId: string | null;
   tagNames: string[];
+  coverImageUrl: string | null;
 };
 
 const AUTOSAVE_DELAY_MS = 1500;
@@ -50,6 +51,7 @@ export function useAutosavePost(initialPostId?: string) {
             contentJson: pending.contentJson,
             categoryId: pending.categoryId,
             tagNames: pending.tagNames,
+            coverImageUrl: pending.coverImageUrl,
             published: false,
           });
           postIdRef.current = created.id;
@@ -62,6 +64,7 @@ export function useAutosavePost(initialPostId?: string) {
             contentJson: pending.contentJson,
             categoryId: pending.categoryId,
             tagNames: pending.tagNames,
+            coverImageUrl: pending.coverImageUrl,
           });
           setSlug(updated.slug);
         }

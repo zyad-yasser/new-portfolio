@@ -1,11 +1,44 @@
+function parseUrl(urlString) {
+  try {
+    return new URL(urlString);
+  } catch {
+    return null;
+  }
+}
+
+const isDev = process.env.NODE_ENV !== "production";
+const s3PublicUrl = parseUrl(process.env.S3_PUBLIC_URL);
+const s3Endpoint = parseUrl(process.env.S3_ENDPOINT);
+
+const s3RemotePattern = s3PublicUrl
+  ? {
+      protocol: s3PublicUrl.protocol.replace(":", ""),
+      hostname: s3PublicUrl.hostname,
+      port: s3PublicUrl.port || undefined,
+      pathname: `${s3PublicUrl.pathname.replace(/\/$/, "")}/**`,
+    }
+  : undefined;
+
+const s3ConnectOrigins = [...new Set([s3PublicUrl?.origin, s3Endpoint?.origin].filter(Boolean))];
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   transpilePackages: ["@repo/ui", "@repo/auth", "@repo/trpc"],
+  images: {
+    remotePatterns: s3RemotePattern ? [s3RemotePattern] : [],
+    dangerouslyAllowLocalIP: isDev,
+  },
   async headers() {
-    const isDev = process.env.NODE_ENV !== "production";
     const scriptSrc = isDev
       ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com"
       : "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com";
+    const imgSrc = ["img-src 'self' data:", ...s3ConnectOrigins].join(" ");
+    const connectSrc = [
+      "connect-src 'self'",
+      ...(isDev ? ["ws:"] : []),
+      "https://challenges.cloudflare.com",
+      ...s3ConnectOrigins,
+    ].join(" ");
     return [
       {
         source: "/:path*",
@@ -14,13 +47,11 @@ const nextConfig = {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              "img-src 'self' data:",
+              imgSrc,
               scriptSrc,
               "style-src 'self' 'unsafe-inline'",
               "font-src 'self' data:",
-              isDev
-                ? "connect-src 'self' ws: https://challenges.cloudflare.com"
-                : "connect-src 'self' https://challenges.cloudflare.com",
+              connectSrc,
               "frame-src https://challenges.cloudflare.com",
               "form-action 'self'",
               "frame-ancestors 'none'",

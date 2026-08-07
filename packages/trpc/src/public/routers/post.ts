@@ -219,6 +219,7 @@ export const postRouter = createPublicTRPCRouter({
         contentJson: tiptapNodeSchema,
         categoryId: z.string().nullable().optional(),
         tagNames: z.array(z.string().trim().min(1).max(30)).max(MAX_TAGS).optional(),
+        coverImageUrl: z.string().url().nullable().optional(),
         published: z.boolean().default(false),
       })
     )
@@ -237,6 +238,7 @@ export const postRouter = createPublicTRPCRouter({
             slug,
             excerptText: buildExcerpt(input.contentJson),
             contentJson: input.contentJson,
+            coverImageUrl: input.coverImageUrl ?? null,
             published: input.published,
           })
           .returning();
@@ -263,6 +265,7 @@ export const postRouter = createPublicTRPCRouter({
         contentJson: tiptapNodeSchema.optional(),
         categoryId: z.string().nullable().optional(),
         tagNames: z.array(z.string().trim().min(1).max(30)).max(MAX_TAGS).optional(),
+        coverImageUrl: z.string().url().nullable().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -278,6 +281,9 @@ export const postRouter = createPublicTRPCRouter({
         }
         if (input.categoryId !== undefined) {
           patch.categoryId = input.categoryId;
+        }
+        if (input.coverImageUrl !== undefined) {
+          patch.coverImageUrl = input.coverImageUrl;
         }
 
         const rows = await tx

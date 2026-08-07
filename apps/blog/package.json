@@ -25,6 +25,7 @@
     "@repo/trpc": "workspace:^",
     "@repo/ui": "workspace:*",
     "@tiptap/extension-character-count": "^3.29.2",
+    "@tiptap/extension-image": "^3.29.2",
     "@tiptap/extension-placeholder": "^3.29.2",
     "@tiptap/pm": "^3.29.2",
     "@tiptap/react": "^3.29.2",

@@ -1,5 +1,7 @@
 "use client";
 
+import { MediaPickerDialog } from "@/components/media/media-picker-dialog";
+import type { MediaItem } from "@/components/media/use-media-upload";
 import type { TiptapDoc } from "@repo/db/schema";
 import { Button } from "@repo/ui/button";
 import { Separator } from "@repo/ui/separator";
@@ -8,6 +10,7 @@ import {
   Bold,
   Heading2,
   Heading3,
+  ImageIcon,
   Italic,
   Link as LinkIcon,
   List,
@@ -16,7 +19,7 @@ import {
   Redo,
   Undo,
 } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { createExtensions } from "./extensions";
 
 function ToolbarButton({
@@ -54,6 +57,8 @@ export function TiptapEditor({
   onChange: (doc: TiptapDoc) => void;
   placeholder?: string;
 }) {
+  const [imagePickerOpen, setImagePickerOpen] = useState(false);
+
   const editor = useEditor({
     extensions: createExtensions(placeholder),
     content: content as JSONContent,
@@ -72,6 +77,10 @@ export function TiptapEditor({
   useEffect(() => {
     return () => editor?.destroy();
   }, [editor]);
+
+  function insertImage(item: MediaItem) {
+    editor?.chain().focus().setImage({ src: item.url, alt: item.originalName }).run();
+  }
 
   if (!editor) {
     return null;
@@ -148,6 +157,9 @@ export function TiptapEditor({
         <ToolbarButton label="Link" active={editor.isActive("link")} onClick={setLink}>
           <LinkIcon className="size-4" />
         </ToolbarButton>
+        <ToolbarButton label="Insert image" onClick={() => setImagePickerOpen(true)}>
+          <ImageIcon className="size-4" />
+        </ToolbarButton>
         <Separator orientation="vertical" className="mx-0.5 h-6" />
         <ToolbarButton label="Undo" onClick={() => editor.chain().focus().undo().run()}>
           <Undo className="size-4" />
@@ -162,6 +174,12 @@ export function TiptapEditor({
       <div className="border-t border-input px-3 py-1.5 text-right text-xs text-muted-foreground">
         {editor.storage.characterCount.characters()} characters
       </div>
+
+      <MediaPickerDialog
+        open={imagePickerOpen}
+        onOpenChange={setImagePickerOpen}
+        onSelect={insertImage}
+      />
     </div>
   );
 }

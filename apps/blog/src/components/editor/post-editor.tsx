@@ -1,5 +1,6 @@
 "use client";
 
+import { CoverImagePicker } from "@/components/media/cover-image-picker";
 import { categoryColorClasses } from "@/lib/category-colors";
 import type { TiptapDoc } from "@repo/db/schema";
 import { publicApi } from "@repo/trpc/public/react";
@@ -147,6 +148,7 @@ export function PostEditor({
   initialContentJson,
   initialCategoryId,
   initialTagNames,
+  initialCoverImageUrl,
   doneHref,
 }: {
   mode: "create" | "edit";
@@ -155,6 +157,7 @@ export function PostEditor({
   initialContentJson?: TiptapDoc;
   initialCategoryId?: string | null;
   initialTagNames?: string[];
+  initialCoverImageUrl?: string | null;
   doneHref?: string;
 }) {
   const router = useRouter();
@@ -162,6 +165,7 @@ export function PostEditor({
   const [contentJson, setContentJson] = useState<TiptapDoc>(initialContentJson ?? EMPTY_DOC);
   const [categoryId, setCategoryId] = useState<string | null>(initialCategoryId ?? null);
   const [tagNames, setTagNames] = useState<string[]>(initialTagNames ?? []);
+  const [coverImageUrl, setCoverImageUrl] = useState<string | null>(initialCoverImageUrl ?? null);
 
   const { data: categories } = publicApi.category.list.useQuery(undefined, {
     staleTime: 10 * 60 * 1000,
@@ -174,8 +178,8 @@ export function PostEditor({
       skipNextAutosave.current = false;
       return;
     }
-    autosave.schedule({ title, contentJson, categoryId, tagNames });
-  }, [title, contentJson, categoryId, tagNames]);
+    autosave.schedule({ title, contentJson, categoryId, tagNames, coverImageUrl });
+  }, [title, contentJson, categoryId, tagNames, coverImageUrl]);
 
   function addTag(name: string) {
     const trimmed = name.trim();
@@ -204,6 +208,8 @@ export function PostEditor({
         <SavingIndicator status={autosave.status} />
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
+        <CoverImagePicker value={coverImageUrl} onChange={setCoverImageUrl} />
+
         <Input
           autoFocus
           placeholder="Post title"
