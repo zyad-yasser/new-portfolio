@@ -12,5 +12,13 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/new", "/mine", "/post/:slug/edit", "/settings/:path*", "/saved", "/series/mine"],
+  matcher: [
+    "/new",
+    "/mine",
+    "/post/:slug/edit",
+    "/settings/:path*",
+    "/saved",
+    "/series/mine",
+    "/notifications",
+  ],
 };

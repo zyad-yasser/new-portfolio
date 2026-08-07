@@ -4,6 +4,7 @@ import {
   category,
   comment,
   media,
+  notification,
   post,
   postBookmark,
   postReaction,
@@ -41,6 +42,8 @@ export const userRelations = relations(user, ({ many, one }) => ({
   bookmarks: many(postBookmark),
   media: many(media),
   series: many(series),
+  notificationsReceived: many(notification, { relationName: "notificationsReceived" }),
+  notificationsSent: many(notification, { relationName: "notificationsSent" }),
 }));
 
 export const seriesRelations = relations(series, ({ one, many }) => ({
@@ -146,5 +149,26 @@ export const mediaRelations = relations(media, ({ one }) => ({
   owner: one(user, {
     fields: [media.ownerId],
     references: [user.id],
+  }),
+}));
+
+export const notificationRelations = relations(notification, ({ one }) => ({
+  recipient: one(user, {
+    fields: [notification.recipientId],
+    references: [user.id],
+    relationName: "notificationsReceived",
+  }),
+  actor: one(user, {
+    fields: [notification.actorId],
+    references: [user.id],
+    relationName: "notificationsSent",
+  }),
+  post: one(post, {
+    fields: [notification.postId],
+    references: [post.id],
+  }),
+  comment: one(comment, {
+    fields: [notification.commentId],
+    references: [comment.id],
   }),
 }));

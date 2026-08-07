@@ -6,6 +6,7 @@ import { and, asc, eq, isNull, notInArray } from "drizzle-orm";
 import { z } from "zod";
 import { authedProcedure, createPublicTRPCRouter, publicProcedure, strictRateLimit } from "../init";
 import { assertNotBlocked } from "./block";
+import { createNotification } from "./notification";
 import { ensureUserProfile } from "./profile";
 
 const authorColumns = { id: true, name: true, image: true } as const;
@@ -62,8 +63,10 @@ export const commentRouter = createPublicTRPCRouter({
 
       await assertNotBlocked(ctx.session.user.id, targetPost.authorId);
 
+      let parent: typeof comment.$inferSelect | undefined;
+
       if (input.parentCommentId) {
-        const parent = await db.query.comment.findFirst({
+        parent = await db.query.comment.findFirst({
           where: eq(comment.id, input.parentCommentId),
         });
 
@@ -88,7 +91,19 @@ export const commentRouter = createPublicTRPCRouter({
         })
         .returning();
 
-      return rows[0];
+      const created = rows[0];
+
+      if (created) {
+        await createNotification({
+          recipientId: parent ? parent.authorId : targetPost.authorId,
+          actorId: ctx.session.user.id,
+          type: parent ? "reply" : "comment",
+          postId: input.postId,
+          commentId: created.id,
+        });
+      }
+
+      return created;
     }),
 
   update: authedProcedure

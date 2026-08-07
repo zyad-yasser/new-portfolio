@@ -5,6 +5,7 @@ import { categoryRouter } from "./category";
 import { commentRouter } from "./comment";
 import { followRouter } from "./follow";
 import { mediaRouter } from "./media";
+import { notificationRouter } from "./notification";
 import { postRouter } from "./post";
 import { profileRouter } from "./profile";
 import { reactionRouter } from "./reaction";
@@ -31,6 +32,7 @@ export const publicAppRouter = createPublicTRPCRouter({
   media: mediaRouter,
   search: searchRouter,
   series: seriesRouter,
+  notification: notificationRouter,
 });
 
 export type PublicAppRouter = typeof publicAppRouter;

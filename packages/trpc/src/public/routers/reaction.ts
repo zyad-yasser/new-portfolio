@@ -1,9 +1,10 @@
 import { randomUUID } from "node:crypto";
 import { db } from "@repo/db";
-import { REACTION_TYPES, postReaction } from "@repo/db/schema";
+import { REACTION_TYPES, post, postReaction } from "@repo/db/schema";
 import { and, desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { authedProcedure, createPublicTRPCRouter, publicProcedure } from "../init";
+import { createNotification } from "./notification";
 
 const MAX_REACTORS_SHOWN = 6;
 
@@ -56,15 +57,28 @@ export const reactionRouter = createPublicTRPCRouter({
           .update(postReaction)
           .set({ type: input.type })
           .where(eq(postReaction.id, existing.id));
-        return { type: input.type };
+      } else {
+        await db.insert(postReaction).values({
+          id: randomUUID(),
+          postId: input.postId,
+          userId: ctx.session.user.id,
+          type: input.type,
+        });
       }
 
-      await db.insert(postReaction).values({
-        id: randomUUID(),
-        postId: input.postId,
-        userId: ctx.session.user.id,
-        type: input.type,
+      const targetPost = await db.query.post.findFirst({
+        where: eq(post.id, input.postId),
+        columns: { authorId: true },
       });
+
+      if (targetPost) {
+        await createNotification({
+          recipientId: targetPost.authorId,
+          actorId: ctx.session.user.id,
+          type: "reaction",
+          postId: input.postId,
+        });
+      }
 
       return { type: input.type };
     }),

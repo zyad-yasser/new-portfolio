@@ -19,17 +19,22 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@repo/ui/dropdown-menu";
-import { PenLine, Search } from "lucide-react";
+import { Bell, PenLine, Search } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const SEARCH_DEBOUNCE_MS = 250;
+const UNREAD_POLL_INTERVAL_MS = 30_000;
 
 export function SiteHeader() {
   const router = useRouter();
   const { data: session, isPending } = publicAuthClient.useSession();
   const { data: myProfile } = publicApi.profile.mine.useQuery(undefined, { enabled: !!session });
+  const { data: unreadCount } = publicApi.notification.unreadCount.useQuery(undefined, {
+    enabled: !!session,
+    refetchInterval: UNREAD_POLL_INTERVAL_MS,
+  });
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
@@ -107,6 +112,16 @@ export function SiteHeader() {
 
             {!isPending && session && (
               <>
+                <Button asChild variant="ghost" size="icon" className="relative">
+                  <Link href="/notifications" aria-label="Notifications">
+                    <Bell className="size-4" />
+                    {!!unreadCount && (
+                      <span className="absolute top-0.5 right-0.5 flex size-4 items-center justify-center rounded-full bg-destructive text-[10px] font-medium text-destructive-foreground">
+                        {unreadCount > 9 ? "9+" : unreadCount}
+                      </span>
+                    )}
+                  </Link>
+                </Button>
                 <Button asChild size="sm" className="gap-2">
                   <Link href="/new">
                     <PenLine className="size-4" />

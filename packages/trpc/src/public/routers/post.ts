@@ -264,6 +264,7 @@ export const postRouter = createPublicTRPCRouter({
         seriesId: z.string().nullable().optional(),
         tagNames: z.array(z.string().trim().min(1).max(30)).max(MAX_TAGS).optional(),
         coverImageUrl: z.string().url().nullable().optional(),
+        canonicalUrl: z.string().url().nullable().optional(),
         published: z.boolean().default(false),
       })
     )
@@ -289,6 +290,7 @@ export const postRouter = createPublicTRPCRouter({
             excerptText: buildExcerpt(plainText),
             contentJson: input.contentJson,
             coverImageUrl: input.coverImageUrl ?? null,
+            canonicalUrl: input.canonicalUrl ?? null,
             searchVector: buildSearchVector(input.title, plainText),
             published: input.published,
           })
@@ -318,6 +320,7 @@ export const postRouter = createPublicTRPCRouter({
         seriesId: z.string().nullable().optional(),
         tagNames: z.array(z.string().trim().min(1).max(30)).max(MAX_TAGS).optional(),
         coverImageUrl: z.string().url().nullable().optional(),
+        canonicalUrl: z.string().url().nullable().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -351,6 +354,9 @@ export const postRouter = createPublicTRPCRouter({
       }
       if (input.coverImageUrl !== undefined) {
         patch.coverImageUrl = input.coverImageUrl;
+      }
+      if (input.canonicalUrl !== undefined) {
+        patch.canonicalUrl = input.canonicalUrl;
       }
       if (input.seriesId !== undefined && input.seriesId !== current.seriesId) {
         patch.seriesId = input.seriesId;

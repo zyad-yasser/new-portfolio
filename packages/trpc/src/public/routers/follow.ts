@@ -5,6 +5,7 @@ import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import { authedProcedure, createPublicTRPCRouter, publicProcedure } from "../init";
 import { assertNotBlocked } from "./block";
+import { createNotification } from "./notification";
 
 const followUserColumns = { id: true, name: true, image: true } as const;
 
@@ -64,6 +65,12 @@ export const followRouter = createPublicTRPCRouter({
         await db
           .insert(userFollow)
           .values({ followerId: ctx.session.user.id, followingId: input.userId });
+
+        await createNotification({
+          recipientId: input.userId,
+          actorId: ctx.session.user.id,
+          type: "follow",
+        });
       }
 
       return { following: true };

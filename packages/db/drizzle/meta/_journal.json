@@ -64,6 +64,13 @@
       "when": 1786108519853,
       "tag": "0008_strange_korath",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1786112834910,
+      "tag": "0009_fluffy_zarda",
+      "breakpoints": true
     }
   ]
 }

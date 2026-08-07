@@ -10,8 +10,19 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Blog — Zyad Yasser",
+  metadataBase: new URL("https://blog.zyadyasser.net"),
+  title: {
+    default: "Blog — Zyad Yasser",
+    template: "%s | Blog — Zyad Yasser",
+  },
   description: "Writing from Zyad Yasser.",
+  alternates: {
+    types: { "application/rss+xml": "/feed.xml" },
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

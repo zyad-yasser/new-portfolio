@@ -22,6 +22,9 @@ const tsvector = customType<{ data: string }>({
 export const REACTION_TYPES = ["like", "unicorn", "mindblown", "raised_hands", "fire"] as const;
 export type ReactionType = (typeof REACTION_TYPES)[number];
 
+export const NOTIFICATION_TYPES = ["follow", "comment", "reply", "reaction", "mention"] as const;
+export type NotificationType = (typeof NOTIFICATION_TYPES)[number];
+
 export type TiptapDoc = {
   type: string;
   attrs?: Record<string, unknown> | undefined;
@@ -73,6 +76,7 @@ export const post = pgTable(
     excerptText: text("excerpt_text").notNull(),
     contentJson: jsonb("content_json").$type<TiptapDoc>().notNull(),
     coverImageUrl: text("cover_image_url"),
+    canonicalUrl: text("canonical_url"),
     searchVector: tsvector("search_vector"),
     published: boolean("published").notNull().default(false),
     viewCount: integer("view_count").notNull().default(0),
@@ -224,4 +228,21 @@ export const media = pgTable(
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },
   (table) => [index("media_owner_id_idx").on(table.ownerId)]
+);
+
+export const notification = pgTable(
+  "notification",
+  {
+    id: text("id").primaryKey(),
+    recipientId: text("recipient_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    actorId: text("actor_id").references(() => user.id, { onDelete: "cascade" }),
+    type: text("type").notNull().$type<NotificationType>(),
+    postId: text("post_id").references(() => post.id, { onDelete: "cascade" }),
+    commentId: text("comment_id").references(() => comment.id, { onDelete: "cascade" }),
+    readAt: timestamp("read_at"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (table) => [index("notification_recipient_id_read_at_idx").on(table.recipientId, table.readAt)]
 );
