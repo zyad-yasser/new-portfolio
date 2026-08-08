@@ -20,5 +20,6 @@ export const config = {
     "/saved",
     "/series/mine",
     "/notifications",
+    "/media",
   ],
 };

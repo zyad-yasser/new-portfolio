@@ -59,7 +59,7 @@ export function useMediaUpload(onUploaded: (item: MediaItem) => void) {
   const utils = publicApi.useUtils();
 
   const upload = useCallback(
-    async (file: File) => {
+    async (file: File, folderId: string | null) => {
       const id = crypto.randomUUID();
       setItems((prev) => [...prev, { id, file, progress: 0, status: "uploading" }]);
 
@@ -82,6 +82,7 @@ export function useMediaUpload(onUploaded: (item: MediaItem) => void) {
           originalName: file.name,
           mimeType: file.type,
           size: file.size,
+          folderId,
           ...dims,
         });
 
@@ -110,9 +111,9 @@ export function useMediaUpload(onUploaded: (item: MediaItem) => void) {
   );
 
   const uploadFiles = useCallback(
-    (files: File[]) => {
+    (files: File[], folderId: string | null = null) => {
       for (const file of files) {
-        upload(file);
+        upload(file, folderId);
       }
     },
     [upload]

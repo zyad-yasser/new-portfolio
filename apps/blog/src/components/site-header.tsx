@@ -148,6 +148,9 @@ export function SiteHeader() {
                       <Link href="/series/mine">My series</Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
+                      <Link href="/media">Media library</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
                       <Link href="/saved">Saved posts</Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>

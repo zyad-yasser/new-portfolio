@@ -211,6 +211,23 @@ export const postBookmark = pgTable(
   ]
 );
 
+export const mediaFolder = pgTable(
+  "media_folder",
+  {
+    id: text("id").primaryKey(),
+    ownerId: text("owner_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    parentId: text("parent_id").references((): AnyPgColumn => mediaFolder.id, {
+      onDelete: "cascade",
+    }),
+    name: text("name").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (table) => [index("media_folder_owner_id_parent_id_idx").on(table.ownerId, table.parentId)]
+);
+
 export const media = pgTable(
   "media",
   {
@@ -218,6 +235,7 @@ export const media = pgTable(
     ownerId: text("owner_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
+    folderId: text("folder_id").references(() => mediaFolder.id, { onDelete: "set null" }),
     storageKey: text("storage_key").notNull().unique(),
     url: text("url").notNull(),
     originalName: text("original_name").notNull(),
@@ -227,7 +245,10 @@ export const media = pgTable(
     height: integer("height"),
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },
-  (table) => [index("media_owner_id_idx").on(table.ownerId)]
+  (table) => [
+    index("media_owner_id_idx").on(table.ownerId),
+    index("media_folder_id_idx").on(table.folderId),
+  ]
 );
 
 export const notification = pgTable(

@@ -4,6 +4,7 @@ import {
   category,
   comment,
   media,
+  mediaFolder,
   notification,
   post,
   postBookmark,
@@ -150,6 +151,24 @@ export const mediaRelations = relations(media, ({ one }) => ({
     fields: [media.ownerId],
     references: [user.id],
   }),
+  folder: one(mediaFolder, {
+    fields: [media.folderId],
+    references: [mediaFolder.id],
+  }),
+}));
+
+export const mediaFolderRelations = relations(mediaFolder, ({ one, many }) => ({
+  owner: one(user, {
+    fields: [mediaFolder.ownerId],
+    references: [user.id],
+  }),
+  parent: one(mediaFolder, {
+    fields: [mediaFolder.parentId],
+    references: [mediaFolder.id],
+    relationName: "folderTree",
+  }),
+  children: many(mediaFolder, { relationName: "folderTree" }),
+  media: many(media),
 }));
 
 export const notificationRelations = relations(notification, ({ one }) => ({
