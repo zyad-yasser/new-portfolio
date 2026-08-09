@@ -7,6 +7,7 @@ export type MediaItem = {
   id: string;
   url: string;
   originalName: string;
+  mimeType: string;
   width: number | null;
   height: number | null;
 };
@@ -18,6 +19,30 @@ export type UploadItem = {
   status: "uploading" | "done" | "error";
   error?: string;
 };
+
+const ALLOWED_MEDIA_TYPES = new Set([
+  "image/png",
+  "image/jpeg",
+  "image/webp",
+  "image/gif",
+  "video/mp4",
+  "video/webm",
+  "video/quicktime",
+]);
+const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
+const MAX_VIDEO_BYTES = 200 * 1024 * 1024;
+
+function validateFile(file: File): string | null {
+  if (!ALLOWED_MEDIA_TYPES.has(file.type)) {
+    return "Unsupported file type";
+  }
+  const isVideo = file.type.startsWith("video/");
+  const maxBytes = isVideo ? MAX_VIDEO_BYTES : MAX_IMAGE_BYTES;
+  if (file.size > maxBytes) {
+    return `File is too large (max ${Math.round(maxBytes / (1024 * 1024))} MB)`;
+  }
+  return null;
+}
 
 function captureImageDimensions(file: File): Promise<{ width?: number; height?: number }> {
   return new Promise((resolve) => {
@@ -33,6 +58,29 @@ function captureImageDimensions(file: File): Promise<{ width?: number; height?: 
     };
     img.src = url;
   });
+}
+
+function captureVideoDimensions(file: File): Promise<{ width?: number; height?: number }> {
+  return new Promise((resolve) => {
+    const url = URL.createObjectURL(file);
+    const video = document.createElement("video");
+    video.preload = "metadata";
+    video.onloadedmetadata = () => {
+      resolve({ width: video.videoWidth, height: video.videoHeight });
+      URL.revokeObjectURL(url);
+    };
+    video.onerror = () => {
+      resolve({});
+      URL.revokeObjectURL(url);
+    };
+    video.src = url;
+  });
+}
+
+function captureMediaDimensions(file: File): Promise<{ width?: number; height?: number }> {
+  return file.type.startsWith("video/")
+    ? captureVideoDimensions(file)
+    : captureImageDimensions(file);
 }
 
 function uploadWithProgress(uploadUrl: string, file: File, onProgress: (fraction: number) => void) {
@@ -63,8 +111,18 @@ export function useMediaUpload(onUploaded: (item: MediaItem) => void) {
       const id = crypto.randomUUID();
       setItems((prev) => [...prev, { id, file, progress: 0, status: "uploading" }]);
 
+      const validationError = validateFile(file);
+      if (validationError) {
+        setItems((prev) =>
+          prev.map((item) =>
+            item.id === id ? { ...item, status: "error", error: validationError } : item
+          )
+        );
+        return;
+      }
+
       try {
-        const dims = await captureImageDimensions(file);
+        const dims = await captureMediaDimensions(file);
         const { uploadUrl, publicUrl, key } = await createPresignedUrl.mutateAsync({
           contentType: file.type,
           size: file.size,

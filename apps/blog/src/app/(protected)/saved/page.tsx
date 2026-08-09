@@ -20,7 +20,7 @@ export default function SavedPostsPage() {
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {isLoading &&
               Array.from({ length: 3 }).map((_, i) => (
-                <Skeleton key={i} className="h-52 w-full rounded-xl" />
+                <Skeleton key={i} className="skeleton-shimmer h-52 w-full rounded-xl" />
               ))}
             {error && (
               <div className="col-span-full flex flex-col items-center gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-center text-sm text-destructive">

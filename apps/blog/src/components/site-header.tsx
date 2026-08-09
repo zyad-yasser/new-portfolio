@@ -1,5 +1,6 @@
 "use client";
 
+import { NotificationsDropdown } from "@/components/notifications-dropdown";
 import { publicAuthClient } from "@repo/auth/public-client";
 import { publicApi } from "@repo/trpc/public/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@repo/ui/avatar";
@@ -19,7 +20,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@repo/ui/dropdown-menu";
-import { Bell, PenLine, Search } from "lucide-react";
+import {
+  Bookmark,
+  FileText,
+  Image as ImageIcon,
+  Library,
+  LogOut,
+  PenLine,
+  Search,
+  Settings,
+  User,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -83,10 +94,10 @@ export function SiteHeader() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur">
+      <header className="glass sticky top-0 z-40">
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between gap-4 px-6">
           <Link href="/" className="flex items-center gap-2">
-            <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-primary text-xs font-bold text-primary-foreground">
+            <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-gradient-brand text-xs font-bold text-primary-foreground">
               ZY
             </span>
             <span className="text-sm font-semibold">Blog</span>
@@ -112,17 +123,8 @@ export function SiteHeader() {
 
             {!isPending && session && (
               <>
-                <Button asChild variant="ghost" size="icon" className="relative">
-                  <Link href="/notifications" aria-label="Notifications">
-                    <Bell className="size-4" />
-                    {!!unreadCount && (
-                      <span className="absolute top-0.5 right-0.5 flex size-4 items-center justify-center rounded-full bg-destructive text-[10px] font-medium text-destructive-foreground">
-                        {unreadCount > 9 ? "9+" : unreadCount}
-                      </span>
-                    )}
-                  </Link>
-                </Button>
-                <Button asChild size="sm" className="gap-2">
+                <NotificationsDropdown unreadCount={unreadCount} />
+                <Button asChild size="sm" className="btn-glow gap-2">
                   <Link href="/new">
                     <PenLine className="size-4" />
                     Write
@@ -135,32 +137,69 @@ export function SiteHeader() {
                       <AvatarFallback>{initials}</AvatarFallback>
                     </Avatar>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
+                  <DropdownMenuContent
+                    align="end"
+                    className="glass-strong w-64 rounded-xl p-1.5 shadow-xl"
+                  >
+                    <div className="flex items-center gap-2.5 px-2 py-2">
+                      <Avatar size="sm" className="shrink-0">
+                        <AvatarImage
+                          src={session.user.image ?? undefined}
+                          alt={session.user.name}
+                        />
+                        <AvatarFallback>{initials}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex min-w-0 flex-col">
+                        <span className="truncate text-sm font-medium">{session.user.name}</span>
+                        <span className="truncate text-xs text-muted-foreground">
+                          {session.user.email}
+                        </span>
+                      </div>
+                    </div>
+                    <DropdownMenuSeparator />
                     {myProfile && (
                       <DropdownMenuItem asChild>
-                        <Link href={`/u/${myProfile.username}`}>My profile</Link>
+                        <Link href={`/u/${myProfile.username}`}>
+                          <User />
+                          My profile
+                        </Link>
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuItem asChild>
-                      <Link href="/mine">My posts</Link>
+                      <Link href="/mine">
+                        <FileText />
+                        My posts
+                      </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="/series/mine">My series</Link>
+                      <Link href="/series/mine">
+                        <Library />
+                        My series
+                      </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="/media">Media library</Link>
+                      <Link href="/media">
+                        <ImageIcon />
+                        Media library
+                      </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="/saved">Saved posts</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/settings/profile">Edit profile</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/settings/blocked">Blocked users</Link>
+                      <Link href="/saved">
+                        <Bookmark />
+                        Saved posts
+                      </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleSignOut}>Sign out</DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/settings/profile">
+                        <Settings />
+                        Settings
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem variant="destructive" onClick={handleSignOut}>
+                      <LogOut />
+                      Sign out
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </>

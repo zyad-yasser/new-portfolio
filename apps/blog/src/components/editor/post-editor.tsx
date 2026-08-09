@@ -343,7 +343,11 @@ export function PostEditor({
             </Button>
           )}
           {mode === "create" && (
-            <Button onClick={handlePublish} disabled={!title.trim() || autosave.isPublishing}>
+            <Button
+              className="btn-glow"
+              onClick={handlePublish}
+              disabled={!title.trim() || autosave.isPublishing}
+            >
               {autosave.isPublishing && <Loader2 className="size-4 animate-spin" />}
               Publish
             </Button>

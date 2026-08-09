@@ -141,7 +141,7 @@ export default function MySeriesPage() {
           <h1 className="text-2xl font-semibold">My series</h1>
           <SeriesFormDialog
             trigger={
-              <Button size="sm" className="gap-2">
+              <Button size="sm" className="btn-glow gap-2">
                 <Plus className="size-4" />
                 New series
               </Button>
@@ -157,7 +157,7 @@ export default function MySeriesPage() {
         <div className="flex flex-col gap-4">
           {isLoading &&
             Array.from({ length: 3 }).map((_, i) => (
-              <Skeleton key={i} className="h-32 w-full rounded-lg" />
+              <Skeleton key={i} className="skeleton-shimmer h-32 w-full rounded-lg" />
             ))}
 
           {error && (
@@ -178,7 +178,7 @@ export default function MySeriesPage() {
           {seriesList?.map((s) => {
             const postIds = s.posts.map((p) => p.id);
             return (
-              <Card key={s.id}>
+              <Card key={s.id} className="card-hover">
                 <CardHeader className="flex flex-row items-center justify-between gap-3">
                   <CardTitle className="text-base">
                     <Link href={`/series/${s.slug}`} className="hover:underline">

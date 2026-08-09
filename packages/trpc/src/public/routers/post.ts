@@ -8,7 +8,13 @@ import { TRPCError } from "@trpc/server";
 import { and, asc, desc, eq, lt, ne, notInArray, or, sql } from "drizzle-orm";
 import type { PgUpdateSetSource } from "drizzle-orm/pg-core";
 import { z } from "zod";
-import { authedProcedure, createPublicTRPCRouter, publicProcedure, strictRateLimit } from "../init";
+import {
+  authedProcedure,
+  createPublicTRPCRouter,
+  publicProcedure,
+  strictRateLimit,
+  verifiedProcedure,
+} from "../init";
 import { ensureUserProfile } from "./profile";
 
 const appName = requireEnv("APP_NAME");
@@ -254,7 +260,7 @@ export const postRouter = createPublicTRPCRouter({
       };
     }),
 
-  create: authedProcedure
+  create: verifiedProcedure
     .use(strictRateLimit({ path: "post.create", limit: 5, window: "1 h" }))
     .input(
       z.object({
@@ -310,7 +316,7 @@ export const postRouter = createPublicTRPCRouter({
       });
     }),
 
-  update: authedProcedure
+  update: verifiedProcedure
     .input(
       z.object({
         id: z.string(),
@@ -386,7 +392,7 @@ export const postRouter = createPublicTRPCRouter({
       });
     }),
 
-  delete: authedProcedure
+  delete: verifiedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const rows = await db
@@ -401,7 +407,7 @@ export const postRouter = createPublicTRPCRouter({
       return { id: rows[0].id };
     }),
 
-  setPublished: authedProcedure
+  setPublished: verifiedProcedure
     .input(z.object({ id: z.string(), published: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
       const rows = await db

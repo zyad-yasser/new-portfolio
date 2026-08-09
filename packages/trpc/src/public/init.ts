@@ -38,6 +38,17 @@ export const authedProcedure = publicProcedure.use(({ ctx, next }) => {
   });
 });
 
+export const verifiedProcedure = authedProcedure.use(({ ctx, next }) => {
+  if (!ctx.session.user.emailVerified) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "Please verify your email address before doing this.",
+    });
+  }
+
+  return next({ ctx });
+});
+
 export function strictRateLimit({
   path,
   limit,

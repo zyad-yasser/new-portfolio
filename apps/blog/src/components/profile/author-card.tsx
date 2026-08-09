@@ -49,7 +49,7 @@ export function AuthorCard({ username }: { username: string }) {
   }
 
   return (
-    <Card className="flex flex-col gap-3 border-border/60 p-4">
+    <Card className="glass flex flex-col gap-3 p-4">
       <div className="flex items-center gap-3">
         <Avatar>
           <AvatarImage src={profile.user.image ?? undefined} alt={profile.user.name} />

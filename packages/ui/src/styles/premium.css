@@ -1,0 +1,85 @@
+/* Opt-in "premium" surface/motion utilities, shared across @repo/ui consumers.
+   Hue-agnostic — every color reference goes through theme.css's tokens, so each
+   consuming app renders these with its own palette. Import explicitly per app
+   (not bundled into theme.css) since not every consumer wants them. */
+
+.card-hover {
+  transition: transform 0.4s var(--ease-premium), box-shadow 0.4s var(--ease-premium), border-color
+    0.4s var(--ease-premium);
+  border: 1px solid hsl(var(--border));
+}
+
+.card-hover:hover {
+  border-color: hsl(var(--primary) / 0.35);
+  box-shadow: 0 20px 60px -15px hsl(var(--primary) / 0.15), 0 8px 24px -8px hsl(0 0% 0% / 0.4);
+  transform: translateY(-4px);
+}
+
+.card-hover:focus-within {
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 0 3px hsl(var(--primary) / 0.2);
+}
+
+.btn-glow:hover {
+  box-shadow: 0 0 0 1px hsl(var(--primary)), 0 0 30px hsl(var(--primary) / 0.35), 0 8px 20px
+    hsl(var(--primary) / 0.25);
+}
+
+.glass {
+  background: hsl(var(--card) / 0.6);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid hsl(var(--border) / 0.5);
+}
+
+.glass-strong {
+  background: hsl(var(--card) / 0.85);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid hsl(var(--border) / 0.6);
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .glass,
+  .glass-strong {
+    background: hsl(var(--card) / 0.95);
+  }
+}
+
+.glow-ambient {
+  box-shadow: 0 0 60px hsl(var(--primary) / 0.12);
+}
+
+button:focus-visible {
+  transform: scale(1.02);
+  transition: transform 0.15s ease-in-out;
+}
+
+.skeleton-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.skeleton-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, hsl(var(--foreground) / 0.06), transparent);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer-sweep 1.6s ease-in-out infinite;
+}
+
+@keyframes skeleton-shimmer-sweep {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-shimmer::after {
+    animation: none;
+  }
+}

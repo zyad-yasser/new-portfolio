@@ -13,7 +13,7 @@ function getBucket() {
   return bucket;
 }
 
-const PRESIGN_EXPIRY_MS = 60 * 1000;
+const PRESIGN_EXPIRY_SECONDS = 60;
 
 export function getPublicUrl(key: string) {
   return `https://storage.googleapis.com/${requireEnv("FIREBASE_STORAGE_BUCKET")}/${key}`;
@@ -22,16 +22,18 @@ export function getPublicUrl(key: string) {
 export async function createPresignedUploadUrl({
   key,
   contentType,
+  expiresInSeconds = PRESIGN_EXPIRY_SECONDS,
 }: {
   key: string;
   contentType: string;
+  expiresInSeconds?: number;
 }) {
   const [uploadUrl] = await getBucket()
     .file(key)
     .getSignedUrl({
       version: "v4",
       action: "write",
-      expires: Date.now() + PRESIGN_EXPIRY_MS,
+      expires: Date.now() + expiresInSeconds * 1000,
       contentType,
     });
 

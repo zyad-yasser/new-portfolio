@@ -57,7 +57,7 @@ export function TiptapEditor({
   onChange: (doc: TiptapDoc) => void;
   placeholder?: string;
 }) {
-  const [imagePickerOpen, setImagePickerOpen] = useState(false);
+  const [mediaPickerOpen, setMediaPickerOpen] = useState(false);
 
   const editor = useEditor({
     extensions: createExtensions(placeholder),
@@ -78,8 +78,12 @@ export function TiptapEditor({
     return () => editor?.destroy();
   }, [editor]);
 
-  function insertImage(item: MediaItem) {
-    editor?.chain().focus().setImage({ src: item.url, alt: item.originalName }).run();
+  function insertMedia(item: MediaItem) {
+    if (item.mimeType.startsWith("video/")) {
+      editor?.chain().focus().setVideo({ src: item.url }).run();
+    } else {
+      editor?.chain().focus().setImage({ src: item.url, alt: item.originalName }).run();
+    }
   }
 
   if (!editor) {
@@ -157,7 +161,7 @@ export function TiptapEditor({
         <ToolbarButton label="Link" active={editor.isActive("link")} onClick={setLink}>
           <LinkIcon className="size-4" />
         </ToolbarButton>
-        <ToolbarButton label="Insert image" onClick={() => setImagePickerOpen(true)}>
+        <ToolbarButton label="Insert media" onClick={() => setMediaPickerOpen(true)}>
           <ImageIcon className="size-4" />
         </ToolbarButton>
         <Separator orientation="vertical" className="mx-0.5 h-6" />
@@ -176,9 +180,9 @@ export function TiptapEditor({
       </div>
 
       <MediaPickerDialog
-        open={imagePickerOpen}
-        onOpenChange={setImagePickerOpen}
-        onSelect={insertImage}
+        open={mediaPickerOpen}
+        onOpenChange={setMediaPickerOpen}
+        onSelect={insertMedia}
       />
     </div>
   );

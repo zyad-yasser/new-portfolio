@@ -5,16 +5,22 @@ import { createPresignedUploadUrl, deleteObject } from "@repo/utils/storage";
 import { TRPCError } from "@trpc/server";
 import { and, desc, eq, ilike, isNull, lt, or } from "drizzle-orm";
 import { z } from "zod";
-import { authedProcedure, createPublicTRPCRouter, strictRateLimit } from "../init";
+import { authedProcedure, createPublicTRPCRouter, strictRateLimit, verifiedProcedure } from "../init";
+import { getQuota, releaseQuota, tryReserveQuota } from "./media-quota";
 
-const ALLOWED_IMAGE_TYPES: Record<string, string> = {
+const ALLOWED_MEDIA_TYPES: Record<string, string> = {
   "image/png": "png",
   "image/jpeg": "jpg",
   "image/webp": "webp",
   "image/gif": "gif",
+  "video/mp4": "mp4",
+  "video/webm": "webm",
+  "video/quicktime": "mov",
 };
 
-const MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
+const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
+const MAX_VIDEO_BYTES = 200 * 1024 * 1024;
+const VIDEO_PRESIGN_EXPIRY_SECONDS = 1200;
 
 const cursorSchema = z.object({ createdAt: z.coerce.date(), id: z.string() });
 
@@ -70,30 +76,47 @@ export const mediaRouter = createPublicTRPCRouter({
       };
     }),
 
-  createPresignedUrl: authedProcedure
+  createPresignedUrl: verifiedProcedure
     .use(strictRateLimit({ path: "media.createPresignedUrl", limit: 30, window: "1 h" }))
     .input(
-      z.object({
-        contentType: z.string(),
-        size: z.number().int().positive().max(MAX_UPLOAD_BYTES),
-      })
+      z
+        .object({
+          contentType: z.string(),
+          size: z.number().int().positive(),
+        })
+        .refine(
+          (input) => {
+            const maxBytes = input.contentType.startsWith("video/")
+              ? MAX_VIDEO_BYTES
+              : MAX_IMAGE_BYTES;
+            return input.size <= maxBytes;
+          },
+          { message: "File is too large", path: ["size"] }
+        )
     )
     .mutation(async ({ ctx, input }) => {
-      const ext = ALLOWED_IMAGE_TYPES[input.contentType];
+      const ext = ALLOWED_MEDIA_TYPES[input.contentType];
       if (!ext) {
-        throw new TRPCError({ code: "BAD_REQUEST", message: "Unsupported image type" });
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Unsupported media type" });
       }
 
+      const quota = await getQuota(ctx.session.user.id);
+      if (quota.usedBytes + input.size > quota.totalBytes) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Storage quota exceeded" });
+      }
+
+      const isVideo = input.contentType.startsWith("video/");
       const key = `media/${ctx.session.user.id}/${randomUUID()}.${ext}`;
       const { uploadUrl, publicUrl } = await createPresignedUploadUrl({
         key,
         contentType: input.contentType,
+        ...(isVideo ? { expiresInSeconds: VIDEO_PRESIGN_EXPIRY_SECONDS } : {}),
       });
 
       return { uploadUrl, publicUrl, key };
     }),
 
-  confirm: authedProcedure
+  confirm: verifiedProcedure
     .input(
       z.object({
         key: z.string(),
@@ -123,26 +146,40 @@ export const mediaRouter = createPublicTRPCRouter({
         }
       }
 
-      const rows = await db
-        .insert(media)
-        .values({
-          id: randomUUID(),
-          ownerId: ctx.session.user.id,
-          folderId: input.folderId ?? null,
-          storageKey: input.key,
-          url: input.url,
-          originalName: input.originalName,
-          mimeType: input.mimeType,
-          size: input.size,
-          width: input.width ?? null,
-          height: input.height ?? null,
-        })
-        .returning();
+      const inserted = await db.transaction(async (tx) => {
+        const reserved = await tryReserveQuota(ctx.session.user.id, input.size, tx);
+        if (!reserved) {
+          return null;
+        }
 
-      return rows[0];
+        const rows = await tx
+          .insert(media)
+          .values({
+            id: randomUUID(),
+            ownerId: ctx.session.user.id,
+            folderId: input.folderId ?? null,
+            storageKey: input.key,
+            url: input.url,
+            originalName: input.originalName,
+            mimeType: input.mimeType,
+            size: input.size,
+            width: input.width ?? null,
+            height: input.height ?? null,
+          })
+          .returning();
+
+        return rows[0];
+      });
+
+      if (!inserted) {
+        await deleteObject(input.key);
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Storage quota exceeded" });
+      }
+
+      return inserted;
     }),
 
-  rename: authedProcedure
+  rename: verifiedProcedure
     .input(z.object({ id: z.string(), name: z.string().trim().min(1).max(255) }))
     .mutation(async ({ ctx, input }) => {
       const rows = await db
@@ -159,7 +196,7 @@ export const mediaRouter = createPublicTRPCRouter({
       return updated;
     }),
 
-  move: authedProcedure
+  move: verifiedProcedure
     .input(z.object({ id: z.string(), folderId: z.string().nullable() }))
     .mutation(async ({ ctx, input }) => {
       if (input.folderId) {
@@ -188,7 +225,7 @@ export const mediaRouter = createPublicTRPCRouter({
       return updated;
     }),
 
-  delete: authedProcedure
+  delete: verifiedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const rows = await db
@@ -202,14 +239,16 @@ export const mediaRouter = createPublicTRPCRouter({
       }
 
       await deleteObject(deleted.storageKey);
+      await releaseQuota(ctx.session.user.id, deleted.size);
 
       return { id: deleted.id };
     }),
 
-  bulkDelete: authedProcedure
+  bulkDelete: verifiedProcedure
     .input(z.object({ ids: z.array(z.string()).min(1).max(200) }))
     .mutation(async ({ ctx, input }) => {
       const deletedIds: string[] = [];
+      let releasedBytes = 0;
 
       for (const id of input.ids) {
         const rows = await db
@@ -221,7 +260,12 @@ export const mediaRouter = createPublicTRPCRouter({
         if (deleted) {
           await deleteObject(deleted.storageKey);
           deletedIds.push(deleted.id);
+          releasedBytes += deleted.size;
         }
+      }
+
+      if (releasedBytes > 0) {
+        await releaseQuota(ctx.session.user.id, releasedBytes);
       }
 
       return { ids: deletedIds };

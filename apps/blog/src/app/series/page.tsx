@@ -23,7 +23,7 @@ export default function SeriesIndexPage() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {isLoading &&
             Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton key={i} className="h-32 w-full rounded-xl" />
+              <Skeleton key={i} className="skeleton-shimmer h-32 w-full rounded-xl" />
             ))}
 
           {error && (
@@ -41,7 +41,7 @@ export default function SeriesIndexPage() {
 
           {seriesList?.map((s) => (
             <Link key={s.id} href={`/series/${s.slug}`}>
-              <Card className="flex h-full flex-col gap-2 border-border/60 p-5 transition-colors hover:bg-accent/50">
+              <Card className="card-hover flex h-full flex-col gap-2 p-5">
                 <CardHeader className="flex flex-row items-center gap-2 p-0">
                   <Library className="size-4 shrink-0 text-muted-foreground" />
                   <CardTitle className="text-base">{s.title}</CardTitle>

@@ -1,17 +1,19 @@
 import { db } from "@repo/db";
-import { post, series } from "@repo/db/schema";
+import { category, post, series, tag } from "@repo/db/schema";
 import { eq } from "drizzle-orm";
 import type { MetadataRoute } from "next";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://blog.zyadyasser.net";
 
-  const [posts, allSeries] = await Promise.all([
+  const [posts, allSeries, allCategories, allTags] = await Promise.all([
     db.query.post.findMany({
       where: eq(post.published, true),
       columns: { slug: true, updatedAt: true },
     }),
     db.query.series.findMany({ columns: { slug: true, updatedAt: true } }),
+    db.query.category.findMany({ columns: { slug: true, createdAt: true } }),
+    db.query.tag.findMany({ columns: { slug: true, createdAt: true } }),
   ]);
 
   return [
@@ -28,6 +30,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: s.updatedAt,
       changeFrequency: "monthly" as const,
       priority: 0.6,
+    })),
+    ...allCategories.map((c) => ({
+      url: `${baseUrl}/category/${c.slug}`,
+      lastModified: c.createdAt,
+      changeFrequency: "weekly" as const,
+      priority: 0.5,
+    })),
+    ...allTags.map((t) => ({
+      url: `${baseUrl}/tag/${t.slug}`,
+      lastModified: t.createdAt,
+      changeFrequency: "weekly" as const,
+      priority: 0.4,
     })),
   ];
 }

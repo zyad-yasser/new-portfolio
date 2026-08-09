@@ -7,6 +7,23 @@ import { formatPost, postWith } from "./post";
 
 const cursorSchema = z.object({ rank: z.number(), id: z.string() });
 
+function buildPrefixTsQuery(query: string) {
+  const words = query
+    .split(/\s+/)
+    .map((word) => word.replace(/[&|!:()<>*\\']/g, "").trim())
+    .filter(Boolean);
+
+  if (words.length === 0) {
+    return null;
+  }
+
+  const tsqueryString = words
+    .map((word, index) => (index === words.length - 1 ? `${word}:*` : word))
+    .join(" & ");
+
+  return sql`to_tsquery('english', ${tsqueryString})`;
+}
+
 export const searchRouter = createPublicTRPCRouter({
   posts: publicProcedure
     .input(
@@ -19,7 +36,12 @@ export const searchRouter = createPublicTRPCRouter({
     .query(async ({ ctx, input }) => {
       const cursor = input.cursor;
       const limit = input.limit;
-      const tsquery = sql`websearch_to_tsquery('english', ${input.query})`;
+      const tsquery = buildPrefixTsQuery(input.query);
+
+      if (!tsquery) {
+        return { items: [], nextCursor: null };
+      }
+
       const rank = sql<number>`ts_rank(${post.searchVector}, ${tsquery})`;
 
       const blockedIds = ctx.session

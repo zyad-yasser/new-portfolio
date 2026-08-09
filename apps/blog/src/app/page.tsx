@@ -5,15 +5,18 @@ import { SiteHeader } from "@/components/site-header";
 import { categoryColorClasses } from "@/lib/category-colors";
 import { publicAuthClient } from "@repo/auth/public-client";
 import { publicApi } from "@repo/trpc/public/react";
+import { AmbientGradient } from "@repo/ui/ambient-gradient";
 import { Badge } from "@repo/ui/badge";
 import { Button } from "@repo/ui/button";
 import { Card } from "@repo/ui/card";
+import { containerVariants, itemVariants } from "@repo/ui/lib/motion";
 import { cn } from "@repo/ui/lib/utils";
 import { Skeleton } from "@repo/ui/skeleton";
 import { TooltipProvider } from "@repo/ui/tooltip";
+import { motion } from "framer-motion";
 import { Loader2, PenLine } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
 export default function BlogHomePage() {
   const { data: session } = publicAuthClient.useSession();
@@ -27,24 +30,7 @@ export default function BlogHomePage() {
   });
   const { data: tags } = publicApi.tag.list.useQuery(undefined, { staleTime: 5 * 60 * 1000 });
 
-  const [categorySlug, setCategorySlug] = useState<string | null>(null);
-  const [tagSlug, setTagSlug] = useState<string | null>(null);
-
   const posts = useMemo(() => data?.pages.flatMap((page) => page.items), [data]);
-  const filteredPosts = useMemo(() => {
-    if (!posts) {
-      return posts;
-    }
-    return posts.filter((post) => {
-      if (categorySlug && post.category?.slug !== categorySlug) {
-        return false;
-      }
-      if (tagSlug && !post.tags.some((tag) => tag.slug === tagSlug)) {
-        return false;
-      }
-      return true;
-    });
-  }, [posts, categorySlug, tagSlug]);
 
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
@@ -71,7 +57,8 @@ export default function BlogHomePage() {
     <>
       <SiteHeader />
       <main className="mx-auto flex max-w-6xl flex-col gap-8 px-6 py-16">
-        <div className="flex flex-col gap-2">
+        <div className="relative flex flex-col gap-2">
+          <AmbientGradient variant="subtle" className="-z-10" />
           <h1 className="text-3xl font-semibold">Blog</h1>
           <p className="text-muted-foreground">A space for everyone to write.</p>
         </div>
@@ -81,41 +68,36 @@ export default function BlogHomePage() {
             <span className="mb-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
               Categories
             </span>
-            <button
-              type="button"
-              onClick={() => setCategorySlug(null)}
-              className={cn(
-                "cursor-pointer rounded-md px-2 py-1.5 text-left text-sm hover:bg-accent",
-                !categorySlug && "bg-accent font-medium"
-              )}
+            <Link
+              href="/"
+              className="rounded-md bg-accent px-2 py-1.5 text-left text-sm font-medium hover:bg-accent"
             >
               All posts
-            </button>
+            </Link>
             {categories?.map((category) => (
-              <button
+              <Link
                 key={category.id}
-                type="button"
-                onClick={() =>
-                  setCategorySlug(category.slug === categorySlug ? null : category.slug)
-                }
-                className={cn(
-                  "flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-accent",
-                  categorySlug === category.slug && "bg-accent font-medium"
-                )}
+                href={`/category/${category.slug}`}
+                className="flex items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-accent"
               >
                 <span
                   className={cn("size-2 rounded-full", categoryColorClasses(category.color).dot)}
                 />
                 {category.name}
-              </button>
+              </Link>
             ))}
           </aside>
 
           <TooltipProvider>
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              variants={containerVariants}
+              className="grid grid-cols-1 gap-5 sm:grid-cols-2"
+            >
               {isLoading &&
                 Array.from({ length: 6 }).map((_, i) => (
-                  <Skeleton key={i} className="h-52 w-full rounded-xl" />
+                  <Skeleton key={i} className="skeleton-shimmer h-52 w-full rounded-xl" />
                 ))}
 
               {error && (
@@ -127,18 +109,18 @@ export default function BlogHomePage() {
                 </div>
               )}
 
-              {!isLoading && !error && filteredPosts?.length === 0 && (
+              {!isLoading && !error && posts?.length === 0 && (
                 <p className="col-span-full text-center text-muted-foreground">
-                  {posts?.length === 0
-                    ? "No posts yet - be the first."
-                    : "No posts match this filter."}
+                  No posts yet - be the first.
                 </p>
               )}
 
-              {filteredPosts?.map((post) => (
-                <PostCard key={post.id} post={post} />
+              {posts?.map((post) => (
+                <motion.div key={post.id} variants={itemVariants}>
+                  <PostCard post={post} />
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
 
             {hasNextPage && (
               <div ref={loadMoreRef} className="flex justify-center py-6">
@@ -181,16 +163,9 @@ export default function BlogHomePage() {
                 </span>
                 <div className="flex flex-wrap gap-1.5">
                   {tags.map((tag) => (
-                    <button
-                      key={tag.id}
-                      type="button"
-                      className="cursor-pointer"
-                      onClick={() => setTagSlug(tag.slug === tagSlug ? null : tag.slug)}
-                    >
-                      <Badge variant={tagSlug === tag.slug ? "default" : "secondary"}>
-                        {tag.name}
-                      </Badge>
-                    </button>
+                    <Link key={tag.id} href={`/tag/${tag.slug}`}>
+                      <Badge variant="secondary">{tag.name}</Badge>
+                    </Link>
                   ))}
                 </div>
               </Card>

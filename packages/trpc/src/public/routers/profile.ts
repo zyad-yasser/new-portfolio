@@ -3,7 +3,7 @@ import { post, user, userFollow, userProfile } from "@repo/db/schema";
 import { TRPCError } from "@trpc/server";
 import { and, count, desc, eq, ne } from "drizzle-orm";
 import { z } from "zod";
-import { authedProcedure, createPublicTRPCRouter, publicProcedure } from "../init";
+import { authedProcedure, createPublicTRPCRouter, publicProcedure, verifiedProcedure } from "../init";
 import { formatPost, postWith } from "./post";
 
 function slugifyBase(value: string) {
@@ -119,7 +119,7 @@ export const profileRouter = createPublicTRPCRouter({
 
   mine: authedProcedure.query(({ ctx }) => ensureUserProfile(ctx.session.user.id)),
 
-  update: authedProcedure
+  update: verifiedProcedure
     .input(
       z.object({
         username: z

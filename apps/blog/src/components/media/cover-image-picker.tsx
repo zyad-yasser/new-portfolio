@@ -37,6 +37,7 @@ export function CoverImagePicker({
           open={open}
           onOpenChange={setOpen}
           onSelect={(item) => onChange(item.url)}
+          mediaKind="image"
         />
       </div>
     );
@@ -58,6 +59,7 @@ export function CoverImagePicker({
         open={open}
         onOpenChange={setOpen}
         onSelect={(item) => onChange(item.url)}
+        mediaKind="image"
       />
     </>
   );

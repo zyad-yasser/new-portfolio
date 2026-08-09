@@ -5,10 +5,13 @@
   "sideEffects": ["**/*.css"],
   "exports": {
     "./styles/theme.css": "./src/styles/theme.css",
+    "./styles/premium.css": "./src/styles/premium.css",
     "./lib/utils": "./src/lib/utils.ts",
+    "./lib/motion": "./src/lib/motion.ts",
     "./hooks/*": "./src/hooks/*.ts",
     "./theme-provider": "./src/components/theme-provider.tsx",
     "./theme-toggle": "./src/components/theme-toggle.tsx",
+    "./ambient-gradient": "./src/components/ambient-gradient.tsx",
     "./*": "./src/components/ui/*.tsx"
   },
   "scripts": {
@@ -22,6 +25,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
+    "framer-motion": "^11.12.0",
     "lucide-react": "^0.469.0",
     "next-themes": "^0.4.6",
     "radix-ui": "^1.6.7",

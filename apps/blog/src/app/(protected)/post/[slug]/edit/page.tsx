@@ -18,8 +18,8 @@ export default function EditPostPage() {
       <>
         <SiteHeader />
         <main className="mx-auto flex max-w-3xl flex-col gap-6 px-6 py-16">
-          <Skeleton className="h-9 w-1/2" />
-          <Skeleton className="h-64 w-full" />
+          <Skeleton className="skeleton-shimmer h-9 w-1/2" />
+          <Skeleton className="skeleton-shimmer h-64 w-full" />
         </main>
       </>
     );

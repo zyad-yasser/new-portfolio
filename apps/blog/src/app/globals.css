@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "@repo/ui/styles/theme.css";
+@import "@repo/ui/styles/premium.css";
 @plugin "@tailwindcss/typography";
 @source "../../../../packages/ui/src";
 
@@ -23,6 +24,32 @@
   --border: 250 10% 17%;
   --input: 250 10% 15%;
   --ring: 262 83% 66%;
+
+  --success: 152 60% 32%;
+  --success-foreground: 0 0% 100%;
+  --warning: 38 92% 55%;
+  --warning-foreground: 0 0% 6%;
+
+  /* Cool "aurora" gradient anchored on the blog's own violet --primary, flanked by
+     a cyan and a magenta/deep-purple waypoint — same 4-stop structure as the shared
+     premium pattern, distinct hues from apps/web's warm coral/amber identity. */
+  --gradient-brand: linear-gradient(
+    135deg,
+    hsl(189 90% 55%) 0%,
+    hsl(var(--primary)) 40%,
+    hsl(310 78% 62%) 70%,
+    hsl(280 65% 58%) 100%
+  );
+  --gradient-brand-radial: radial-gradient(
+    circle at 30% 20%,
+    hsl(189 90% 55% / 0.85) 0%,
+    hsl(var(--primary) / 0.55) 35%,
+    hsl(310 78% 62% / 0.35) 65%,
+    hsl(280 65% 58% / 0.25) 85%,
+    transparent 100%
+  );
+  --ambient-glow-opacity: 0.12;
+  --ambient-glow-blend: screen;
 }
 
 .light {
@@ -45,6 +72,29 @@
   --border: 255 10% 90%;
   --input: 255 10% 90%;
   --ring: 262 83% 58%;
+
+  --success: 152 60% 30%;
+  --success-foreground: 0 0% 100%;
+  --warning: 38 85% 40%;
+  --warning-foreground: 0 0% 100%;
+
+  --gradient-brand: linear-gradient(
+    135deg,
+    hsl(192 85% 38%) 0%,
+    hsl(var(--primary)) 40%,
+    hsl(310 70% 45%) 70%,
+    hsl(280 55% 42%) 100%
+  );
+  --gradient-brand-radial: radial-gradient(
+    circle at 30% 20%,
+    hsl(192 85% 38% / 0.7) 0%,
+    hsl(var(--primary) / 0.45) 35%,
+    hsl(310 70% 45% / 0.3) 65%,
+    hsl(280 55% 42% / 0.2) 85%,
+    transparent 100%
+  );
+  --ambient-glow-opacity: 0.08;
+  --ambient-glow-blend: normal;
 }
 
 body {

@@ -18,8 +18,8 @@ export default function SeriesDetailPage() {
       <>
         <SiteHeader />
         <main className="mx-auto flex max-w-6xl flex-col gap-6 px-6 py-16">
-          <Skeleton className="h-9 w-1/2" />
-          <Skeleton className="h-4 w-1/3" />
+          <Skeleton className="skeleton-shimmer h-9 w-1/2" />
+          <Skeleton className="skeleton-shimmer h-4 w-1/3" />
         </main>
       </>
     );

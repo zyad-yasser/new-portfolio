@@ -1,3 +1,4 @@
+import { EmailVerificationBanner } from "@/components/email-verification-banner";
 import { PublicTRPCReactProvider } from "@repo/trpc/public/react";
 import { ThemeProvider } from "@repo/ui/theme-provider";
 import type { Metadata } from "next";
@@ -35,7 +36,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           enableSystem
           disableTransitionOnChange
         >
-          <PublicTRPCReactProvider>{children}</PublicTRPCReactProvider>
+          <PublicTRPCReactProvider>
+            <EmailVerificationBanner />
+            {children}
+          </PublicTRPCReactProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -1,68 +1,20 @@
 "use client";
 
 import { SiteHeader } from "@/components/site-header";
+import {
+  NOTIFICATION_TYPE_ICON,
+  initialsFor,
+  notificationHref,
+  notificationText,
+} from "@/lib/notifications";
 import { publicApi } from "@repo/trpc/public/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@repo/ui/avatar";
 import { Button } from "@repo/ui/button";
 import { cn } from "@repo/ui/lib/utils";
 import { Skeleton } from "@repo/ui/skeleton";
-import { Heart, Loader2, MessageCircle, Reply, UserPlus } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useMemo } from "react";
-
-type NotificationItem = {
-  id: string;
-  type: "follow" | "comment" | "reply" | "reaction" | "mention";
-  readAt: Date | string | null;
-  createdAt: Date | string;
-  actor: {
-    id: string;
-    name: string;
-    image: string | null;
-    profile: { username: string } | null;
-  } | null;
-  post: { slug: string; title: string } | null;
-};
-
-const TYPE_ICON = {
-  follow: UserPlus,
-  comment: MessageCircle,
-  reply: Reply,
-  reaction: Heart,
-  mention: MessageCircle,
-} as const;
-
-function notificationText(n: NotificationItem) {
-  const actorName = n.actor?.name ?? "Someone";
-  switch (n.type) {
-    case "follow":
-      return `${actorName} started following you`;
-    case "comment":
-      return `${actorName} commented on "${n.post?.title ?? "your post"}"`;
-    case "reply":
-      return `${actorName} replied to your comment on "${n.post?.title ?? "a post"}"`;
-    case "reaction":
-      return `${actorName} reacted to "${n.post?.title ?? "your post"}"`;
-    case "mention":
-      return `${actorName} mentioned you in "${n.post?.title ?? "a post"}"`;
-  }
-}
-
-function notificationHref(n: NotificationItem) {
-  if (n.type === "follow") {
-    return n.actor?.profile ? `/u/${n.actor.profile.username}` : "/";
-  }
-  return n.post ? `/post/${n.post.slug}` : "/";
-}
-
-function initialsFor(name: string) {
-  return name
-    .split(" ")
-    .map((part) => part[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
-}
 
 export default function NotificationsPage() {
   const utils = publicApi.useUtils();
@@ -108,7 +60,7 @@ export default function NotificationsPage() {
         <div className="flex flex-col gap-2">
           {isLoading &&
             Array.from({ length: 5 }).map((_, i) => (
-              <Skeleton key={i} className="h-16 w-full rounded-lg" />
+              <Skeleton key={i} className="skeleton-shimmer h-16 w-full rounded-lg" />
             ))}
 
           {error && (
@@ -125,7 +77,7 @@ export default function NotificationsPage() {
           )}
 
           {notifications?.map((n) => {
-            const Icon = TYPE_ICON[n.type];
+            const Icon = NOTIFICATION_TYPE_ICON[n.type];
             return (
               <Link
                 key={n.id}

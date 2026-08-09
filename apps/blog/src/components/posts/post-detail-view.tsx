@@ -44,10 +44,10 @@ export function PostDetailView({ slug }: { slug: string }) {
       <>
         <SiteHeader />
         <main className="mx-auto flex max-w-5xl flex-col gap-6 px-6 py-16">
-          <Skeleton className="h-4 w-40" />
-          <Skeleton className="h-9 w-2/3" />
-          <Skeleton className="h-4 w-1/3" />
-          <Skeleton className="h-64 w-full" />
+          <Skeleton className="skeleton-shimmer h-4 w-40" />
+          <Skeleton className="skeleton-shimmer h-9 w-2/3" />
+          <Skeleton className="skeleton-shimmer h-4 w-1/3" />
+          <Skeleton className="skeleton-shimmer h-64 w-full" />
         </main>
       </>
     );
@@ -165,7 +165,7 @@ export function PostDetailView({ slug }: { slug: string }) {
             {post.author.profile && <AuthorCard username={post.author.profile.username} />}
 
             {post.series && post.seriesContext && (
-              <Card className="flex flex-col gap-3 border-border/60 p-4">
+              <Card className="glass flex flex-col gap-3 p-4">
                 <Link
                   href={`/series/${post.series.slug}`}
                   className="flex items-center gap-2 text-sm font-medium hover:underline"
@@ -208,7 +208,7 @@ export function PostDetailView({ slug }: { slug: string }) {
             )}
 
             {post.tags.length > 0 && (
-              <Card className="flex flex-col gap-2 border-border/60 p-4">
+              <Card className="glass flex flex-col gap-2 p-4">
                 <span className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
                   Tags
                 </span>
@@ -223,7 +223,7 @@ export function PostDetailView({ slug }: { slug: string }) {
             )}
 
             {headings.length >= 2 && (
-              <Card className="flex flex-col gap-2 border-border/60 p-4">
+              <Card className="glass flex flex-col gap-2 p-4">
                 <span className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
                   On this page
                 </span>

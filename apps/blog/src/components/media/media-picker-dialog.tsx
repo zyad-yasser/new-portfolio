@@ -9,13 +9,28 @@ import { Input } from "@repo/ui/input";
 import { cn } from "@repo/ui/lib/utils";
 import { Progress } from "@repo/ui/progress";
 import { Skeleton } from "@repo/ui/skeleton";
-import { AlertCircle, ChevronRight, Folder, ImageOff, Plus, Search, Trash2 } from "lucide-react";
+import {
+  AlertCircle,
+  ChevronRight,
+  Folder,
+  ImageOff,
+  Play,
+  Plus,
+  Search,
+  Trash2,
+} from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
-const ACCEPT = "image/png,image/jpeg,image/webp,image/gif";
-const MAX_SIZE_BYTES = 8 * 1024 * 1024;
+const IMAGE_ACCEPT = "image/png,image/jpeg,image/webp,image/gif";
+const ALL_ACCEPT = `${IMAGE_ACCEPT},video/mp4,video/webm,video/quicktime`;
+const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
+const MAX_VIDEO_BYTES = 200 * 1024 * 1024;
 const SEARCH_DEBOUNCE_MS = 250;
+
+function isVideoItem(item: { mimeType: string }) {
+  return item.mimeType.startsWith("video/");
+}
 
 function UploadRow({ file, progress, status, error }: { file: File } & Record<string, unknown>) {
   return (
@@ -37,10 +52,12 @@ export function MediaPickerDialog({
   open,
   onOpenChange,
   onSelect,
+  mediaKind = "all",
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSelect: (item: MediaItem) => void;
+  mediaKind?: "image" | "all";
 }) {
   const [folderId, setFolderId] = useState<string | null>(null);
   const [query, setQuery] = useState("");
@@ -77,7 +94,10 @@ export function MediaPickerDialog({
     { folderId, search: trimmedQuery || undefined },
     { enabled: open }
   );
-  const mediaList = mediaData?.items;
+  const mediaList =
+    mediaKind === "image"
+      ? mediaData?.items.filter((item) => !isVideoItem(item))
+      : mediaData?.items;
 
   const createFolder = publicApi.mediaFolder.create.useMutation({
     onSuccess: (created) => {
@@ -103,7 +123,7 @@ export function MediaPickerDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex max-h-[80vh] flex-col sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Choose an image</DialogTitle>
+          <DialogTitle>{mediaKind === "image" ? "Choose an image" : "Choose media"}</DialogTitle>
         </DialogHeader>
 
         <div className="flex items-center gap-2">
@@ -187,9 +207,9 @@ export function MediaPickerDialog({
         )}
 
         <Dropzone
-          accept={ACCEPT}
+          accept={mediaKind === "image" ? IMAGE_ACCEPT : ALL_ACCEPT}
           multiple
-          maxSize={MAX_SIZE_BYTES}
+          maxSize={mediaKind === "image" ? MAX_IMAGE_BYTES : MAX_VIDEO_BYTES}
           onFiles={(files) => uploadFiles(files, folderId)}
           className="min-h-28 p-6"
         />
@@ -206,7 +226,7 @@ export function MediaPickerDialog({
           {isLoading ? (
             <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
               {Array.from({ length: 8 }).map((_, index) => (
-                <Skeleton key={index} className="aspect-square rounded-lg" />
+                <Skeleton key={index} className="skeleton-shimmer aspect-square rounded-lg" />
               ))}
             </div>
           ) : !subfolders?.length && !mediaList?.length ? (
@@ -247,14 +267,29 @@ export function MediaPickerDialog({
                     }}
                     className="absolute inset-0 cursor-pointer"
                   >
-                    <Image
-                      src={item.url}
-                      alt={item.originalName}
-                      fill
-                      sizes="160px"
-                      className="object-cover"
-                      draggable={false}
-                    />
+                    {isVideoItem(item) ? (
+                      <>
+                        <video
+                          src={item.url}
+                          muted
+                          playsInline
+                          preload="metadata"
+                          className="h-full w-full object-cover"
+                        />
+                        <span className="absolute inset-0 flex items-center justify-center bg-black/20">
+                          <Play className="size-6 fill-white text-white" />
+                        </span>
+                      </>
+                    ) : (
+                      <Image
+                        src={item.url}
+                        alt={item.originalName}
+                        fill
+                        sizes="160px"
+                        className="object-cover"
+                        draggable={false}
+                      />
+                    )}
                   </button>
                   <button
                     type="button"

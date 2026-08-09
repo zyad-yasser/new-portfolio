@@ -4,7 +4,12 @@ import { comment, post, userBlock } from "@repo/db/schema";
 import { TRPCError } from "@trpc/server";
 import { and, asc, eq, isNull, notInArray } from "drizzle-orm";
 import { z } from "zod";
-import { authedProcedure, createPublicTRPCRouter, publicProcedure, strictRateLimit } from "../init";
+import {
+  createPublicTRPCRouter,
+  publicProcedure,
+  strictRateLimit,
+  verifiedProcedure,
+} from "../init";
 import { assertNotBlocked } from "./block";
 import { createNotification } from "./notification";
 import { ensureUserProfile } from "./profile";
@@ -44,7 +49,7 @@ export const commentRouter = createPublicTRPCRouter({
       });
     }),
 
-  create: authedProcedure
+  create: verifiedProcedure
     .use(strictRateLimit({ path: "comment.create", limit: 20, window: "1 h" }))
     .input(
       z.object({
@@ -106,7 +111,7 @@ export const commentRouter = createPublicTRPCRouter({
       return created;
     }),
 
-  update: authedProcedure
+  update: verifiedProcedure
     .input(z.object({ id: z.string(), body: z.string().trim().min(1).max(2000) }))
     .mutation(async ({ ctx, input }) => {
       const rows = await db
@@ -122,7 +127,7 @@ export const commentRouter = createPublicTRPCRouter({
       return rows[0];
     }),
 
-  delete: authedProcedure
+  delete: verifiedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const target = await db.query.comment.findFirst({

@@ -15,6 +15,7 @@ import {
   userBlock,
   userFollow,
   userProfile,
+  userStorageQuota,
 } from "./blog";
 
 export const postRelations = relations(post, ({ one, many }) => ({
@@ -45,6 +46,7 @@ export const userRelations = relations(user, ({ many, one }) => ({
   series: many(series),
   notificationsReceived: many(notification, { relationName: "notificationsReceived" }),
   notificationsSent: many(notification, { relationName: "notificationsSent" }),
+  storageQuota: one(userStorageQuota),
 }));
 
 export const seriesRelations = relations(series, ({ one, many }) => ({
@@ -169,6 +171,13 @@ export const mediaFolderRelations = relations(mediaFolder, ({ one, many }) => ({
   }),
   children: many(mediaFolder, { relationName: "folderTree" }),
   media: many(media),
+}));
+
+export const userStorageQuotaRelations = relations(userStorageQuota, ({ one }) => ({
+  owner: one(user, {
+    fields: [userStorageQuota.ownerId],
+    references: [user.id],
+  }),
 }));
 
 export const notificationRelations = relations(notification, ({ one }) => ({

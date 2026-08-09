@@ -64,8 +64,8 @@ export default function ProfilePage() {
       <>
         <SiteHeader />
         <main className="mx-auto flex max-w-3xl flex-col gap-6 px-6 py-16">
-          <Skeleton className="h-24 w-full" />
-          <Skeleton className="h-64 w-full" />
+          <Skeleton className="skeleton-shimmer h-24 w-full" />
+          <Skeleton className="skeleton-shimmer h-64 w-full" />
         </main>
       </>
     );
@@ -145,7 +145,7 @@ export default function ProfilePage() {
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                 {postsLoading &&
                   Array.from({ length: 4 }).map((_, i) => (
-                    <Skeleton key={i} className="h-52 w-full rounded-xl" />
+                    <Skeleton key={i} className="skeleton-shimmer h-52 w-full rounded-xl" />
                   ))}
                 {!postsLoading && posts?.length === 0 && (
                   <p className="col-span-full text-center text-muted-foreground">

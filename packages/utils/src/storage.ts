@@ -9,7 +9,11 @@ export function getPublicUrl(key: string) {
   return getProvider().getPublicUrl(key);
 }
 
-export function createPresignedUploadUrl(args: { key: string; contentType: string }) {
+export function createPresignedUploadUrl(args: {
+  key: string;
+  contentType: string;
+  expiresInSeconds?: number;
+}) {
   return getProvider().createPresignedUploadUrl(args);
 }
 

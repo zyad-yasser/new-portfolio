@@ -25,6 +25,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@repo/ui/dialo
 import { Dropzone } from "@repo/ui/dropzone";
 import { Input } from "@repo/ui/input";
 import { cn } from "@repo/ui/lib/utils";
+import { Progress } from "@repo/ui/progress";
 import { Skeleton } from "@repo/ui/skeleton";
 import {
   Check,
@@ -35,6 +36,7 @@ import {
   ImageOff,
   Loader2,
   Pencil,
+  Play,
   Plus,
   Trash2,
 } from "lucide-react";
@@ -42,8 +44,50 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { type KeyboardEvent, useMemo, useState } from "react";
 
-const ACCEPT = "image/png,image/jpeg,image/webp,image/gif";
-const MAX_SIZE_BYTES = 8 * 1024 * 1024;
+const ACCEPT = "image/png,image/jpeg,image/webp,image/gif,video/mp4,video/webm,video/quicktime";
+const MAX_SIZE_BYTES = 200 * 1024 * 1024;
+
+function isVideoItem(item: { mimeType: string }) {
+  return item.mimeType.startsWith("video/");
+}
+
+function formatGb(bytes: number) {
+  return (bytes / (1024 * 1024 * 1024)).toFixed(1);
+}
+
+function StorageUsageBar() {
+  const { data: quota } = publicApi.mediaQuota.get.useQuery();
+
+  if (!quota) {
+    return <Skeleton className="skeleton-shimmer h-10 w-full rounded-lg" />;
+  }
+
+  const fraction = quota.totalBytes > 0 ? quota.usedBytes / quota.totalBytes : 0;
+  const percent = Math.min(100, fraction * 100);
+  const isFull = fraction >= 1;
+  const isNearFull = fraction >= 0.8;
+
+  return (
+    <div className="flex flex-col gap-1.5 rounded-lg border border-border/60 p-3">
+      <div className="flex items-center justify-between gap-3 text-sm">
+        <span className="text-muted-foreground">Storage used</span>
+        <span className={cn("font-medium", isFull && "text-destructive")}>
+          {formatGb(quota.usedBytes)} GB of {formatGb(quota.totalBytes)} GB
+        </span>
+      </div>
+      <Progress
+        value={percent}
+        className={cn(
+          "[&>[data-slot=progress-indicator]]:bg-primary",
+          isNearFull &&
+            !isFull &&
+            "[&>[data-slot=progress-indicator]]:bg-amber-500 dark:[&>[data-slot=progress-indicator]]:bg-amber-400",
+          isFull && "[&>[data-slot=progress-indicator]]:bg-destructive"
+        )}
+      />
+    </div>
+  );
+}
 
 type DragPayload = { id: string; kind: "file" | "folder" };
 
@@ -378,6 +422,8 @@ export default function MediaLibraryPage() {
           </div>
         </div>
 
+        <StorageUsageBar />
+
         {actionError && (
           <div className="flex items-center justify-between gap-3 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
             {actionError}
@@ -464,7 +510,7 @@ export default function MediaLibraryPage() {
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
           {foldersLoading &&
             Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton key={i} className="aspect-square rounded-lg" />
+              <Skeleton key={i} className="skeleton-shimmer aspect-square rounded-lg" />
             ))}
 
           {subfolders?.map((folder) => (
@@ -565,7 +611,10 @@ export default function MediaLibraryPage() {
 
           {filesLoading &&
             Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton key={`file-skel-${i}`} className="aspect-square rounded-lg" />
+              <Skeleton
+                key={`file-skel-${i}`}
+                className="skeleton-shimmer aspect-square rounded-lg"
+              />
             ))}
 
           {files.map((item) => (
@@ -600,18 +649,33 @@ export default function MediaLibraryPage() {
                     }
                   }}
                   className={cn(
-                    "group relative aspect-square cursor-pointer overflow-hidden rounded-lg border border-border/60 hover:border-primary",
+                    "card-hover group relative aspect-square cursor-pointer overflow-hidden rounded-lg",
                     selectedFileIds.has(item.id) && "border-primary ring-2 ring-primary"
                   )}
                 >
-                  <Image
-                    src={item.url}
-                    alt={item.originalName}
-                    fill
-                    sizes="220px"
-                    className="object-cover"
-                    draggable={false}
-                  />
+                  {isVideoItem(item) ? (
+                    <>
+                      <video
+                        src={item.url}
+                        muted
+                        playsInline
+                        preload="metadata"
+                        className="h-full w-full object-cover"
+                      />
+                      <span className="absolute inset-0 flex items-center justify-center bg-black/20">
+                        <Play className="size-6 fill-white text-white" />
+                      </span>
+                    </>
+                  ) : (
+                    <Image
+                      src={item.url}
+                      alt={item.originalName}
+                      fill
+                      sizes="220px"
+                      className="object-cover"
+                      draggable={false}
+                    />
+                  )}
                   {selectMode && (
                     <div
                       className={cn(

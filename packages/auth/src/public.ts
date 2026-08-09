@@ -1,11 +1,14 @@
 import { db } from "@repo/db";
 import * as schema from "@repo/db/schema";
+import { sendVerificationEmail } from "@repo/email";
 import { requireEnv } from "@repo/utils";
 import { createSecondaryStorage } from "@repo/utils/secondary-storage";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { captcha } from "better-auth/plugins";
 import { roleField } from "./shared";
+
+const appName = requireEnv("APP_NAME");
 
 if (!process.env.PUBLIC_BETTER_AUTH_SECRET) {
   throw new Error("PUBLIC_BETTER_AUTH_SECRET is not set");
@@ -18,6 +21,13 @@ export const publicAuth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
+  },
+  emailVerification: {
+    sendOnSignUp: true,
+    autoSignInAfterVerification: true,
+    sendVerificationEmail: async ({ user, url }) => {
+      await sendVerificationEmail({ appName, to: user.email, name: user.name, url });
+    },
   },
   secret: process.env.PUBLIC_BETTER_AUTH_SECRET,
   baseURL: process.env.PUBLIC_BETTER_AUTH_URL,
@@ -40,6 +50,7 @@ export const publicAuth = betterAuth({
       "/sign-in/email": { window: 60, max: 5 },
       "/sign-up/email": { window: 3600, max: 3 },
       "/request-password-reset": { window: 300, max: 3 },
+      "/send-verification-email": { window: 300, max: 3 },
     },
   },
   plugins: [

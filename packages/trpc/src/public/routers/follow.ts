@@ -3,7 +3,7 @@ import { userFollow } from "@repo/db/schema";
 import { TRPCError } from "@trpc/server";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
-import { authedProcedure, createPublicTRPCRouter, publicProcedure } from "../init";
+import { authedProcedure, createPublicTRPCRouter, publicProcedure, verifiedProcedure } from "../init";
 import { assertNotBlocked } from "./block";
 import { createNotification } from "./notification";
 
@@ -45,7 +45,7 @@ export const followRouter = createPublicTRPCRouter({
       return rows.map((row) => row.following);
     }),
 
-  follow: authedProcedure
+  follow: verifiedProcedure
     .input(z.object({ userId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       if (input.userId === ctx.session.user.id) {
@@ -76,7 +76,7 @@ export const followRouter = createPublicTRPCRouter({
       return { following: true };
     }),
 
-  unfollow: authedProcedure
+  unfollow: verifiedProcedure
     .input(z.object({ userId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       await db

@@ -3,7 +3,7 @@ import { userBlock } from "@repo/db/schema";
 import { TRPCError } from "@trpc/server";
 import { and, eq, or } from "drizzle-orm";
 import { z } from "zod";
-import { authedProcedure, createPublicTRPCRouter } from "../init";
+import { authedProcedure, createPublicTRPCRouter, verifiedProcedure } from "../init";
 
 export async function assertNotBlocked(viewerId: string, targetUserId: string) {
   if (viewerId === targetUserId) {
@@ -35,7 +35,7 @@ export const blockRouter = createPublicTRPCRouter({
     return rows.map((row) => row.blocked);
   }),
 
-  block: authedProcedure
+  block: verifiedProcedure
     .input(z.object({ userId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       if (input.userId === ctx.session.user.id) {
@@ -58,7 +58,7 @@ export const blockRouter = createPublicTRPCRouter({
       return { blocked: true };
     }),
 
-  unblock: authedProcedure
+  unblock: verifiedProcedure
     .input(z.object({ userId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       await db

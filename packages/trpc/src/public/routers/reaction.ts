@@ -3,7 +3,7 @@ import { db } from "@repo/db";
 import { REACTION_TYPES, post, postReaction } from "@repo/db/schema";
 import { and, desc, eq } from "drizzle-orm";
 import { z } from "zod";
-import { authedProcedure, createPublicTRPCRouter, publicProcedure } from "../init";
+import { authedProcedure, createPublicTRPCRouter, publicProcedure, verifiedProcedure } from "../init";
 import { createNotification } from "./notification";
 
 const MAX_REACTORS_SHOWN = 6;
@@ -37,7 +37,7 @@ export const reactionRouter = createPublicTRPCRouter({
       return row?.type ?? null;
     }),
 
-  react: authedProcedure
+  react: verifiedProcedure
     .input(z.object({ postId: z.string(), type: z.enum(REACTION_TYPES) }))
     .mutation(async ({ ctx, input }) => {
       const existing = await db.query.postReaction.findFirst({

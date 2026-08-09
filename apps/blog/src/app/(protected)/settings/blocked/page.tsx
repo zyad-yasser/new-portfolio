@@ -1,20 +1,11 @@
 "use client";
 
-import { SiteHeader } from "@/components/site-header";
+import { initialsFor } from "@/lib/notifications";
 import { publicApi } from "@repo/trpc/public/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@repo/ui/avatar";
 import { Button } from "@repo/ui/button";
 import { Card } from "@repo/ui/card";
 import { Skeleton } from "@repo/ui/skeleton";
-
-function initialsFor(name: string) {
-  return name
-    .split(" ")
-    .map((part) => part[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
-}
 
 export default function BlockedUsersPage() {
   const utils = publicApi.useUtils();
@@ -25,49 +16,46 @@ export default function BlockedUsersPage() {
   });
 
   return (
-    <>
-      <SiteHeader />
-      <main className="mx-auto flex max-w-xl flex-col gap-6 px-6 py-16">
-        <h1 className="text-2xl font-semibold">Blocked users</h1>
+    <div className="flex flex-col gap-6">
+      <h1 className="text-2xl font-semibold">Blocked users</h1>
 
-        {isLoading && <Skeleton className="h-24 w-full" />}
-        {error && (
-          <div className="flex flex-col items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
-            <p>Couldn't load blocked users. {error.message}</p>
-            <Button variant="outline" size="sm" onClick={() => refetch()}>
-              Try again
-            </Button>
-          </div>
-        )}
-        {!isLoading && !error && blocked?.length === 0 && (
-          <p className="text-muted-foreground">You haven't blocked anyone.</p>
-        )}
-
-        <div className="flex flex-col gap-3">
-          {blocked?.map((blockedUser) => (
-            <Card
-              key={blockedUser.id}
-              className="flex flex-row items-center justify-between gap-3 p-4"
-            >
-              <div className="flex items-center gap-3">
-                <Avatar size="sm">
-                  <AvatarImage src={blockedUser.image ?? undefined} alt={blockedUser.name} />
-                  <AvatarFallback>{initialsFor(blockedUser.name)}</AvatarFallback>
-                </Avatar>
-                <span className="text-sm font-medium">{blockedUser.name}</span>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={unblock.isPending}
-                onClick={() => unblock.mutate({ userId: blockedUser.id })}
-              >
-                Unblock
-              </Button>
-            </Card>
-          ))}
+      {isLoading && <Skeleton className="skeleton-shimmer h-24 w-full" />}
+      {error && (
+        <div className="flex flex-col items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
+          <p>Couldn't load blocked users. {error.message}</p>
+          <Button variant="outline" size="sm" onClick={() => refetch()}>
+            Try again
+          </Button>
         </div>
-      </main>
-    </>
+      )}
+      {!isLoading && !error && blocked?.length === 0 && (
+        <p className="text-muted-foreground">You haven't blocked anyone.</p>
+      )}
+
+      <div className="flex flex-col gap-3">
+        {blocked?.map((blockedUser) => (
+          <Card
+            key={blockedUser.id}
+            className="flex flex-row items-center justify-between gap-3 p-4"
+          >
+            <div className="flex items-center gap-3">
+              <Avatar size="sm">
+                <AvatarImage src={blockedUser.image ?? undefined} alt={blockedUser.name} />
+                <AvatarFallback>{initialsFor(blockedUser.name)}</AvatarFallback>
+              </Avatar>
+              <span className="text-sm font-medium">{blockedUser.name}</span>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={unblock.isPending}
+              onClick={() => unblock.mutate({ userId: blockedUser.id })}
+            >
+              Unblock
+            </Button>
+          </Card>
+        ))}
+      </div>
+    </div>
   );
 }

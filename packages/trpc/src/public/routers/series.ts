@@ -4,7 +4,13 @@ import { post, series } from "@repo/db/schema";
 import { TRPCError } from "@trpc/server";
 import { and, asc, eq, ne } from "drizzle-orm";
 import { z } from "zod";
-import { authedProcedure, createPublicTRPCRouter, publicProcedure, strictRateLimit } from "../init";
+import {
+  authedProcedure,
+  createPublicTRPCRouter,
+  publicProcedure,
+  strictRateLimit,
+  verifiedProcedure,
+} from "../init";
 import { formatPost, postWith } from "./post";
 
 function slugifyBase(value: string) {
@@ -93,7 +99,7 @@ export const seriesRouter = createPublicTRPCRouter({
     }));
   }),
 
-  create: authedProcedure
+  create: verifiedProcedure
     .use(strictRateLimit({ path: "series.create", limit: 10, window: "1 h" }))
     .input(
       z.object({
@@ -123,7 +129,7 @@ export const seriesRouter = createPublicTRPCRouter({
       return created;
     }),
 
-  update: authedProcedure
+  update: verifiedProcedure
     .input(
       z.object({
         id: z.string(),
@@ -154,7 +160,7 @@ export const seriesRouter = createPublicTRPCRouter({
       return updated;
     }),
 
-  delete: authedProcedure
+  delete: verifiedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const rows = await db
@@ -169,7 +175,7 @@ export const seriesRouter = createPublicTRPCRouter({
       return { id: rows[0].id };
     }),
 
-  reorder: authedProcedure
+  reorder: verifiedProcedure
     .input(z.object({ seriesId: z.string(), postIds: z.array(z.string()).min(1) }))
     .mutation(async ({ ctx, input }) => {
       const owned = await db.query.series.findFirst({

@@ -28,9 +28,11 @@ export function getPublicUrl(key: string) {
 export async function createPresignedUploadUrl({
   key,
   contentType,
+  expiresInSeconds = PRESIGN_EXPIRY_SECONDS,
 }: {
   key: string;
   contentType: string;
+  expiresInSeconds?: number;
 }) {
   const command = new PutObjectCommand({
     Bucket: requireEnv("S3_BUCKET"),
@@ -38,7 +40,7 @@ export async function createPresignedUploadUrl({
     ContentType: contentType,
   });
   const uploadUrl = await getSignedUrl(getS3Client(), command, {
-    expiresIn: PRESIGN_EXPIRY_SECONDS,
+    expiresIn: expiresInSeconds,
   });
 
   return { uploadUrl, publicUrl: getPublicUrl(key) };

@@ -38,14 +38,18 @@ export function MediaPreviewDialog({
 
         {item && (
           <>
-            <div className="relative max-h-[55vh] min-h-48 flex-1 overflow-hidden rounded-lg border border-border/60 bg-muted/30">
-              <Image
-                src={item.url}
-                alt={item.originalName}
-                fill
-                sizes="672px"
-                className="object-contain"
-              />
+            <div className="relative flex max-h-[55vh] min-h-48 flex-1 items-center justify-center overflow-hidden rounded-lg border border-border/60 bg-muted/30">
+              {item.mimeType.startsWith("video/") ? (
+                <video src={item.url} controls className="max-h-[55vh] w-full" />
+              ) : (
+                <Image
+                  src={item.url}
+                  alt={item.originalName}
+                  fill
+                  sizes="672px"
+                  className="object-contain"
+                />
+              )}
             </div>
 
             <dl className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-sm sm:grid-cols-4">

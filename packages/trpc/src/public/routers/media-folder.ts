@@ -5,7 +5,8 @@ import { deleteObject } from "@repo/utils/storage";
 import { TRPCError } from "@trpc/server";
 import { and, asc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
-import { authedProcedure, createPublicTRPCRouter } from "../init";
+import { authedProcedure, createPublicTRPCRouter, verifiedProcedure } from "../init";
+import { releaseQuota } from "./media-quota";
 
 async function getDescendantFolderIds(rootId: string) {
   const rows = await db.execute<{ id: string }>(sql`
@@ -69,7 +70,7 @@ export const mediaFolderRouter = createPublicTRPCRouter({
       return path;
     }),
 
-  create: authedProcedure
+  create: verifiedProcedure
     .input(
       z.object({
         name: z.string().trim().min(1).max(100),
@@ -107,7 +108,7 @@ export const mediaFolderRouter = createPublicTRPCRouter({
       return created;
     }),
 
-  rename: authedProcedure
+  rename: verifiedProcedure
     .input(z.object({ id: z.string(), name: z.string().trim().min(1).max(100) }))
     .mutation(async ({ ctx, input }) => {
       const rows = await db
@@ -124,7 +125,7 @@ export const mediaFolderRouter = createPublicTRPCRouter({
       return updated;
     }),
 
-  move: authedProcedure
+  move: verifiedProcedure
     .input(z.object({ id: z.string(), parentId: z.string().nullable() }))
     .mutation(async ({ ctx, input }) => {
       const owned = await db.query.mediaFolder.findFirst({
@@ -170,7 +171,7 @@ export const mediaFolderRouter = createPublicTRPCRouter({
       return rows[0];
     }),
 
-  delete: authedProcedure
+  delete: verifiedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const owned = await db.query.mediaFolder.findFirst({
@@ -184,7 +185,7 @@ export const mediaFolderRouter = createPublicTRPCRouter({
 
       const containedMedia = await db.query.media.findMany({
         where: inArray(media.folderId, descendantIds),
-        columns: { id: true, storageKey: true },
+        columns: { id: true, storageKey: true, size: true },
       });
 
       for (const item of containedMedia) {
@@ -198,6 +199,8 @@ export const mediaFolderRouter = createPublicTRPCRouter({
             containedMedia.map((item) => item.id)
           )
         );
+        const releasedBytes = containedMedia.reduce((sum, item) => sum + item.size, 0);
+        await releaseQuota(ctx.session.user.id, releasedBytes);
       }
 
       await db.delete(mediaFolder).where(eq(mediaFolder.id, input.id));

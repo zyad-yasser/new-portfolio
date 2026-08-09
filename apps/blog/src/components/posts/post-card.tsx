@@ -111,7 +111,7 @@ export function PostCard({ post }: { post: PostCardData }) {
   }
 
   return (
-    <Card className="group relative flex flex-col gap-3 overflow-hidden rounded-xl border-border/60 p-5">
+    <Card className="card-hover group relative flex flex-col gap-3 overflow-hidden rounded-xl p-5">
       <span className={cn("absolute inset-y-0 left-0 w-1", colors.bar)} aria-hidden />
 
       {post.coverImageUrl && (
@@ -179,8 +179,8 @@ export function PostCard({ post }: { post: PostCardData }) {
       )}
 
       <div className="flex items-center justify-between gap-3 border-t border-border/60 pt-3 text-xs text-muted-foreground">
-        <div className="flex items-center gap-2">
-          <Avatar size="sm">
+        <div className="flex min-w-0 items-center gap-2">
+          <Avatar size="sm" className="shrink-0">
             <AvatarImage src={post.author.image ?? undefined} alt={post.author.name} />
             <AvatarFallback>{initialsFor(post.author.name)}</AvatarFallback>
           </Avatar>
@@ -188,15 +188,15 @@ export function PostCard({ post }: { post: PostCardData }) {
             <Link
               href={authorHref}
               onClick={(event) => event.stopPropagation()}
-              className="hover:text-foreground hover:underline"
+              className="truncate hover:text-foreground hover:underline"
             >
               {post.author.name}
             </Link>
           ) : (
-            <span>{post.author.name}</span>
+            <span className="truncate">{post.author.name}</span>
           )}
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex shrink-0 items-center gap-3 whitespace-nowrap">
           <span>{formatDate(post.createdAt)}</span>
           <span className="flex items-center gap-1">
             <Eye className="size-3.5" />

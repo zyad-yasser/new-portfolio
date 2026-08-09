@@ -67,13 +67,13 @@ export default function SignupPage() {
       />
 
       <div className="flex items-center gap-2">
-        <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-primary text-xs font-bold text-primary-foreground">
+        <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-gradient-brand text-xs font-bold text-primary-foreground">
           ZY
         </span>
         <span className="text-lg font-semibold">Zyad Yasser Blog</span>
       </div>
 
-      <Card className="w-full max-w-sm border-border/60 shadow-xl shadow-black/5">
+      <Card className="glass w-full max-w-sm shadow-xl shadow-black/5">
         <CardHeader>
           <CardTitle className="text-2xl">Create an account</CardTitle>
           <CardDescription>Sign up to write posts</CardDescription>
@@ -141,7 +141,7 @@ export default function SignupPage() {
               )}
               <Button
                 type="submit"
-                className="w-full gap-2"
+                className="btn-glow w-full gap-2"
                 disabled={isSubmitting || !turnstileToken}
               >
                 {isSubmitting && <Loader2 className="size-4 animate-spin" />}

@@ -1,5 +1,6 @@
 import {
   type AnyPgColumn,
+  bigint,
   boolean,
   customType,
   index,
@@ -250,6 +251,19 @@ export const media = pgTable(
     index("media_folder_id_idx").on(table.folderId),
   ]
 );
+
+export const userStorageQuota = pgTable("user_storage_quota", {
+  id: text("id").primaryKey(),
+  ownerId: text("owner_id")
+    .notNull()
+    .unique()
+    .references(() => user.id, { onDelete: "cascade" }),
+  totalBytes: bigint("total_bytes", { mode: "number" })
+    .notNull()
+    .default(5 * 1024 * 1024 * 1024),
+  usedBytes: bigint("used_bytes", { mode: "number" }).notNull().default(0),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
 
 export const notification = pgTable(
   "notification",

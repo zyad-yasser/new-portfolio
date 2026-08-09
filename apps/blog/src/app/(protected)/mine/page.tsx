@@ -48,7 +48,7 @@ export default function MinePostsPage() {
         <div className="flex flex-col gap-4">
           {isLoading &&
             Array.from({ length: 3 }).map((_, i) => (
-              <Skeleton key={i} className="h-24 w-full rounded-lg" />
+              <Skeleton key={i} className="skeleton-shimmer h-24 w-full rounded-lg" />
             ))}
 
           {error && (
@@ -73,7 +73,7 @@ export default function MinePostsPage() {
           )}
 
           {posts?.map((post) => (
-            <Card key={post.id}>
+            <Card key={post.id} className="card-hover">
               <CardHeader className="flex flex-row items-center justify-between gap-3">
                 <CardTitle className="text-base">
                   <Link href={`/post/${post.slug}`} className="hover:underline">
