@@ -2,6 +2,7 @@
 
 import { PostCard } from "@/components/posts/post-card";
 import { SiteHeader } from "@/components/site-header";
+import { VerifiedGate } from "@/components/verified-gate";
 import { categoryColorClasses } from "@/lib/category-colors";
 import { publicAuthClient } from "@repo/auth/public-client";
 import { publicApi } from "@repo/trpc/public/react";
@@ -148,12 +149,21 @@ export default function BlogHomePage() {
                   ? "Share your thoughts with the community."
                   : "Sign up to write, comment, and react to posts."}
               </p>
-              <Button asChild size="sm" className="gap-2">
-                <Link href={session ? "/new" : "/signup"}>
-                  <PenLine className="size-4" />
-                  {session ? "Write a post" : "Sign up"}
-                </Link>
-              </Button>
+              {session && !session.user.emailVerified ? (
+                <VerifiedGate verified={false} message="Verify your email to write a post">
+                  <Button size="sm" className="gap-2" disabled>
+                    <PenLine className="size-4" />
+                    Write a post
+                  </Button>
+                </VerifiedGate>
+              ) : (
+                <Button asChild size="sm" className="gap-2">
+                  <Link href={session ? "/new" : "/signup"}>
+                    <PenLine className="size-4" />
+                    {session ? "Write a post" : "Sign up"}
+                  </Link>
+                </Button>
+              )}
             </Card>
 
             {tags && tags.length > 0 && (

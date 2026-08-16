@@ -1,6 +1,7 @@
 "use client";
 
 import { NotificationsDropdown } from "@/components/notifications-dropdown";
+import { VerifiedGate } from "@/components/verified-gate";
 import { publicAuthClient } from "@repo/auth/public-client";
 import { publicApi } from "@repo/trpc/public/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@repo/ui/avatar";
@@ -124,14 +125,23 @@ export function SiteHeader() {
             {!isPending && session && (
               <>
                 <NotificationsDropdown unreadCount={unreadCount} />
-                <Button asChild size="sm" className="btn-glow gap-2">
-                  <Link href="/new">
-                    <PenLine className="size-4" />
-                    Write
-                  </Link>
-                </Button>
+                {session.user.emailVerified ? (
+                  <Button asChild size="sm" className="btn-glow gap-2">
+                    <Link href="/new">
+                      <PenLine className="size-4" />
+                      Write
+                    </Link>
+                  </Button>
+                ) : (
+                  <VerifiedGate verified={false} message="Verify your email to write a post">
+                    <Button size="sm" className="gap-2" disabled>
+                      <PenLine className="size-4" />
+                      Write
+                    </Button>
+                  </VerifiedGate>
+                )}
                 <DropdownMenu>
-                  <DropdownMenuTrigger className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                  <DropdownMenuTrigger className="cursor-pointer rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring">
                     <Avatar size="sm">
                       <AvatarImage src={session.user.image ?? undefined} alt={session.user.name} />
                       <AvatarFallback>{initials}</AvatarFallback>

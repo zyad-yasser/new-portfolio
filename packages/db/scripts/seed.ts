@@ -1,8 +1,15 @@
 import { randomUUID } from "node:crypto";
 import { hashPassword } from "better-auth/crypto";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db } from "../src";
 import { account, category, post, postTag, tag, user } from "../src/schema";
+
+const TEST_USER_PASSWORD = "SeedUser-Pass123!";
+
+const testUsers = [
+  { name: "Seed Writer", email: "seed.writer@example.com" },
+  { name: "Seed Reviewer", email: "seed.reviewer@example.com" },
+];
 
 const blogSeedCategories = [
   { name: "Engineering", color: "blue", description: "Software engineering notes and write-ups" },
@@ -131,6 +138,45 @@ async function seedBlogPosts(adminId: string) {
   }
 }
 
+// Reset (not just create-if-missing) so the documented password stays valid across reseeds,
+// even if a prior run or manual signup already created the row with a different password.
+async function seedTestUsers() {
+  const hash = await hashPassword(TEST_USER_PASSWORD);
+
+  for (const testUser of testUsers) {
+    const existing = await db.query.user.findFirst({ where: eq(user.email, testUser.email) });
+
+    if (existing) {
+      await db
+        .update(account)
+        .set({ password: hash })
+        .where(and(eq(account.userId, existing.id), eq(account.providerId, "credential")));
+      console.log(`Reset password for test user: ${testUser.email}`);
+      continue;
+    }
+
+    const id = randomUUID();
+
+    await db.insert(user).values({
+      id,
+      name: testUser.name,
+      email: testUser.email,
+      emailVerified: false,
+      role: "user",
+    });
+
+    await db.insert(account).values({
+      id: randomUUID(),
+      userId: id,
+      providerId: "credential",
+      accountId: id,
+      password: hash,
+    });
+
+    console.log(`Created test user: ${testUser.email}`);
+  }
+}
+
 // Inserts directly rather than calling @repo/auth's `auth.api.signUpEmail` so this package
 // doesn't have to depend on @repo/auth (which itself depends on @repo/db - a real dependency
 // cycle Turborepo would reject). This mirrors exactly what signUpEmail does internally for
@@ -177,6 +223,14 @@ async function main() {
 
   await seedCategories();
   await seedBlogPosts(adminId);
+
+  const isLocalDatabase = /localhost|127\.0\.0\.1/.test(process.env.DATABASE_URL ?? "");
+
+  if (isLocalDatabase) {
+    await seedTestUsers();
+  } else {
+    console.log("Skipping test user seeding: DATABASE_URL is not local");
+  }
 }
 
 main()

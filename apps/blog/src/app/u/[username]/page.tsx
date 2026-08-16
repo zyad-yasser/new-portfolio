@@ -2,6 +2,7 @@
 
 import { PostCard } from "@/components/posts/post-card";
 import { SiteHeader } from "@/components/site-header";
+import { VerifiedGate } from "@/components/verified-gate";
 import { isSafeHttpUrl } from "@/lib/safe-url";
 import { publicAuthClient } from "@repo/auth/public-client";
 import { publicApi } from "@repo/trpc/public/react";
@@ -10,7 +11,7 @@ import { Button } from "@repo/ui/button";
 import { Skeleton } from "@repo/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui/tabs";
 import { TooltipProvider } from "@repo/ui/tooltip";
-import { Calendar, Globe, Loader2, MapPin } from "lucide-react";
+import { Calendar, FileText, Globe, Loader2, MapPin, User } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 
@@ -102,20 +103,25 @@ export default function ProfilePage() {
           </div>
 
           {!isOwnProfile && session && (
-            <Button
-              variant={isFollowing ? "outline" : "default"}
-              disabled={follow.isPending || unfollow.isPending}
-              onClick={() =>
-                isFollowing
-                  ? unfollow.mutate({ userId: profile.userId })
-                  : follow.mutate({ userId: profile.userId })
-              }
+            <VerifiedGate
+              verified={session.user.emailVerified}
+              message="Verify your email to follow other users"
             >
-              {(follow.isPending || unfollow.isPending) && (
-                <Loader2 className="size-4 animate-spin" />
-              )}
-              {isFollowing ? "Following" : "Follow"}
-            </Button>
+              <Button
+                variant={isFollowing ? "outline" : "default"}
+                disabled={!session.user.emailVerified || follow.isPending || unfollow.isPending}
+                onClick={() =>
+                  isFollowing
+                    ? unfollow.mutate({ userId: profile.userId })
+                    : follow.mutate({ userId: profile.userId })
+                }
+              >
+                {(follow.isPending || unfollow.isPending) && (
+                  <Loader2 className="size-4 animate-spin" />
+                )}
+                {isFollowing ? "Following" : "Follow"}
+              </Button>
+            </VerifiedGate>
           )}
         </div>
 
@@ -134,13 +140,20 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        <Tabs defaultValue="posts">
-          <TabsList>
-            <TabsTrigger value="posts">Posts</TabsTrigger>
-            <TabsTrigger value="about">About</TabsTrigger>
+        <Tabs defaultValue="posts" className="gap-4">
+          <TabsList className="w-full sm:w-fit">
+            <TabsTrigger value="posts" className="gap-1.5">
+              <FileText className="size-3.5" />
+              Posts
+              <span className="text-xs text-muted-foreground">{profile.postCount}</span>
+            </TabsTrigger>
+            <TabsTrigger value="about" className="gap-1.5">
+              <User className="size-3.5" />
+              About
+            </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="posts" className="pt-4">
+          <TabsContent value="posts" className="pt-2">
             <TooltipProvider>
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                 {postsLoading &&
@@ -159,7 +172,7 @@ export default function ProfilePage() {
             </TooltipProvider>
           </TabsContent>
 
-          <TabsContent value="about" className="flex flex-col gap-3 pt-4 text-sm">
+          <TabsContent value="about" className="flex flex-col gap-3 pt-2 text-sm">
             {profile.bio ? (
               <p>{profile.bio}</p>
             ) : (

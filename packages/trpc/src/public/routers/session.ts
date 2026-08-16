@@ -13,8 +13,8 @@ export const sessionRouter = createPublicTRPCRouter({
         token: session.token,
         ipAddress: session.ipAddress ?? null,
         userAgent: session.userAgent ?? null,
-        createdAt: session.createdAt,
-        expiresAt: session.expiresAt,
+        createdAt: new Date(session.createdAt),
+        expiresAt: new Date(session.expiresAt),
         isCurrent: session.token === currentToken,
       }))
       .sort((a, b) => {

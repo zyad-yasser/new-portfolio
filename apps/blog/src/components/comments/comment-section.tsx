@@ -1,5 +1,6 @@
 "use client";
 
+import { VerifiedGate } from "@/components/verified-gate";
 import { publicAuthClient } from "@repo/auth/public-client";
 import { publicApi } from "@repo/trpc/public/react";
 import {
@@ -148,6 +149,7 @@ function CommentItem({
   postId,
   postAuthorId,
   viewerId,
+  emailVerified,
   isReply,
   replyOpen,
   onToggleReply,
@@ -157,6 +159,7 @@ function CommentItem({
   postId: string;
   postAuthorId: string;
   viewerId?: string | undefined;
+  emailVerified?: boolean | undefined;
   isReply: boolean;
   replyOpen: boolean;
   onToggleReply?: (() => void) | undefined;
@@ -226,14 +229,19 @@ function CommentItem({
                 <Button variant="outline" size="sm" onClick={() => setEditing(false)}>
                   Cancel
                 </Button>
-                <Button
-                  size="sm"
-                  disabled={!editValue.trim() || updateComment.isPending}
-                  onClick={() => updateComment.mutate({ id: comment.id, body: editValue })}
+                <VerifiedGate
+                  verified={!!emailVerified}
+                  message="Verify your email to edit your comment"
                 >
-                  {updateComment.isPending && <Loader2 className="size-3.5 animate-spin" />}
-                  Save
-                </Button>
+                  <Button
+                    size="sm"
+                    disabled={!emailVerified || !editValue.trim() || updateComment.isPending}
+                    onClick={() => updateComment.mutate({ id: comment.id, body: editValue })}
+                  >
+                    {updateComment.isPending && <Loader2 className="size-3.5 animate-spin" />}
+                    Save
+                  </Button>
+                </VerifiedGate>
               </div>
             </div>
           ) : (
@@ -260,10 +268,12 @@ function CommentItem({
 function ReplyForm({
   postId,
   parentCommentId,
+  emailVerified,
   onDone,
 }: {
   postId: string;
   parentCommentId: string;
+  emailVerified: boolean;
   onDone: () => void;
 }) {
   const [value, setValue] = useState("");
@@ -290,14 +300,16 @@ function ReplyForm({
         <Button variant="outline" size="sm" onClick={onDone}>
           Cancel
         </Button>
-        <Button
-          size="sm"
-          disabled={!value.trim() || createComment.isPending}
-          onClick={() => createComment.mutate({ postId, parentCommentId, body: value })}
-        >
-          {createComment.isPending && <Loader2 className="size-3.5 animate-spin" />}
-          Reply
-        </Button>
+        <VerifiedGate verified={emailVerified} message="Verify your email to reply">
+          <Button
+            size="sm"
+            disabled={!emailVerified || !value.trim() || createComment.isPending}
+            onClick={() => createComment.mutate({ postId, parentCommentId, body: value })}
+          >
+            {createComment.isPending && <Loader2 className="size-3.5 animate-spin" />}
+            Reply
+          </Button>
+        </VerifiedGate>
       </div>
     </div>
   );
@@ -336,14 +348,21 @@ export function CommentSection({
             onChange={(event) => setNewComment(event.target.value)}
           />
           <div className="flex justify-end">
-            <Button
-              size="sm"
-              disabled={!newComment.trim() || createComment.isPending}
-              onClick={() => createComment.mutate({ postId, body: newComment })}
+            <VerifiedGate
+              verified={!!session.user.emailVerified}
+              message="Verify your email to comment"
             >
-              {createComment.isPending && <Loader2 className="size-3.5 animate-spin" />}
-              Comment
-            </Button>
+              <Button
+                size="sm"
+                disabled={
+                  !session.user.emailVerified || !newComment.trim() || createComment.isPending
+                }
+                onClick={() => createComment.mutate({ postId, body: newComment })}
+              >
+                {createComment.isPending && <Loader2 className="size-3.5 animate-spin" />}
+                Comment
+              </Button>
+            </VerifiedGate>
           </div>
         </div>
       ) : (
@@ -369,6 +388,7 @@ export function CommentSection({
             postId={postId}
             postAuthorId={postAuthorId}
             viewerId={session?.user.id}
+            emailVerified={session?.user.emailVerified}
             isReply={false}
             replyOpen={replyingTo === topLevel.id}
             onToggleReply={() =>
@@ -383,6 +403,7 @@ export function CommentSection({
                     postId={postId}
                     postAuthorId={postAuthorId}
                     viewerId={session?.user.id}
+                    emailVerified={session?.user.emailVerified}
                     isReply
                     replyOpen={false}
                   />
@@ -391,6 +412,7 @@ export function CommentSection({
                   <ReplyForm
                     postId={postId}
                     parentCommentId={topLevel.id}
+                    emailVerified={!!session?.user.emailVerified}
                     onDone={() => setReplyingTo(null)}
                   />
                 )}

@@ -1,5 +1,6 @@
 "use client";
 
+import { VerifiedGate } from "@/components/verified-gate";
 import { publicAuthClient } from "@repo/auth/public-client";
 import { publicApi } from "@repo/trpc/public/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@repo/ui/avatar";
@@ -66,21 +67,26 @@ export function AuthorCard({ username }: { username: string }) {
       {profile.bio && <p className="text-sm text-muted-foreground">{profile.bio}</p>}
 
       {!isOwnProfile && session && (
-        <Button
-          size="sm"
-          variant={isFollowing ? "outline" : "default"}
-          disabled={follow.isPending || unfollow.isPending}
-          onClick={() =>
-            isFollowing
-              ? unfollow.mutate({ userId: profile.userId })
-              : follow.mutate({ userId: profile.userId })
-          }
+        <VerifiedGate
+          verified={session.user.emailVerified}
+          message="Verify your email to follow other users"
         >
-          {(follow.isPending || unfollow.isPending) && (
-            <Loader2 className="size-3.5 animate-spin" />
-          )}
-          {isFollowing ? "Following" : "Follow"}
-        </Button>
+          <Button
+            size="sm"
+            variant={isFollowing ? "outline" : "default"}
+            disabled={!session.user.emailVerified || follow.isPending || unfollow.isPending}
+            onClick={() =>
+              isFollowing
+                ? unfollow.mutate({ userId: profile.userId })
+                : follow.mutate({ userId: profile.userId })
+            }
+          >
+            {(follow.isPending || unfollow.isPending) && (
+              <Loader2 className="size-3.5 animate-spin" />
+            )}
+            {isFollowing ? "Following" : "Follow"}
+          </Button>
+        </VerifiedGate>
       )}
     </Card>
   );

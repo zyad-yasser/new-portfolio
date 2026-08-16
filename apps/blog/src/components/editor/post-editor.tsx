@@ -1,7 +1,9 @@
 "use client";
 
 import { CoverImagePicker } from "@/components/media/cover-image-picker";
+import { VerifiedGate } from "@/components/verified-gate";
 import { categoryColorClasses } from "@/lib/category-colors";
+import { publicAuthClient } from "@repo/auth/public-client";
 import type { TiptapDoc } from "@repo/db/schema";
 import { publicApi } from "@repo/trpc/public/react";
 import { Badge } from "@repo/ui/badge";
@@ -230,6 +232,7 @@ export function PostEditor({
   doneHref?: string;
 }) {
   const router = useRouter();
+  const { data: session } = publicAuthClient.useSession();
   const [title, setTitle] = useState(initialTitle ?? "");
   const [contentJson, setContentJson] = useState<TiptapDoc>(initialContentJson ?? EMPTY_DOC);
   const [categoryId, setCategoryId] = useState<string | null>(initialCategoryId ?? null);
@@ -343,14 +346,19 @@ export function PostEditor({
             </Button>
           )}
           {mode === "create" && (
-            <Button
-              className="btn-glow"
-              onClick={handlePublish}
-              disabled={!title.trim() || autosave.isPublishing}
+            <VerifiedGate
+              verified={!!session?.user.emailVerified}
+              message="Verify your email to publish a post"
             >
-              {autosave.isPublishing && <Loader2 className="size-4 animate-spin" />}
-              Publish
-            </Button>
+              <Button
+                className="btn-glow"
+                onClick={handlePublish}
+                disabled={!session?.user.emailVerified || !title.trim() || autosave.isPublishing}
+              >
+                {autosave.isPublishing && <Loader2 className="size-4 animate-spin" />}
+                Publish
+              </Button>
+            </VerifiedGate>
           )}
         </div>
       </CardContent>

@@ -5,9 +5,11 @@ import { publicAuthClient } from "@repo/auth/public-client";
 import { Button } from "@repo/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@repo/ui/form";
+import { GoogleIcon } from "@repo/ui/icons";
 import { Input } from "@repo/ui/input";
+import { PasswordInput } from "@repo/ui/password-input";
 import { Turnstile } from "@repo/ui/turnstile";
-import { Loader2 } from "lucide-react";
+import { Github, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -22,11 +24,14 @@ const signupSchema = z.object({
 
 type SignupValues = z.infer<typeof signupSchema>;
 
+const POST_SIGNUP_PATH = "/mine";
+
 export default function SignupPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [turnstileKey, setTurnstileKey] = useState(0);
+  const [socialProvider, setSocialProvider] = useState<"google" | "github" | null>(null);
 
   const form = useForm<SignupValues>({
     resolver: zodResolver(signupSchema),
@@ -53,11 +58,27 @@ export default function SignupPage() {
       return;
     }
 
-    router.push("/mine");
+    router.push(POST_SIGNUP_PATH);
     router.refresh();
   }
 
+  async function onSocialSignIn(provider: "google" | "github") {
+    setError(null);
+    setSocialProvider(provider);
+
+    const { error: signInError } = await publicAuthClient.signIn.social({
+      provider,
+      callbackURL: POST_SIGNUP_PATH,
+    });
+
+    if (signInError) {
+      setError(signInError.message ?? "Couldn't sign in.");
+      setSocialProvider(null);
+    }
+  }
+
   const isSubmitting = form.formState.isSubmitting;
+  const isSocialLoading = socialProvider !== null;
 
   return (
     <main className="relative flex min-h-svh flex-col items-center justify-center gap-8 overflow-hidden p-6">
@@ -78,7 +99,44 @@ export default function SignupPage() {
           <CardTitle className="text-2xl">Create an account</CardTitle>
           <CardDescription>Sign up to write posts</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
+          <div className="grid gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full gap-2"
+              disabled={isSocialLoading}
+              onClick={() => onSocialSignIn("google")}
+            >
+              {socialProvider === "google" ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <GoogleIcon className="size-4" />
+              )}
+              Continue with Google
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full gap-2"
+              disabled={isSocialLoading}
+              onClick={() => onSocialSignIn("github")}
+            >
+              {socialProvider === "github" ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Github className="size-4" />
+              )}
+              Continue with GitHub
+            </Button>
+          </div>
+
+          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+            <div className="h-px flex-1 bg-border" />
+            Or continue with email
+            <div className="h-px flex-1 bg-border" />
+          </div>
+
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
@@ -119,7 +177,7 @@ export default function SignupPage() {
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input type="password" autoComplete="new-password" {...field} />
+                      <PasswordInput autoComplete="new-password" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -142,7 +200,7 @@ export default function SignupPage() {
               <Button
                 type="submit"
                 className="btn-glow w-full gap-2"
-                disabled={isSubmitting || !turnstileToken}
+                disabled={isSubmitting || !turnstileToken || isSocialLoading}
               >
                 {isSubmitting && <Loader2 className="size-4 animate-spin" />}
                 {isSubmitting ? "Creating account..." : "Sign up"}

@@ -70,25 +70,18 @@ function BookmarkButton({ postId }: { postId: string }) {
     },
   });
 
-  if (!session) {
-    return (
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button variant="ghost" size="icon" className="size-7" disabled aria-label="Save post">
-            <Bookmark className="size-3.5" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>Sign in to save</TooltipContent>
-      </Tooltip>
-    );
-  }
+  const disabledReason = !session
+    ? "Sign in to save"
+    : !session.user.emailVerified
+      ? "Verify your email to save posts"
+      : null;
 
-  return (
+  const button = (
     <Button
       variant="ghost"
       size="icon"
       className="size-7"
-      disabled={toggle.isPending}
+      disabled={!!disabledReason || toggle.isPending}
       aria-label={bookmarked ? "Remove bookmark" : "Save post"}
       aria-pressed={!!bookmarked}
       onClick={(event) => {
@@ -98,6 +91,22 @@ function BookmarkButton({ postId }: { postId: string }) {
     >
       <Bookmark className={cn("size-3.5", bookmarked && "fill-current")} />
     </Button>
+  );
+
+  if (!disabledReason) {
+    return button;
+  }
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        {/* biome-ignore lint/a11y/noNoninteractiveTabindex: focusable so keyboard users can reveal why the disabled control inside is disabled */}
+        <span tabIndex={0} className="inline-flex">
+          {button}
+        </span>
+      </TooltipTrigger>
+      <TooltipContent>{disabledReason}</TooltipContent>
+    </Tooltip>
   );
 }
 
