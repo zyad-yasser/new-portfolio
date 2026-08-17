@@ -14,6 +14,7 @@ import { TooltipProvider } from "@repo/ui/tooltip";
 import { Calendar, FileText, Globe, Loader2, MapPin, User } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { toast } from "sonner";
 
 function initialsFor(name: string) {
   return name
@@ -50,6 +51,7 @@ export default function ProfilePage() {
       }
       utils.profile.getByUsername.invalidate({ username });
     },
+    onError: (mutationError) => toast.error(mutationError.message ?? "Couldn't follow this user."),
   });
   const unfollow = publicApi.follow.unfollow.useMutation({
     onSuccess: () => {
@@ -58,6 +60,8 @@ export default function ProfilePage() {
       }
       utils.profile.getByUsername.invalidate({ username });
     },
+    onError: (mutationError) =>
+      toast.error(mutationError.message ?? "Couldn't unfollow this user."),
   });
 
   if (isLoading) {
@@ -155,20 +159,26 @@ export default function ProfilePage() {
 
           <TabsContent value="posts" className="pt-2">
             <TooltipProvider>
-              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                {postsLoading &&
-                  Array.from({ length: 4 }).map((_, i) => (
-                    <Skeleton key={i} className="skeleton-shimmer h-52 w-full rounded-xl" />
+              {!postsLoading && posts?.length === 0 && (
+                <p className="text-center text-muted-foreground">No published posts yet.</p>
+              )}
+
+              {(postsLoading || (posts && posts.length > 0)) && (
+                <div className="columns-1 gap-5 sm:columns-2">
+                  {postsLoading &&
+                    Array.from({ length: 4 }).map((_, i) => (
+                      <Skeleton
+                        key={i}
+                        className="skeleton-shimmer mb-5 h-52 w-full rounded-xl break-inside-avoid"
+                      />
+                    ))}
+                  {posts?.map((post) => (
+                    <div key={post.id} className="mb-5 break-inside-avoid">
+                      <PostCard post={post} />
+                    </div>
                   ))}
-                {!postsLoading && posts?.length === 0 && (
-                  <p className="col-span-full text-center text-muted-foreground">
-                    No published posts yet.
-                  </p>
-                )}
-                {posts?.map((post) => (
-                  <PostCard key={post.id} post={post} />
-                ))}
-              </div>
+                </div>
+              )}
             </TooltipProvider>
           </TabsContent>
 

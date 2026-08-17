@@ -20,6 +20,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui/card";
 import { Skeleton } from "@repo/ui/skeleton";
 import { Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
+import { toast } from "sonner";
 
 export default function MinePostsPage() {
   const utils = publicApi.useUtils();
@@ -30,13 +31,16 @@ export default function MinePostsPage() {
       await utils.post.mine.invalidate();
       await utils.post.list.invalidate();
     },
+    onError: (error) => toast.error(error.message ?? "Couldn't update this post."),
   });
 
   const deletePost = publicApi.post.delete.useMutation({
     onSuccess: async () => {
       await utils.post.mine.invalidate();
       await utils.post.list.invalidate();
+      toast.success("Post deleted.");
     },
+    onError: (error) => toast.error(error.message ?? "Couldn't delete this post."),
   });
 
   return (

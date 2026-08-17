@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarGroup, AvatarImage } from "@repo/ui/avata
 import { cn } from "@repo/ui/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@repo/ui/popover";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@repo/ui/tooltip";
+import { toast } from "sonner";
 
 type Reactor = { id: string; name: string; image: string | null };
 
@@ -99,6 +100,7 @@ export function ReactionBar({ postId }: { postId: string }) {
       utils.reaction.summary.invalidate({ postId });
       utils.reaction.mine.invalidate({ postId });
     },
+    onError: (error) => toast.error(error.message ?? "Couldn't react to this post."),
   });
 
   return (

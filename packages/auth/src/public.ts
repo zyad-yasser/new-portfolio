@@ -74,7 +74,7 @@ export const publicAuth = betterAuth({
       "/sign-in/email": { window: 60, max: 5 },
       "/sign-up/email": { window: 3600, max: 3 },
       "/request-password-reset": { window: 300, max: 3 },
-      "/send-verification-email": { window: 300, max: 3 },
+      "/send-verification-email": { window: 900, max: 1 },
     },
   },
   plugins: [

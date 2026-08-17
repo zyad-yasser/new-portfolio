@@ -1,8 +1,8 @@
-import { Heart, MessageCircle, Reply, UserPlus } from "lucide-react";
+import { Heart, MessageCircle, Quote, Repeat2, Reply, UserPlus } from "lucide-react";
 
 export type NotificationItem = {
   id: string;
-  type: "follow" | "comment" | "reply" | "reaction" | "mention";
+  type: "follow" | "comment" | "reply" | "reaction" | "mention" | "reshare" | "quote";
   readAt: Date | string | null;
   createdAt: Date | string;
   actor: {
@@ -11,7 +11,7 @@ export type NotificationItem = {
     image: string | null;
     profile: { username: string } | null;
   } | null;
-  post: { slug: string; title: string } | null;
+  post: { slug: string; title: string | null } | null;
 };
 
 export const NOTIFICATION_TYPE_ICON = {
@@ -20,6 +20,8 @@ export const NOTIFICATION_TYPE_ICON = {
   reply: Reply,
   reaction: Heart,
   mention: MessageCircle,
+  reshare: Repeat2,
+  quote: Quote,
 } as const;
 
 export function notificationText(n: NotificationItem) {
@@ -35,6 +37,10 @@ export function notificationText(n: NotificationItem) {
       return `${actorName} reacted to "${n.post?.title ?? "your post"}"`;
     case "mention":
       return `${actorName} mentioned you in "${n.post?.title ?? "a post"}"`;
+    case "reshare":
+      return `${actorName} reshared your post`;
+    case "quote":
+      return `${actorName} quoted your post`;
   }
 }
 

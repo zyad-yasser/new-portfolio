@@ -14,6 +14,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 const loginSchema = z.object({
@@ -28,7 +29,6 @@ const POST_LOGIN_PATH = "/submit";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [error, setError] = useState<string | null>(null);
   const [socialProvider, setSocialProvider] = useState<"google" | "github" | null>(null);
 
   const form = useForm<LoginValues>({
@@ -37,12 +37,10 @@ export default function LoginPage() {
   });
 
   async function onSubmit(values: LoginValues) {
-    setError(null);
-
     const { error: signInError } = await publicAuthClient.signIn.email(values);
 
     if (signInError) {
-      setError(signInError.message ?? "Invalid email or password.");
+      toast.error(signInError.message ?? "Invalid email or password.");
       return;
     }
 
@@ -51,7 +49,6 @@ export default function LoginPage() {
   }
 
   async function onSocialSignIn(provider: "google" | "github") {
-    setError(null);
     setSocialProvider(provider);
 
     const { error: signInError } = await publicAuthClient.signIn.social({
@@ -60,7 +57,7 @@ export default function LoginPage() {
     });
 
     if (signInError) {
-      setError(signInError.message ?? "Couldn't sign in.");
+      toast.error(signInError.message ?? "Couldn't sign in.");
       setSocialProvider(null);
     }
   }
@@ -171,14 +168,6 @@ export default function LoginPage() {
                   </FormItem>
                 )}
               />
-              {error && (
-                <p
-                  role="alert"
-                  className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
-                >
-                  {error}
-                </p>
-              )}
               <Button
                 type="submit"
                 className="w-full gap-2"

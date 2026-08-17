@@ -1,5 +1,6 @@
 "use client";
 
+import { MediaPostDialog } from "@/components/composer/media-post-dialog";
 import { NotificationsDropdown } from "@/components/notifications-dropdown";
 import { VerifiedGate } from "@/components/verified-gate";
 import { publicAuthClient } from "@repo/auth/public-client";
@@ -35,6 +36,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 const SEARCH_DEBOUNCE_MS = 250;
 const UNREAD_POLL_INTERVAL_MS = 30_000;
@@ -50,6 +52,7 @@ export function SiteHeader() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [mediaPostOpen, setMediaPostOpen] = useState(false);
 
   useEffect(() => {
     const timeout = setTimeout(() => setDebouncedQuery(searchQuery), SEARCH_DEBOUNCE_MS);
@@ -81,7 +84,11 @@ export function SiteHeader() {
   }
 
   async function handleSignOut() {
-    await publicAuthClient.signOut();
+    const { error } = await publicAuthClient.signOut();
+    if (error) {
+      toast.error(error.message ?? "Couldn't sign out.");
+      return;
+    }
     router.push("/login");
     router.refresh();
   }
@@ -105,6 +112,12 @@ export function SiteHeader() {
           </Link>
 
           <div className="flex items-center gap-2">
+            {!isPending && session && (
+              <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
+                <Link href="/feed">Feed</Link>
+              </Button>
+            )}
+
             <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
               <Link href="/series">Series</Link>
             </Button>
@@ -126,14 +139,28 @@ export function SiteHeader() {
               <>
                 <NotificationsDropdown unreadCount={unreadCount} />
                 {session.user.emailVerified ? (
-                  <Button asChild size="sm" className="btn-glow gap-2">
-                    <Link href="/new">
-                      <PenLine className="size-4" />
-                      Write
-                    </Link>
-                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button size="sm" className="btn-glow gap-2">
+                        <PenLine className="size-4" />
+                        Write
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem asChild>
+                        <Link href="/new">
+                          <FileText />
+                          Write article
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setMediaPostOpen(true)}>
+                        <ImageIcon />
+                        Create post
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 ) : (
-                  <VerifiedGate verified={false} message="Verify your email to write a post">
+                  <VerifiedGate verified={false} message="Verify your email to write">
                     <Button size="sm" className="gap-2" disabled>
                       <PenLine className="size-4" />
                       Write
@@ -272,6 +299,8 @@ export function SiteHeader() {
           )}
         </CommandList>
       </CommandDialog>
+
+      <MediaPostDialog open={mediaPostOpen} onOpenChange={setMediaPostOpen} />
     </>
   );
 }

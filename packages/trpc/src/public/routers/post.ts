@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { db } from "@repo/db";
 import { post, postTag, series, tag, userBlock } from "@repo/db/schema";
-import type { TiptapDoc } from "@repo/db/schema";
+import type { PostType, TiptapDoc } from "@repo/db/schema";
 import { requireEnv } from "@repo/utils";
 import { createRateLimiter, getClientIp, safeLimit } from "@repo/utils/rate-limit";
 import { TRPCError } from "@trpc/server";
@@ -15,6 +15,8 @@ import {
   strictRateLimit,
   verifiedProcedure,
 } from "../init";
+import { assertNotBlocked } from "./block";
+import { createNotification } from "./notification";
 import { ensureUserProfile } from "./profile";
 
 const appName = requireEnv("APP_NAME");
@@ -35,8 +37,12 @@ function slugifyBase(value: string) {
     .replace(/(^-|-$)/g, "");
 }
 
-async function uniqueSlug(title: string, excludePostId?: string) {
-  const base = slugifyBase(title) || "post";
+function randomSlugBase() {
+  return randomUUID().replace(/-/g, "").slice(0, 10);
+}
+
+async function uniqueSlug(title: string | null | undefined, excludePostId?: string) {
+  const base = (title ? slugifyBase(title) : "") || randomSlugBase();
   let candidate = base;
   let suffix = 1;
 
@@ -136,17 +142,36 @@ async function syncPostTags(tx: Tx, postId: string, tagNames: string[]) {
 }
 
 const authorColumns = { id: true, name: true, image: true } as const;
-export const postWith = {
+const basePostWith = {
   author: { columns: authorColumns, with: { profile: { columns: { username: true } } } },
   category: true,
   series: true,
   postTags: { with: { tag: true } },
 } as const;
 
-export function formatPost<T extends { postTags: Array<{ tag: unknown }> }>(row: T) {
+export const postWith = {
+  ...basePostWith,
+  quotedPost: { with: basePostWith },
+} as const;
+
+function _postRowShape() {
+  return db.query.post.findFirst({ with: postWith });
+}
+type PostRow = NonNullable<Awaited<ReturnType<typeof _postRowShape>>>;
+type QuotedPostRow = NonNullable<PostRow["quotedPost"]>;
+
+function formatQuotedPost(row: QuotedPostRow) {
   const { postTags, ...rest } = row;
-  type Tag = T["postTags"][number]["tag"];
-  return { ...rest, tags: postTags.map((postTag) => postTag.tag) as Tag[] };
+  return { ...rest, tags: postTags.map((postTag) => postTag.tag) };
+}
+
+export function formatPost(row: PostRow) {
+  const { postTags, quotedPost, ...rest } = row;
+  return {
+    ...rest,
+    tags: postTags.map((postTag) => postTag.tag),
+    quotedPost: quotedPost ? formatQuotedPost(quotedPost) : null,
+  };
 }
 
 const cursorSchema = z.object({ createdAt: z.coerce.date(), id: z.string() });
@@ -263,20 +288,27 @@ export const postRouter = createPublicTRPCRouter({
   create: verifiedProcedure
     .use(strictRateLimit({ path: "post.create", limit: 5, window: "1 h" }))
     .input(
-      z.object({
-        title: z.string().trim().min(1).max(150),
-        contentJson: tiptapNodeSchema,
-        categoryId: z.string().nullable().optional(),
-        seriesId: z.string().nullable().optional(),
-        tagNames: z.array(z.string().trim().min(1).max(30)).max(MAX_TAGS).optional(),
-        coverImageUrl: z.string().url().nullable().optional(),
-        canonicalUrl: z.string().url().nullable().optional(),
-        published: z.boolean().default(false),
-      })
+      z
+        .object({
+          type: z.enum(["article", "media"]).default("article"),
+          title: z.string().trim().max(150).optional(),
+          contentJson: tiptapNodeSchema,
+          categoryId: z.string().nullable().optional(),
+          seriesId: z.string().nullable().optional(),
+          tagNames: z.array(z.string().trim().min(1).max(30)).max(MAX_TAGS).optional(),
+          coverImageUrl: z.string().url().nullable().optional(),
+          canonicalUrl: z.string().url().nullable().optional(),
+          published: z.boolean().default(false),
+        })
+        .refine((value) => value.type !== "article" || !!value.title?.length, {
+          message: "Title is required for articles",
+          path: ["title"],
+        })
     )
     .mutation(async ({ ctx, input }) => {
       await ensureUserProfile(ctx.session.user.id);
-      const slug = await uniqueSlug(input.title);
+      const title = input.title?.length ? input.title : null;
+      const slug = await uniqueSlug(title);
       const plainText = extractPlainText(input.contentJson);
       const seriesOrder = input.seriesId
         ? await computeAppendOrder(input.seriesId, ctx.session.user.id)
@@ -291,13 +323,14 @@ export const postRouter = createPublicTRPCRouter({
             categoryId: input.categoryId ?? null,
             seriesId: input.seriesId ?? null,
             seriesOrder,
-            title: input.title,
+            type: input.type as PostType,
+            title,
             slug,
-            excerptText: buildExcerpt(plainText),
+            excerptText: plainText ? buildExcerpt(plainText) : null,
             contentJson: input.contentJson,
             coverImageUrl: input.coverImageUrl ?? null,
             canonicalUrl: input.canonicalUrl ?? null,
-            searchVector: buildSearchVector(input.title, plainText),
+            searchVector: buildSearchVector(title ?? "", plainText),
             published: input.published,
           })
           .returning();
@@ -314,6 +347,59 @@ export const postRouter = createPublicTRPCRouter({
 
         return created;
       });
+    }),
+
+  createQuote: verifiedProcedure
+    .use(strictRateLimit({ path: "post.createQuote", limit: 10, window: "1 h" }))
+    .input(
+      z.object({
+        quotedPostId: z.string(),
+        contentJson: tiptapNodeSchema,
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const quoted = await db.query.post.findFirst({ where: eq(post.id, input.quotedPostId) });
+
+      if (!quoted || !quoted.published) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
+      await assertNotBlocked(ctx.session.user.id, quoted.authorId);
+      await ensureUserProfile(ctx.session.user.id);
+
+      const plainText = extractPlainText(input.contentJson);
+      const slug = await uniqueSlug(null);
+
+      const created = await db
+        .insert(post)
+        .values({
+          id: randomUUID(),
+          authorId: ctx.session.user.id,
+          type: "quote",
+          quotedPostId: quoted.id,
+          title: null,
+          slug,
+          excerptText: plainText ? buildExcerpt(plainText) : null,
+          contentJson: input.contentJson,
+          searchVector: buildSearchVector("", plainText),
+          published: true,
+        })
+        .returning();
+
+      const row = created[0];
+
+      if (!row) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      }
+
+      await createNotification({
+        recipientId: quoted.authorId,
+        actorId: ctx.session.user.id,
+        type: "quote",
+        postId: row.id,
+      });
+
+      return row;
     }),
 
   update: verifiedProcedure
@@ -351,9 +437,9 @@ export const postRouter = createPublicTRPCRouter({
         const title = input.title ?? current.title;
         const plainText = extractPlainText(input.contentJson ?? current.contentJson);
         if (input.contentJson !== undefined) {
-          patch.excerptText = buildExcerpt(plainText);
+          patch.excerptText = plainText ? buildExcerpt(plainText) : null;
         }
-        patch.searchVector = buildSearchVector(title, plainText);
+        patch.searchVector = buildSearchVector(title ?? "", plainText);
       }
       if (input.categoryId !== undefined) {
         patch.categoryId = input.categoryId;

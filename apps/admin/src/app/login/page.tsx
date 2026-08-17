@@ -9,8 +9,8 @@ import { Input } from "@repo/ui/input";
 import { PasswordInput } from "@repo/ui/password-input";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 const loginSchema = z.object({
@@ -22,7 +22,6 @@ type LoginValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const router = useRouter();
-  const [error, setError] = useState<string | null>(null);
 
   const form = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
@@ -30,12 +29,10 @@ export default function LoginPage() {
   });
 
   async function onSubmit(values: LoginValues) {
-    setError(null);
-
     const { error: signInError } = await authClient.signIn.email(values);
 
     if (signInError) {
-      setError(signInError.message ?? "Invalid email or password.");
+      toast.error(signInError.message ?? "Invalid email or password.");
       return;
     }
 
@@ -101,14 +98,6 @@ export default function LoginPage() {
                   </FormItem>
                 )}
               />
-              {error && (
-                <p
-                  role="alert"
-                  className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
-                >
-                  {error}
-                </p>
-              )}
               <Button type="submit" className="w-full gap-2" disabled={isSubmitting}>
                 {isSubmitting && <Loader2 className="size-4 animate-spin" />}
                 {isSubmitting ? "Logging in..." : "Login"}

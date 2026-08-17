@@ -140,6 +140,7 @@ tRPC v11, split into two independent stacks that mirror `packages/auth`'s split 
 ## Code style rules for Claude Code
 
 - Do not write comments in code (this includes `.ts`/`.tsx`/`.js`/`.css` and config files). Code should be self-explanatory through naming and structure; if it needs a comment to be understood, restructure it instead.
+- All client-side feedback from an API call (a tRPC mutation/query result or a Better Auth client call) must be shown via toast, not an inline `<p role="alert">` block, a button label swap (e.g. `"Saved"`/`"Sent"`), or a silently-swallowed error. Use `toast.success(...)` / `toast.error(...)` from `"sonner"` directly in the component — no wrapper hook needed. Each app's `<Toaster />` (from `@repo/ui/sonner`) is mounted once in its root layout; don't add another one per page/component.
 
 ## Git rules for Claude Code
 

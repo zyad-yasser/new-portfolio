@@ -3,6 +3,7 @@ import { blockRouter } from "./block";
 import { bookmarkRouter } from "./bookmark";
 import { categoryRouter } from "./category";
 import { commentRouter } from "./comment";
+import { feedRouter } from "./feed";
 import { followRouter } from "./follow";
 import { mediaRouter } from "./media";
 import { mediaFolderRouter } from "./media-folder";
@@ -11,6 +12,7 @@ import { notificationRouter } from "./notification";
 import { postRouter } from "./post";
 import { profileRouter } from "./profile";
 import { reactionRouter } from "./reaction";
+import { reshareRouter } from "./reshare";
 import { reviewRouter } from "./review";
 import { searchRouter } from "./search";
 import { seriesRouter } from "./series";
@@ -32,6 +34,8 @@ export const publicAppRouter = createPublicTRPCRouter({
   profile: profileRouter,
   follow: followRouter,
   bookmark: bookmarkRouter,
+  reshare: reshareRouter,
+  feed: feedRouter,
   media: mediaRouter,
   mediaFolder: mediaFolderRouter,
   mediaQuota: mediaQuotaRouter,

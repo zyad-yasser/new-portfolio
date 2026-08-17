@@ -6,6 +6,7 @@ import { Button } from "@repo/ui/button";
 import { Card } from "@repo/ui/card";
 import { Skeleton } from "@repo/ui/skeleton";
 import { Laptop, Loader2, LogOut, Smartphone } from "lucide-react";
+import { toast } from "sonner";
 
 function deviceLabel(userAgent: string | null) {
   if (!userAgent) {
@@ -53,11 +54,19 @@ export default function SessionsSettingsPage() {
   const { data: sessions, isLoading, error, refetch } = publicApi.session.list.useQuery();
 
   const revoke = publicApi.session.revoke.useMutation({
-    onSuccess: () => utils.session.list.invalidate(),
+    onSuccess: () => {
+      utils.session.list.invalidate();
+      toast.success("Session revoked.");
+    },
+    onError: (error) => toast.error(error.message ?? "Couldn't revoke this session."),
   });
 
   const revokeOthers = publicApi.session.revokeOthers.useMutation({
-    onSuccess: () => utils.session.list.invalidate(),
+    onSuccess: () => {
+      utils.session.list.invalidate();
+      toast.success("Signed out of other devices.");
+    },
+    onError: (error) => toast.error(error.message ?? "Couldn't sign out other devices."),
   });
 
   const hasOtherSessions = (sessions?.length ?? 0) > 1;

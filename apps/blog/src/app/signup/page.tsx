@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { publicAuthClient } from "@repo/auth/public-client";
+import { markVerificationEmailSent } from "@repo/auth/use-resend-verification-email";
 import { Button } from "@repo/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@repo/ui/form";
@@ -14,6 +15,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 const signupSchema = z.object({
@@ -28,7 +30,6 @@ const POST_SIGNUP_PATH = "/mine";
 
 export default function SignupPage() {
   const router = useRouter();
-  const [error, setError] = useState<string | null>(null);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [turnstileKey, setTurnstileKey] = useState(0);
   const [socialProvider, setSocialProvider] = useState<"google" | "github" | null>(null);
@@ -39,10 +40,8 @@ export default function SignupPage() {
   });
 
   async function onSubmit(values: SignupValues) {
-    setError(null);
-
     if (!turnstileToken) {
-      setError("Please complete the verification.");
+      toast.error("Please complete the verification.");
       return;
     }
 
@@ -54,16 +53,16 @@ export default function SignupPage() {
     setTurnstileKey((key) => key + 1);
 
     if (signUpError) {
-      setError(signUpError.message ?? "Couldn't create your account.");
+      toast.error(signUpError.message ?? "Couldn't create your account.");
       return;
     }
 
+    markVerificationEmailSent(values.email);
     router.push(POST_SIGNUP_PATH);
     router.refresh();
   }
 
   async function onSocialSignIn(provider: "google" | "github") {
-    setError(null);
     setSocialProvider(provider);
 
     const { error: signInError } = await publicAuthClient.signIn.social({
@@ -72,7 +71,7 @@ export default function SignupPage() {
     });
 
     if (signInError) {
-      setError(signInError.message ?? "Couldn't sign in.");
+      toast.error(signInError.message ?? "Couldn't sign in.");
       setSocialProvider(null);
     }
   }
@@ -189,14 +188,6 @@ export default function SignupPage() {
                 onVerify={setTurnstileToken}
                 onExpire={() => setTurnstileToken(null)}
               />
-              {error && (
-                <p
-                  role="alert"
-                  className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
-                >
-                  {error}
-                </p>
-              )}
               <Button
                 type="submit"
                 className="btn-glow w-full gap-2"

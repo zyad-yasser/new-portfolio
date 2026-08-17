@@ -9,6 +9,7 @@ import {
   post,
   postBookmark,
   postReaction,
+  postReshare,
   postTag,
   series,
   tag,
@@ -31,9 +32,15 @@ export const postRelations = relations(post, ({ one, many }) => ({
     fields: [post.seriesId],
     references: [series.id],
   }),
+  quotedPost: one(post, {
+    fields: [post.quotedPostId],
+    references: [post.id],
+    relationName: "quotes",
+  }),
   postTags: many(postTag),
   comments: many(comment),
   reactions: many(postReaction),
+  reshares: many(postReshare),
 }));
 
 export const userRelations = relations(user, ({ many, one }) => ({
@@ -42,6 +49,7 @@ export const userRelations = relations(user, ({ many, one }) => ({
   following: many(userFollow, { relationName: "followingList" }),
   followers: many(userFollow, { relationName: "followerList" }),
   bookmarks: many(postBookmark),
+  reshares: many(postReshare),
   media: many(media),
   series: many(series),
   notificationsReceived: many(notification, { relationName: "notificationsReceived" }),
@@ -144,6 +152,17 @@ export const postBookmarkRelations = relations(postBookmark, ({ one }) => ({
   }),
   post: one(post, {
     fields: [postBookmark.postId],
+    references: [post.id],
+  }),
+}));
+
+export const postReshareRelations = relations(postReshare, ({ one }) => ({
+  user: one(user, {
+    fields: [postReshare.userId],
+    references: [user.id],
+  }),
+  post: one(post, {
+    fields: [postReshare.postId],
     references: [post.id],
   }),
 }));

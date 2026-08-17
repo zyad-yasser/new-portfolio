@@ -1,4 +1,5 @@
 import { TRPCReactProvider } from "@repo/trpc/react";
+import { Toaster } from "@repo/ui/sonner";
 import { ThemeProvider } from "@repo/ui/theme-provider";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
@@ -28,7 +29,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           enableSystem
           disableTransitionOnChange
         >
-          <TRPCReactProvider>{children}</TRPCReactProvider>
+          <TRPCReactProvider>
+            {children}
+            <Toaster />
+          </TRPCReactProvider>
         </ThemeProvider>
       </body>
     </html>

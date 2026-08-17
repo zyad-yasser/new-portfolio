@@ -21,5 +21,6 @@ export const config = {
     "/series/mine",
     "/notifications",
     "/media",
+    "/feed",
   ],
 };

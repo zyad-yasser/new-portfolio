@@ -54,6 +54,23 @@ export default function EditPostPage() {
     );
   }
 
+  if (post.type !== "article") {
+    return (
+      <>
+        <SiteHeader />
+        <main className="mx-auto flex max-w-3xl flex-col items-center gap-4 px-6 py-24 text-center">
+          <h1 className="text-2xl font-semibold">This post can't be edited</h1>
+          <p className="text-muted-foreground">
+            Posts and reshares don't support editing — delete and re-create instead.
+          </p>
+          <Button asChild variant="outline">
+            <Link href={`/post/${post.slug}`}>View post</Link>
+          </Button>
+        </main>
+      </>
+    );
+  }
+
   return (
     <>
       <SiteHeader />
@@ -62,7 +79,7 @@ export default function EditPostPage() {
           key={post.id}
           mode="edit"
           existingPostId={post.id}
-          initialTitle={post.title}
+          initialTitle={post.title ?? ""}
           initialContentJson={post.contentJson}
           initialCategoryId={post.categoryId}
           initialSeriesId={post.seriesId}

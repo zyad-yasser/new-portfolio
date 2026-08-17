@@ -69,9 +69,11 @@ export default function SeriesDetailPage() {
           <p className="text-muted-foreground">No published posts in this series yet.</p>
         ) : (
           <TooltipProvider>
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <div className="columns-1 gap-5 sm:columns-2">
               {series.posts.map((post) => (
-                <PostCard key={post.id} post={post} />
+                <div key={post.id} className="mb-5 break-inside-avoid">
+                  <PostCard post={post} />
+                </div>
               ))}
             </div>
           </TooltipProvider>

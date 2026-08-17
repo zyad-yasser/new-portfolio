@@ -6,13 +6,18 @@ import { Avatar, AvatarFallback, AvatarImage } from "@repo/ui/avatar";
 import { Button } from "@repo/ui/button";
 import { Card } from "@repo/ui/card";
 import { Skeleton } from "@repo/ui/skeleton";
+import { toast } from "sonner";
 
 export default function BlockedUsersPage() {
   const utils = publicApi.useUtils();
   const { data: blocked, isLoading, error, refetch } = publicApi.block.list.useQuery();
 
   const unblock = publicApi.block.unblock.useMutation({
-    onSuccess: () => utils.block.list.invalidate(),
+    onSuccess: () => {
+      utils.block.list.invalidate();
+      toast.success("User unblocked.");
+    },
+    onError: (error) => toast.error(error.message ?? "Couldn't unblock this user."),
   });
 
   return (

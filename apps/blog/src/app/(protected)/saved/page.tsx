@@ -17,27 +17,35 @@ export default function SavedPostsPage() {
         <h1 className="text-2xl font-semibold">Saved posts</h1>
 
         <TooltipProvider>
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {isLoading &&
-              Array.from({ length: 3 }).map((_, i) => (
-                <Skeleton key={i} className="skeleton-shimmer h-52 w-full rounded-xl" />
-              ))}
-            {error && (
-              <div className="col-span-full flex flex-col items-center gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-center text-sm text-destructive">
-                <p>Couldn't load saved posts. {error.message}</p>
-                <Button variant="outline" size="sm" onClick={() => refetch()}>
-                  Try again
-                </Button>
-              </div>
-            )}
+          {error && (
+            <div className="flex flex-col items-center gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-center text-sm text-destructive">
+              <p>Couldn't load saved posts. {error.message}</p>
+              <Button variant="outline" size="sm" onClick={() => refetch()}>
+                Try again
+              </Button>
+            </div>
+          )}
 
-            {!isLoading && !error && posts?.length === 0 && (
-              <p className="col-span-full text-center text-muted-foreground">No saved posts yet.</p>
-            )}
-            {posts?.map((post) => (
-              <PostCard key={post.id} post={post} />
-            ))}
-          </div>
+          {!isLoading && !error && posts?.length === 0 && (
+            <p className="text-center text-muted-foreground">No saved posts yet.</p>
+          )}
+
+          {!error && (isLoading || (posts && posts.length > 0)) && (
+            <div className="columns-1 gap-5 sm:columns-2 lg:columns-3">
+              {isLoading &&
+                Array.from({ length: 3 }).map((_, i) => (
+                  <Skeleton
+                    key={i}
+                    className="skeleton-shimmer mb-5 h-52 w-full rounded-xl break-inside-avoid"
+                  />
+                ))}
+              {posts?.map((post) => (
+                <div key={post.id} className="mb-5 break-inside-avoid">
+                  <PostCard post={post} />
+                </div>
+              ))}
+            </div>
+          )}
         </TooltipProvider>
       </main>
     </>

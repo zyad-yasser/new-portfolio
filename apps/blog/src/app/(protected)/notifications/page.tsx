@@ -15,6 +15,7 @@ import { Skeleton } from "@repo/ui/skeleton";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useMemo } from "react";
+import { toast } from "sonner";
 
 export default function NotificationsPage() {
   const utils = publicApi.useUtils();
@@ -29,6 +30,8 @@ export default function NotificationsPage() {
       utils.notification.list.invalidate();
       utils.notification.unreadCount.invalidate();
     },
+    onError: (mutationError) =>
+      toast.error(mutationError.message ?? "Couldn't update this notification."),
   });
 
   const markAllRead = publicApi.notification.markAllRead.useMutation({
@@ -36,6 +39,8 @@ export default function NotificationsPage() {
       utils.notification.list.invalidate();
       utils.notification.unreadCount.invalidate();
     },
+    onError: (mutationError) =>
+      toast.error(mutationError.message ?? "Couldn't mark notifications as read."),
   });
 
   const notifications = useMemo(() => data?.pages.flatMap((page) => page.items), [data]);

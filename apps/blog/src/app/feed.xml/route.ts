@@ -1,6 +1,6 @@
 import { db } from "@repo/db";
 import { post } from "@repo/db/schema";
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { Feed } from "feed";
 
 const BLOG_URL = "https://blog.zyadyasser.net";
@@ -8,7 +8,7 @@ const MAX_ITEMS = 50;
 
 export async function GET() {
   const posts = await db.query.post.findMany({
-    where: eq(post.published, true),
+    where: and(eq(post.published, true), eq(post.type, "article")),
     orderBy: desc(post.createdAt),
     limit: MAX_ITEMS,
     with: { author: { columns: { name: true } } },
@@ -27,10 +27,10 @@ export async function GET() {
 
   for (const p of posts) {
     feed.addItem({
-      title: p.title,
+      title: p.title ?? "",
       id: `${BLOG_URL}/post/${p.slug}`,
       link: `${BLOG_URL}/post/${p.slug}`,
-      description: p.excerptText,
+      description: p.excerptText ?? "",
       author: [{ name: p.author.name }],
       date: p.createdAt,
       ...(p.coverImageUrl ? { image: p.coverImageUrl } : {}),

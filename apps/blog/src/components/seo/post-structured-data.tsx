@@ -5,8 +5,8 @@ export function PostStructuredData({
   slug,
 }: {
   post: {
-    title: string;
-    excerptText: string;
+    title: string | null;
+    excerptText: string | null;
     coverImageUrl: string | null;
     canonicalUrl: string | null;
     createdAt: Date;
@@ -20,8 +20,8 @@ export function PostStructuredData({
   const schema = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
-    headline: post.title,
-    description: post.excerptText,
+    headline: post.title ?? `A post by ${post.author.name}`,
+    description: post.excerptText ?? undefined,
     image: post.coverImageUrl ?? undefined,
     datePublished: post.createdAt.toISOString(),
     dateModified: post.updatedAt.toISOString(),

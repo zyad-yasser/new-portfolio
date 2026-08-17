@@ -8,6 +8,7 @@ import { Button } from "@repo/ui/button";
 import { Card } from "@repo/ui/card";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
+import { toast } from "sonner";
 
 function initialsFor(name: string) {
   return name
@@ -36,6 +37,7 @@ export function AuthorCard({ username }: { username: string }) {
         utils.follow.isFollowing.invalidate({ userId: profile.userId });
       }
     },
+    onError: (error) => toast.error(error.message ?? "Couldn't follow this user."),
   });
   const unfollow = publicApi.follow.unfollow.useMutation({
     onSuccess: () => {
@@ -43,6 +45,7 @@ export function AuthorCard({ username }: { username: string }) {
         utils.follow.isFollowing.invalidate({ userId: profile.userId });
       }
     },
+    onError: (error) => toast.error(error.message ?? "Couldn't unfollow this user."),
   });
 
   if (!profile) {

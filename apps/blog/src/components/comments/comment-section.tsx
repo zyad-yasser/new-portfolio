@@ -26,6 +26,7 @@ import { Textarea } from "@repo/ui/textarea";
 import { Loader2, MoreHorizontal, UserX } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { toast } from "sonner";
 
 type CommentAuthor = {
   id: string;
@@ -68,14 +69,20 @@ function CommentActions({
   const utils = publicApi.useUtils();
 
   const deleteComment = publicApi.comment.delete.useMutation({
-    onSuccess: () => utils.comment.listByPost.invalidate({ postId }),
+    onSuccess: () => {
+      utils.comment.listByPost.invalidate({ postId });
+      toast.success("Comment deleted.");
+    },
+    onError: (error) => toast.error(error.message ?? "Couldn't delete this comment."),
   });
 
   const blockUser = publicApi.block.block.useMutation({
     onSuccess: () => {
       utils.comment.listByPost.invalidate({ postId });
       utils.post.list.invalidate();
+      toast.success(`Blocked ${comment.author.name}.`);
     },
+    onError: (error) => toast.error(error.message ?? "Couldn't block this user."),
   });
 
   const isOwner = comment.authorId === viewerId;
@@ -173,7 +180,9 @@ function CommentItem({
     onSuccess: () => {
       setEditing(false);
       utils.comment.listByPost.invalidate({ postId });
+      toast.success("Comment updated.");
     },
+    onError: (error) => toast.error(error.message ?? "Couldn't update this comment."),
   });
 
   const isDeleted = !!comment.deletedAt;
@@ -285,6 +294,7 @@ function ReplyForm({
       onDone();
       utils.comment.listByPost.invalidate({ postId });
     },
+    onError: (error) => toast.error(error.message ?? "Couldn't post your reply."),
   });
 
   return (
@@ -333,6 +343,7 @@ export function CommentSection({
       setNewComment("");
       utils.comment.listByPost.invalidate({ postId });
     },
+    onError: (error) => toast.error(error.message ?? "Couldn't post your comment."),
   });
 
   return (

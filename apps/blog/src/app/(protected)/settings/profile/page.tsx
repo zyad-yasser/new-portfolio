@@ -24,6 +24,7 @@ import { Textarea } from "@repo/ui/textarea";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export default function ProfileSettingsPage() {
   const router = useRouter();
@@ -32,8 +33,6 @@ export default function ProfileSettingsPage() {
   const { data: profile, isLoading, error: loadError, refetch } = publicApi.profile.mine.useQuery();
 
   const [name, setName] = useState("");
-  const [nameSaved, setNameSaved] = useState(false);
-  const [nameError, setNameError] = useState<string | null>(null);
   const [nameSaving, setNameSaving] = useState(false);
 
   useEffect(() => {
@@ -43,31 +42,30 @@ export default function ProfileSettingsPage() {
   }, [session?.user.name]);
 
   async function handleAvatarUploaded(url: string) {
-    await publicAuthClient.updateUser({ image: url });
+    const { error } = await publicAuthClient.updateUser({ image: url });
+    if (error) {
+      toast.error(error.message ?? "Couldn't update your photo.");
+    }
   }
 
   async function handleNameSubmit(event: React.FormEvent) {
     event.preventDefault();
-    setNameError(null);
     setNameSaving(true);
     const { error } = await publicAuthClient.updateUser({ name });
     setNameSaving(false);
 
     if (error) {
-      setNameError(error.message ?? "Couldn't update your name.");
+      toast.error(error.message ?? "Couldn't update your name.");
       return;
     }
 
-    setNameSaved(true);
-    setTimeout(() => setNameSaved(false), 2000);
+    toast.success("Name saved.");
   }
 
   const [username, setUsername] = useState("");
   const [bio, setBio] = useState("");
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [location, setLocation] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     if (profile) {
@@ -80,36 +78,30 @@ export default function ProfileSettingsPage() {
 
   const update = publicApi.profile.update.useMutation({
     onSuccess: async (updated) => {
-      setError(null);
-      setSaved(true);
+      toast.success("Profile saved.");
       await utils.profile.mine.invalidate();
       if (updated?.username) {
         await utils.profile.getByUsername.invalidate({ username: updated.username });
       }
-      setTimeout(() => setSaved(false), 2000);
     },
-    onError: (mutationError) => setError(mutationError.message),
+    onError: (mutationError) => toast.error(mutationError.message),
   });
 
   function handleProfileSubmit(event: React.FormEvent) {
     event.preventDefault();
-    setError(null);
     update.mutate({ username, bio, websiteUrl, location });
   }
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [passwordError, setPasswordError] = useState<string | null>(null);
-  const [passwordSaved, setPasswordSaved] = useState(false);
   const [passwordSaving, setPasswordSaving] = useState(false);
 
   async function handlePasswordSubmit(event: React.FormEvent) {
     event.preventDefault();
-    setPasswordError(null);
 
     if (newPassword !== confirmPassword) {
-      setPasswordError("New passwords don't match.");
+      toast.error("New passwords don't match.");
       return;
     }
 
@@ -122,30 +114,27 @@ export default function ProfileSettingsPage() {
     setPasswordSaving(false);
 
     if (changeError) {
-      setPasswordError(changeError.message ?? "Couldn't change your password.");
+      toast.error(changeError.message ?? "Couldn't change your password.");
       return;
     }
 
     setCurrentPassword("");
     setNewPassword("");
     setConfirmPassword("");
-    setPasswordSaved(true);
-    setTimeout(() => setPasswordSaved(false), 2000);
+    toast.success("Password changed.");
   }
 
   const [deletePassword, setDeletePassword] = useState("");
-  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
   async function handleDeleteAccount() {
-    setDeleteError(null);
     setDeleting(true);
     const { error: deleteErr } = await publicAuthClient.deleteUser({ password: deletePassword });
     setDeleting(false);
 
     if (deleteErr) {
-      setDeleteError(deleteErr.message ?? "Couldn't delete your account.");
+      toast.error(deleteErr.message ?? "Couldn't delete your account.");
       return;
     }
 
@@ -194,18 +183,9 @@ export default function ProfileSettingsPage() {
               </div>
             </div>
 
-            {nameError && (
-              <p
-                role="alert"
-                className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
-              >
-                {nameError}
-              </p>
-            )}
-
             <Button type="submit" disabled={nameSaving} className="w-fit gap-2">
               {nameSaving && <Loader2 className="size-4 animate-spin" />}
-              {nameSaved ? "Saved" : "Save name"}
+              Save name
             </Button>
           </form>
         </CardContent>
@@ -255,18 +235,9 @@ export default function ProfileSettingsPage() {
               />
             </div>
 
-            {error && (
-              <p
-                role="alert"
-                className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
-              >
-                {error}
-              </p>
-            )}
-
             <Button type="submit" disabled={update.isPending} className="btn-glow w-fit gap-2">
               {update.isPending && <Loader2 className="size-4 animate-spin" />}
-              {saved ? "Saved" : "Save changes"}
+              Save changes
             </Button>
           </form>
         </CardContent>
@@ -309,22 +280,13 @@ export default function ProfileSettingsPage() {
               />
             </div>
 
-            {passwordError && (
-              <p
-                role="alert"
-                className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
-              >
-                {passwordError}
-              </p>
-            )}
-
             <Button
               type="submit"
               disabled={passwordSaving || !currentPassword || !newPassword}
               className="w-fit gap-2"
             >
               {passwordSaving && <Loader2 className="size-4 animate-spin" />}
-              {passwordSaved ? "Saved" : "Change password"}
+              Change password
             </Button>
           </form>
         </CardContent>
@@ -344,7 +306,6 @@ export default function ProfileSettingsPage() {
               setDeleteOpen(open);
               if (!open) {
                 setDeletePassword("");
-                setDeleteError(null);
               }
             }}
           >
@@ -368,11 +329,6 @@ export default function ProfileSettingsPage() {
                   onChange={(event) => setDeletePassword(event.target.value)}
                 />
               </div>
-              {deleteError && (
-                <p role="alert" className="text-sm text-destructive">
-                  {deleteError}
-                </p>
-              )}
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction

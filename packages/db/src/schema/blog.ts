@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import {
   type AnyPgColumn,
   bigint,
@@ -23,8 +24,19 @@ const tsvector = customType<{ data: string }>({
 export const REACTION_TYPES = ["like", "unicorn", "mindblown", "raised_hands", "fire"] as const;
 export type ReactionType = (typeof REACTION_TYPES)[number];
 
-export const NOTIFICATION_TYPES = ["follow", "comment", "reply", "reaction", "mention"] as const;
+export const NOTIFICATION_TYPES = [
+  "follow",
+  "comment",
+  "reply",
+  "reaction",
+  "mention",
+  "reshare",
+  "quote",
+] as const;
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number];
+
+export const POST_TYPES = ["article", "media", "quote"] as const;
+export type PostType = (typeof POST_TYPES)[number];
 
 export type TiptapDoc = {
   type: string;
@@ -72,9 +84,13 @@ export const post = pgTable(
     categoryId: text("category_id").references(() => category.id, { onDelete: "set null" }),
     seriesId: text("series_id").references(() => series.id, { onDelete: "set null" }),
     seriesOrder: integer("series_order"),
-    title: text("title").notNull(),
+    type: text("type").notNull().default("article").$type<PostType>(),
+    quotedPostId: text("quoted_post_id").references((): AnyPgColumn => post.id, {
+      onDelete: "set null",
+    }),
+    title: text("title"),
     slug: text("slug").notNull().unique(),
-    excerptText: text("excerpt_text").notNull(),
+    excerptText: text("excerpt_text"),
     contentJson: jsonb("content_json").$type<TiptapDoc>().notNull(),
     coverImageUrl: text("cover_image_url"),
     canonicalUrl: text("canonical_url"),
@@ -87,6 +103,11 @@ export const post = pgTable(
   (table) => [
     index("post_series_id_idx").on(table.seriesId),
     index("post_search_vector_idx").using("gin", table.searchVector),
+    index("post_author_id_idx").on(table.authorId),
+    index("post_quoted_post_id_idx").on(table.quotedPostId),
+    index("post_published_created_at_idx")
+      .on(table.published, table.createdAt.desc(), table.id.desc())
+      .where(sql`${table.published} = true`),
   ]
 );
 
@@ -209,6 +230,23 @@ export const postBookmark = pgTable(
   (table) => [
     primaryKey({ columns: [table.userId, table.postId] }),
     index("post_bookmark_post_id_idx").on(table.postId),
+  ]
+);
+
+export const postReshare = pgTable(
+  "post_reshare",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    postId: text("post_id")
+      .notNull()
+      .references(() => post.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.userId, table.postId] }),
+    index("post_reshare_post_id_idx").on(table.postId),
   ]
 );
 

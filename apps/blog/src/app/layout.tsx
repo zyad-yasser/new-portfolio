@@ -1,5 +1,6 @@
 import { EmailVerificationBanner } from "@/components/email-verification-banner";
 import { PublicTRPCReactProvider } from "@repo/trpc/public/react";
+import { Toaster } from "@repo/ui/sonner";
 import { ThemeProvider } from "@repo/ui/theme-provider";
 import { TooltipProvider } from "@repo/ui/tooltip";
 import type { Metadata } from "next";
@@ -41,6 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <TooltipProvider>
               <EmailVerificationBanner />
               {children}
+              <Toaster />
             </TooltipProvider>
           </PublicTRPCReactProvider>
         </ThemeProvider>

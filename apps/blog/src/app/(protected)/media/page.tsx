@@ -43,6 +43,7 @@ import {
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { type KeyboardEvent, useMemo, useState } from "react";
+import { toast } from "sonner";
 
 const ACCEPT = "image/png,image/jpeg,image/webp,image/gif,video/mp4,video/webm,video/quicktime";
 const MAX_SIZE_BYTES = 200 * 1024 * 1024;
@@ -235,7 +236,6 @@ export default function MediaLibraryPage() {
   );
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
   const [dragOverId, setDragOverId] = useState<string | null>(null);
-  const [actionError, setActionError] = useState<string | null>(null);
   const [previewId, setPreviewId] = useState<string | null>(null);
   const previewItem = files.find((file) => file.id === previewId) ?? null;
 
@@ -251,31 +251,48 @@ export default function MediaLibraryPage() {
       setCreatingFolder(false);
       setNewFolderName("");
     },
+    onError: (err) => toast.error(err.message ?? "Couldn't create this folder."),
   });
-  const renameFolder = publicApi.mediaFolder.rename.useMutation({ onSuccess: invalidateAll });
+  const renameFolder = publicApi.mediaFolder.rename.useMutation({
+    onSuccess: invalidateAll,
+    onError: (err) => toast.error(err.message ?? "Couldn't rename this folder."),
+  });
   const moveFolder = publicApi.mediaFolder.move.useMutation({
     onSuccess: invalidateAll,
-    onError: (err) => setActionError(err.message),
+    onError: (err) => toast.error(err.message ?? "Couldn't move this folder."),
   });
   const deleteFolder = publicApi.mediaFolder.delete.useMutation({
     onSuccess: () => {
       invalidateAll();
       setDeleteFolderTarget(null);
+      toast.success("Folder deleted.");
     },
+    onError: (err) => toast.error(err.message ?? "Couldn't delete this folder."),
   });
 
-  const renameFile = publicApi.media.rename.useMutation({ onSuccess: invalidateAll });
+  const renameFile = publicApi.media.rename.useMutation({
+    onSuccess: invalidateAll,
+    onError: (err) => toast.error(err.message ?? "Couldn't rename this file."),
+  });
   const moveFile = publicApi.media.move.useMutation({
     onSuccess: invalidateAll,
-    onError: (err) => setActionError(err.message),
+    onError: (err) => toast.error(err.message ?? "Couldn't move this file."),
   });
-  const deleteFile = publicApi.media.delete.useMutation({ onSuccess: invalidateAll });
+  const deleteFile = publicApi.media.delete.useMutation({
+    onSuccess: () => {
+      invalidateAll();
+      toast.success("File deleted.");
+    },
+    onError: (err) => toast.error(err.message ?? "Couldn't delete this file."),
+  });
   const bulkDeleteFiles = publicApi.media.bulkDelete.useMutation({
     onSuccess: () => {
       invalidateAll();
       setBulkDeleteOpen(false);
       setSelectedFileIds(new Set());
+      toast.success("Files deleted.");
     },
+    onError: (err) => toast.error(err.message ?? "Couldn't delete these files."),
   });
 
   const { items: uploadItems, uploadFiles } = useMediaUpload(() => invalidateAll());
@@ -423,15 +440,6 @@ export default function MediaLibraryPage() {
         </div>
 
         <StorageUsageBar />
-
-        {actionError && (
-          <div className="flex items-center justify-between gap-3 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-            {actionError}
-            <button type="button" onClick={() => setActionError(null)} className="cursor-pointer">
-              Dismiss
-            </button>
-          </div>
-        )}
 
         {creatingFolder && (
           <form

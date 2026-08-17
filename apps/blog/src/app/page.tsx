@@ -90,38 +90,45 @@ export default function BlogHomePage() {
           </aside>
 
           <TooltipProvider>
-            <motion.div
-              initial="hidden"
-              animate="visible"
-              variants={containerVariants}
-              className="grid grid-cols-1 gap-5 sm:grid-cols-2"
-            >
-              {isLoading &&
-                Array.from({ length: 6 }).map((_, i) => (
-                  <Skeleton key={i} className="skeleton-shimmer h-52 w-full rounded-xl" />
+            {error && (
+              <div className="flex flex-col items-center gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-center text-sm text-destructive">
+                <p>Couldn't load posts. {error.message}</p>
+                <Button variant="outline" size="sm" onClick={() => refetch()}>
+                  Try again
+                </Button>
+              </div>
+            )}
+
+            {!isLoading && !error && posts?.length === 0 && (
+              <p className="text-center text-muted-foreground">No posts yet - be the first.</p>
+            )}
+
+            {!error && (isLoading || (posts && posts.length > 0)) && (
+              <motion.div
+                initial="hidden"
+                animate="visible"
+                variants={containerVariants}
+                className="columns-1 gap-5 sm:columns-2"
+              >
+                {isLoading &&
+                  Array.from({ length: 6 }).map((_, i) => (
+                    <Skeleton
+                      key={i}
+                      className="skeleton-shimmer mb-5 h-52 w-full rounded-xl break-inside-avoid"
+                    />
+                  ))}
+
+                {posts?.map((post) => (
+                  <motion.div
+                    key={post.id}
+                    variants={itemVariants}
+                    className="mb-5 break-inside-avoid"
+                  >
+                    <PostCard post={post} />
+                  </motion.div>
                 ))}
-
-              {error && (
-                <div className="col-span-full flex flex-col items-center gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-center text-sm text-destructive">
-                  <p>Couldn't load posts. {error.message}</p>
-                  <Button variant="outline" size="sm" onClick={() => refetch()}>
-                    Try again
-                  </Button>
-                </div>
-              )}
-
-              {!isLoading && !error && posts?.length === 0 && (
-                <p className="col-span-full text-center text-muted-foreground">
-                  No posts yet - be the first.
-                </p>
-              )}
-
-              {posts?.map((post) => (
-                <motion.div key={post.id} variants={itemVariants}>
-                  <PostCard post={post} />
-                </motion.div>
-              ))}
-            </motion.div>
+              </motion.div>
+            )}
 
             {hasNextPage && (
               <div ref={loadMoreRef} className="flex justify-center py-6">

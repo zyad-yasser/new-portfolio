@@ -3,6 +3,7 @@
 import type { TiptapDoc } from "@repo/db/schema";
 import { publicApi } from "@repo/trpc/public/react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 
 export type AutosaveStatus = "idle" | "saving" | "saved" | "error";
 
@@ -29,6 +30,8 @@ export function useAutosavePost(initialPostId?: string) {
 
   const postIdRef = useRef(postId);
   postIdRef.current = postId;
+  const statusRef = useRef(status);
+  statusRef.current = status;
   const pendingRef = useRef<PendingSave | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const flushingRef = useRef<Promise<string | undefined> | null>(null);
@@ -76,7 +79,10 @@ export function useAutosavePost(initialPostId?: string) {
         setStatus("saved");
         utils.post.mine.invalidate();
         return postIdRef.current;
-      } catch {
+      } catch (err) {
+        if (statusRef.current !== "error") {
+          toast.error(err instanceof Error ? err.message : "Couldn't save your changes.");
+        }
         setStatus("error");
         return postIdRef.current;
       } finally {
@@ -109,7 +115,7 @@ export function useAutosavePost(initialPostId?: string) {
 
     const id = await flush();
     if (!id) {
-      return null;
+      throw new Error("Couldn't save your post.");
     }
 
     const result = await setPublishedMutation.mutateAsync({ id, published: true });

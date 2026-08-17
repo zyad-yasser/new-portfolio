@@ -15,6 +15,7 @@ import { SidebarTrigger } from "@repo/ui/sidebar";
 import { ThemeToggle } from "@repo/ui/theme-toggle";
 import { LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 interface DashboardTopbarProps {
   user: {
@@ -28,7 +29,11 @@ export function DashboardTopbar({ user }: DashboardTopbarProps) {
   const router = useRouter();
 
   async function handleSignOut() {
-    await authClient.signOut();
+    const { error } = await authClient.signOut();
+    if (error) {
+      toast.error(error.message ?? "Couldn't sign out.");
+      return;
+    }
     router.push("/login");
     router.refresh();
   }

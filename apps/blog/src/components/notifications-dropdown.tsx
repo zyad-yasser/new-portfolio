@@ -15,6 +15,7 @@ import { Skeleton } from "@repo/ui/skeleton";
 import { Bell, BellOff, CheckCheck } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export function NotificationsDropdown({ unreadCount }: { unreadCount: number | undefined }) {
   const [open, setOpen] = useState(false);
@@ -29,6 +30,7 @@ export function NotificationsDropdown({ unreadCount }: { unreadCount: number | u
       utils.notification.list.invalidate();
       utils.notification.unreadCount.invalidate();
     },
+    onError: (error) => toast.error(error.message ?? "Couldn't update this notification."),
   });
 
   const markAllRead = publicApi.notification.markAllRead.useMutation({
@@ -36,6 +38,7 @@ export function NotificationsDropdown({ unreadCount }: { unreadCount: number | u
       utils.notification.list.invalidate();
       utils.notification.unreadCount.invalidate();
     },
+    onError: (error) => toast.error(error.message ?? "Couldn't mark notifications as read."),
   });
 
   return (

@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 const IMAGE_ACCEPT = "image/png,image/jpeg,image/webp,image/gif";
 const ALL_ACCEPT = `${IMAGE_ACCEPT},video/mp4,video/webm,video/quicktime`;
@@ -108,10 +109,15 @@ export function MediaPickerDialog({
         setFolderId(created.id);
       }
     },
+    onError: (error) => toast.error(error.message ?? "Couldn't create this folder."),
   });
 
   const deleteMedia = publicApi.media.delete.useMutation({
-    onSuccess: () => utils.media.list.invalidate(),
+    onSuccess: () => {
+      utils.media.list.invalidate();
+      toast.success("File deleted.");
+    },
+    onError: (error) => toast.error(error.message ?? "Couldn't delete this file."),
   });
 
   const { items: uploadItems, uploadFiles } = useMediaUpload((item) => {

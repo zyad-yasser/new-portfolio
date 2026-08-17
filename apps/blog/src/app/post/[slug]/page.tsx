@@ -34,15 +34,17 @@ export async function generateMetadata({
   }
 
   const url = found.canonicalUrl ?? `https://blog.zyadyasser.net/post/${slug}`;
+  const title = found.title ?? `A post by ${found.author.name}`;
+  const description = found.excerptText ?? undefined;
 
   return {
-    title: found.title,
-    description: found.excerptText,
+    title,
+    description,
     alternates: { canonical: url },
     openGraph: {
       type: "article",
-      title: found.title,
-      description: found.excerptText,
+      title,
+      description,
       url,
       publishedTime: found.createdAt.toISOString(),
       modifiedTime: found.updatedAt.toISOString(),
@@ -51,8 +53,8 @@ export async function generateMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title: found.title,
-      description: found.excerptText,
+      title,
+      description,
       images: found.coverImageUrl ? [found.coverImageUrl] : undefined,
     },
   };

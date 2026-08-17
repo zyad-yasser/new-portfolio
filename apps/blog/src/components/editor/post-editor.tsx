@@ -35,6 +35,7 @@ import { Check, Loader2, Plus, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { TiptapEditor } from "./tiptap-editor";
 import { type AutosaveStatus, useAutosavePost } from "./use-autosave-post";
 
@@ -166,7 +167,9 @@ function NewSeriesDialog({ onCreated }: { onCreated: (id: string) => void }) {
       setTitle("");
       setDescription("");
       onCreated(created.id);
+      toast.success("Series created.");
     },
+    onError: (error) => toast.error(error.message ?? "Couldn't create this series."),
   });
 
   return (
@@ -266,9 +269,14 @@ export function PostEditor({
   }
 
   async function handlePublish() {
-    const result = await autosave.publish();
-    if (result) {
-      router.push(`/post/${result.slug}`);
+    try {
+      const result = await autosave.publish();
+      if (result) {
+        toast.success("Post published.");
+        router.push(`/post/${result.slug}`);
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Couldn't publish this post.");
     }
   }
 

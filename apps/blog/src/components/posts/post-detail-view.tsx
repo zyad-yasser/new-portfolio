@@ -18,6 +18,7 @@ import { Calendar, ChevronLeft, ChevronRight, Clock, Eye, Library, UserX } from 
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useRef } from "react";
+import { toast } from "sonner";
 
 export function PostDetailView({ slug }: { slug: string }) {
   const { data: session } = publicAuthClient.useSession();
@@ -27,7 +28,11 @@ export function PostDetailView({ slug }: { slug: string }) {
   const hasTrackedView = useRef(false);
 
   const blockAuthor = publicApi.block.block.useMutation({
-    onSuccess: () => utils.post.list.invalidate(),
+    onSuccess: () => {
+      utils.post.list.invalidate();
+      toast.success("User blocked.");
+    },
+    onError: (error) => toast.error(error.message ?? "Couldn't block this user."),
   });
 
   const headings = useMemo(() => (post ? extractHeadings(post.contentJson) : []), [post]);
@@ -82,7 +87,9 @@ export function PostDetailView({ slug }: { slug: string }) {
             Blog
           </Link>
           <ChevronRight className="size-3.5" />
-          <span className="truncate text-foreground">{post.title}</span>
+          <span className="truncate text-foreground">
+            {post.title ?? (post.type === "quote" ? "Quote" : "Post")}
+          </span>
         </nav>
 
         {post.coverImageUrl && (
@@ -107,7 +114,7 @@ export function PostDetailView({ slug }: { slug: string }) {
               </Badge>
             )}
           </div>
-          <h1 className="text-3xl font-semibold">{post.title}</h1>
+          {post.title && <h1 className="text-3xl font-semibold">{post.title}</h1>}
 
           <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm text-muted-foreground">
             <span className="flex items-center gap-1">
@@ -157,8 +164,30 @@ export function PostDetailView({ slug }: { slug: string }) {
         </div>
 
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_280px]">
-          <div className="min-w-0">
+          <div className="flex min-w-0 flex-col gap-4">
             <TiptapContent json={post.contentJson} />
+
+            {post.type === "quote" &&
+              (post.quotedPost ? (
+                <Link
+                  href={`/post/${post.quotedPost.slug}`}
+                  className="flex flex-col gap-1 rounded-lg border border-border/60 p-4 hover:border-primary"
+                >
+                  <span className="text-sm font-medium">{post.quotedPost.author.name}</span>
+                  {post.quotedPost.title && (
+                    <span className="font-medium">{post.quotedPost.title}</span>
+                  )}
+                  {post.quotedPost.excerptText && (
+                    <p className="line-clamp-3 text-sm text-muted-foreground">
+                      {post.quotedPost.excerptText}
+                    </p>
+                  )}
+                </Link>
+              ) : (
+                <p className="rounded-lg border border-dashed border-border/60 p-4 text-sm text-muted-foreground">
+                  This post is no longer available.
+                </p>
+              ))}
           </div>
 
           <aside className="flex flex-col gap-4">

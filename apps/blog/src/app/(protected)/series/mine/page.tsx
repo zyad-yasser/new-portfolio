@@ -30,6 +30,7 @@ import { Textarea } from "@repo/ui/textarea";
 import { ArrowDown, ArrowUp, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { toast } from "sonner";
 
 type SeriesFormValues = { title: string; description: string };
 
@@ -105,16 +106,29 @@ export default function MySeriesPage() {
   const { data: seriesList, isLoading, error, refetch } = publicApi.series.mine.useQuery();
 
   const createSeries = publicApi.series.create.useMutation({
-    onSuccess: () => utils.series.mine.invalidate(),
+    onSuccess: () => {
+      utils.series.mine.invalidate();
+      toast.success("Series created.");
+    },
+    onError: (error) => toast.error(error.message ?? "Couldn't create this series."),
   });
   const updateSeries = publicApi.series.update.useMutation({
-    onSuccess: () => utils.series.mine.invalidate(),
+    onSuccess: () => {
+      utils.series.mine.invalidate();
+      toast.success("Series updated.");
+    },
+    onError: (error) => toast.error(error.message ?? "Couldn't update this series."),
   });
   const deleteSeries = publicApi.series.delete.useMutation({
-    onSuccess: () => utils.series.mine.invalidate(),
+    onSuccess: () => {
+      utils.series.mine.invalidate();
+      toast.success("Series deleted.");
+    },
+    onError: (error) => toast.error(error.message ?? "Couldn't delete this series."),
   });
   const reorder = publicApi.series.reorder.useMutation({
     onSuccess: () => utils.series.mine.invalidate(),
+    onError: (error) => toast.error(error.message ?? "Couldn't reorder this series."),
   });
 
   function movePost(seriesId: string, postIds: string[], index: number, direction: -1 | 1) {
