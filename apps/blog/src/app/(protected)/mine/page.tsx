@@ -2,6 +2,7 @@
 
 import { SiteHeader } from "@/components/site-header";
 import { categoryColorClasses } from "@/lib/category-colors";
+import { getErrorMessage } from "@repo/trpc/error";
 import { publicApi } from "@repo/trpc/public/react";
 import {
   AlertDialog,
@@ -31,7 +32,7 @@ export default function MinePostsPage() {
       await utils.post.mine.invalidate();
       await utils.post.list.invalidate();
     },
-    onError: (error) => toast.error(error.message ?? "Couldn't update this post."),
+    onError: (error) => toast.error(getErrorMessage(error, "Couldn't update this post.")),
   });
 
   const deletePost = publicApi.post.delete.useMutation({
@@ -40,7 +41,7 @@ export default function MinePostsPage() {
       await utils.post.list.invalidate();
       toast.success("Post deleted.");
     },
-    onError: (error) => toast.error(error.message ?? "Couldn't delete this post."),
+    onError: (error) => toast.error(getErrorMessage(error, "Couldn't delete this post.")),
   });
 
   return (
@@ -57,7 +58,7 @@ export default function MinePostsPage() {
 
           {error && (
             <div className="flex flex-col items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
-              <p>Couldn't load your posts. {error.message}</p>
+              <p>Couldn't load your posts. Please try again.</p>
               <Button variant="outline" size="sm" onClick={() => refetch()}>
                 Try again
               </Button>
@@ -71,7 +72,7 @@ export default function MinePostsPage() {
                 href="/new"
                 className="font-medium text-foreground underline underline-offset-4"
               >
-                Write your first post
+                Write your first article
               </Link>
             </p>
           )}

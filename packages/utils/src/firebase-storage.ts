@@ -4,10 +4,17 @@ import { requireEnv } from "./env";
 
 let bucket: ReturnType<ReturnType<typeof getStorage>["bucket"]> | undefined;
 
+function isEmulator() {
+  return !!process.env.FIREBASE_STORAGE_EMULATOR_HOST;
+}
+
 function getBucket() {
   if (!bucket) {
-    const serviceAccount = JSON.parse(requireEnv("FIREBASE_SERVICE_ACCOUNT"));
-    const app = getApps()[0] ?? initializeApp({ credential: cert(serviceAccount) });
+    const app =
+      getApps()[0] ??
+      (isEmulator()
+        ? initializeApp({ projectId: requireEnv("FIREBASE_PROJECT_ID") })
+        : initializeApp({ credential: cert(JSON.parse(requireEnv("FIREBASE_SERVICE_ACCOUNT"))) }));
     bucket = getStorage(app).bucket(requireEnv("FIREBASE_STORAGE_BUCKET"));
   }
   return bucket;
@@ -16,7 +23,12 @@ function getBucket() {
 const PRESIGN_EXPIRY_SECONDS = 60;
 
 export function getPublicUrl(key: string) {
-  return `https://storage.googleapis.com/${requireEnv("FIREBASE_STORAGE_BUCKET")}/${key}`;
+  const bucketName = requireEnv("FIREBASE_STORAGE_BUCKET");
+  if (isEmulator()) {
+    const host = process.env.FIREBASE_STORAGE_EMULATOR_HOST;
+    return `http://${host}/v0/b/${encodeURIComponent(bucketName)}/o/${encodeURIComponent(key)}?alt=media`;
+  }
+  return `https://storage.googleapis.com/${bucketName}/${key}`;
 }
 
 export async function createPresignedUploadUrl({
@@ -28,6 +40,13 @@ export async function createPresignedUploadUrl({
   contentType: string;
   expiresInSeconds?: number;
 }) {
+  if (isEmulator()) {
+    return {
+      uploadUrl: `/api/media-upload?key=${encodeURIComponent(key)}`,
+      publicUrl: getPublicUrl(key),
+    };
+  }
+
   const [uploadUrl] = await getBucket()
     .file(key)
     .getSignedUrl({
@@ -38,6 +57,10 @@ export async function createPresignedUploadUrl({
     });
 
   return { uploadUrl, publicUrl: getPublicUrl(key) };
+}
+
+export async function uploadObjectDirect(key: string, body: Buffer, contentType: string) {
+  await getBucket().file(key).save(body, { contentType, resumable: false });
 }
 
 export async function deleteObject(key: string) {

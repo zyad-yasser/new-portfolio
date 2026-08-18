@@ -3,6 +3,7 @@
 import { MediaPreviewDialog } from "@/components/media/media-preview-dialog";
 import { useMediaUpload } from "@/components/media/use-media-upload";
 import { SiteHeader } from "@/components/site-header";
+import { getErrorMessage } from "@repo/trpc/error";
 import { publicApi } from "@repo/trpc/public/react";
 import {
   AlertDialog,
@@ -251,15 +252,15 @@ export default function MediaLibraryPage() {
       setCreatingFolder(false);
       setNewFolderName("");
     },
-    onError: (err) => toast.error(err.message ?? "Couldn't create this folder."),
+    onError: (err) => toast.error(getErrorMessage(err, "Couldn't create this folder.")),
   });
   const renameFolder = publicApi.mediaFolder.rename.useMutation({
     onSuccess: invalidateAll,
-    onError: (err) => toast.error(err.message ?? "Couldn't rename this folder."),
+    onError: (err) => toast.error(getErrorMessage(err, "Couldn't rename this folder.")),
   });
   const moveFolder = publicApi.mediaFolder.move.useMutation({
     onSuccess: invalidateAll,
-    onError: (err) => toast.error(err.message ?? "Couldn't move this folder."),
+    onError: (err) => toast.error(getErrorMessage(err, "Couldn't move this folder.")),
   });
   const deleteFolder = publicApi.mediaFolder.delete.useMutation({
     onSuccess: () => {
@@ -267,23 +268,23 @@ export default function MediaLibraryPage() {
       setDeleteFolderTarget(null);
       toast.success("Folder deleted.");
     },
-    onError: (err) => toast.error(err.message ?? "Couldn't delete this folder."),
+    onError: (err) => toast.error(getErrorMessage(err, "Couldn't delete this folder.")),
   });
 
   const renameFile = publicApi.media.rename.useMutation({
     onSuccess: invalidateAll,
-    onError: (err) => toast.error(err.message ?? "Couldn't rename this file."),
+    onError: (err) => toast.error(getErrorMessage(err, "Couldn't rename this file.")),
   });
   const moveFile = publicApi.media.move.useMutation({
     onSuccess: invalidateAll,
-    onError: (err) => toast.error(err.message ?? "Couldn't move this file."),
+    onError: (err) => toast.error(getErrorMessage(err, "Couldn't move this file.")),
   });
   const deleteFile = publicApi.media.delete.useMutation({
     onSuccess: () => {
       invalidateAll();
       toast.success("File deleted.");
     },
-    onError: (err) => toast.error(err.message ?? "Couldn't delete this file."),
+    onError: (err) => toast.error(getErrorMessage(err, "Couldn't delete this file.")),
   });
   const bulkDeleteFiles = publicApi.media.bulkDelete.useMutation({
     onSuccess: () => {
@@ -292,7 +293,7 @@ export default function MediaLibraryPage() {
       setSelectedFileIds(new Set());
       toast.success("Files deleted.");
     },
-    onError: (err) => toast.error(err.message ?? "Couldn't delete these files."),
+    onError: (err) => toast.error(getErrorMessage(err, "Couldn't delete these files.")),
   });
 
   const { items: uploadItems, uploadFiles } = useMediaUpload(() => invalidateAll());
@@ -511,7 +512,7 @@ export default function MediaLibraryPage() {
 
         {error && (
           <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-            Couldn't load media. {error.message}
+            Couldn't load media. Please try again.
           </div>
         )}
 

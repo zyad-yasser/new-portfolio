@@ -1,6 +1,7 @@
 "use client";
 
 import { initialsFor } from "@/lib/notifications";
+import { getErrorMessage } from "@repo/trpc/error";
 import { publicApi } from "@repo/trpc/public/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@repo/ui/avatar";
 import { Button } from "@repo/ui/button";
@@ -17,7 +18,7 @@ export default function BlockedUsersPage() {
       utils.block.list.invalidate();
       toast.success("User unblocked.");
     },
-    onError: (error) => toast.error(error.message ?? "Couldn't unblock this user."),
+    onError: (error) => toast.error(getErrorMessage(error, "Couldn't unblock this user.")),
   });
 
   return (
@@ -27,7 +28,7 @@ export default function BlockedUsersPage() {
       {isLoading && <Skeleton className="skeleton-shimmer h-24 w-full" />}
       {error && (
         <div className="flex flex-col items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
-          <p>Couldn't load blocked users. {error.message}</p>
+          <p>Couldn't load blocked users. Please try again.</p>
           <Button variant="outline" size="sm" onClick={() => refetch()}>
             Try again
           </Button>

@@ -28,7 +28,7 @@ export default function SeriesIndexPage() {
 
           {error && (
             <div className="col-span-full flex flex-col items-center gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-center text-sm text-destructive">
-              <p>Couldn't load series. {error.message}</p>
+              <p>Couldn't load series. Please try again.</p>
               <Button variant="outline" size="sm" onClick={() => refetch()}>
                 Try again
               </Button>

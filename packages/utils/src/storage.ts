@@ -20,3 +20,7 @@ export function createPresignedUploadUrl(args: {
 export function deleteObject(key: string) {
   return getProvider().deleteObject(key);
 }
+
+export function uploadObjectDirect(key: string, body: Buffer, contentType: string) {
+  return getProvider().uploadObjectDirect(key, body, contentType);
+}

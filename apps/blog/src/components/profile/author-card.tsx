@@ -2,6 +2,7 @@
 
 import { VerifiedGate } from "@/components/verified-gate";
 import { publicAuthClient } from "@repo/auth/public-client";
+import { getErrorMessage } from "@repo/trpc/error";
 import { publicApi } from "@repo/trpc/public/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@repo/ui/avatar";
 import { Button } from "@repo/ui/button";
@@ -37,7 +38,7 @@ export function AuthorCard({ username }: { username: string }) {
         utils.follow.isFollowing.invalidate({ userId: profile.userId });
       }
     },
-    onError: (error) => toast.error(error.message ?? "Couldn't follow this user."),
+    onError: (error) => toast.error(getErrorMessage(error, "Couldn't follow this user.")),
   });
   const unfollow = publicApi.follow.unfollow.useMutation({
     onSuccess: () => {
@@ -45,7 +46,7 @@ export function AuthorCard({ username }: { username: string }) {
         utils.follow.isFollowing.invalidate({ userId: profile.userId });
       }
     },
-    onError: (error) => toast.error(error.message ?? "Couldn't unfollow this user."),
+    onError: (error) => toast.error(getErrorMessage(error, "Couldn't unfollow this user.")),
   });
 
   if (!profile) {

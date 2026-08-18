@@ -3,6 +3,7 @@
 import { MediaPostDialog } from "@/components/composer/media-post-dialog";
 import { NotificationsDropdown } from "@/components/notifications-dropdown";
 import { VerifiedGate } from "@/components/verified-gate";
+import { getAuthErrorMessage } from "@repo/auth/error-message";
 import { publicAuthClient } from "@repo/auth/public-client";
 import { publicApi } from "@repo/trpc/public/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@repo/ui/avatar";
@@ -22,6 +23,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@repo/ui/dropdown-menu";
+import { ThemeToggle } from "@repo/ui/theme-toggle";
 import {
   Bookmark,
   FileText,
@@ -86,7 +88,7 @@ export function SiteHeader() {
   async function handleSignOut() {
     const { error } = await publicAuthClient.signOut();
     if (error) {
-      toast.error(error.message ?? "Couldn't sign out.");
+      toast.error(getAuthErrorMessage(error, "Couldn't sign out."));
       return;
     }
     router.push("/login");
@@ -112,6 +114,8 @@ export function SiteHeader() {
           </Link>
 
           <div className="flex items-center gap-2">
+            <ThemeToggle />
+
             {!isPending && session && (
               <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
                 <Link href="/feed">Feed</Link>

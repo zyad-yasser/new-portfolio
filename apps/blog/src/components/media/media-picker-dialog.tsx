@@ -1,6 +1,7 @@
 "use client";
 
 import { type MediaItem, useMediaUpload } from "@/components/media/use-media-upload";
+import { getErrorMessage } from "@repo/trpc/error";
 import { publicApi } from "@repo/trpc/public/react";
 import { Button } from "@repo/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@repo/ui/dialog";
@@ -109,7 +110,7 @@ export function MediaPickerDialog({
         setFolderId(created.id);
       }
     },
-    onError: (error) => toast.error(error.message ?? "Couldn't create this folder."),
+    onError: (error) => toast.error(getErrorMessage(error, "Couldn't create this folder.")),
   });
 
   const deleteMedia = publicApi.media.delete.useMutation({
@@ -117,7 +118,7 @@ export function MediaPickerDialog({
       utils.media.list.invalidate();
       toast.success("File deleted.");
     },
-    onError: (error) => toast.error(error.message ?? "Couldn't delete this file."),
+    onError: (error) => toast.error(getErrorMessage(error, "Couldn't delete this file.")),
   });
 
   const { items: uploadItems, uploadFiles } = useMediaUpload((item) => {

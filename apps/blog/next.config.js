@@ -22,14 +22,27 @@ const s3RemotePattern = s3PublicUrl
 const s3ConnectOrigins = [...new Set([s3PublicUrl?.origin, s3Endpoint?.origin].filter(Boolean))];
 
 const firebaseBucket = process.env.FIREBASE_STORAGE_BUCKET;
+const firebaseEmulatorHost = process.env.FIREBASE_STORAGE_EMULATOR_HOST;
+const firebaseEmulatorUrl = firebaseEmulatorHost
+  ? parseUrl(`http://${firebaseEmulatorHost}`)
+  : null;
 const firebaseRemotePattern = firebaseBucket
-  ? {
-      protocol: "https",
-      hostname: "storage.googleapis.com",
-      pathname: `/${firebaseBucket}/**`,
-    }
+  ? firebaseEmulatorUrl
+    ? {
+        protocol: "http",
+        hostname: firebaseEmulatorUrl.hostname,
+        port: firebaseEmulatorUrl.port || undefined,
+        pathname: "/v0/b/**",
+      }
+    : {
+        protocol: "https",
+        hostname: "storage.googleapis.com",
+        pathname: `/${firebaseBucket}/**`,
+      }
   : undefined;
-const firebaseConnectOrigins = firebaseBucket ? ["https://storage.googleapis.com"] : [];
+const firebaseConnectOrigins = firebaseBucket
+  ? [firebaseEmulatorUrl ? firebaseEmulatorUrl.origin : "https://storage.googleapis.com"]
+  : [];
 
 const storageRemotePattern =
   storageProvider === "firebase" ? firebaseRemotePattern : s3RemotePattern;

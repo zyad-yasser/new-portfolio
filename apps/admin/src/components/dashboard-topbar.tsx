@@ -1,6 +1,7 @@
 "use client";
 
 import { authClient } from "@repo/auth/client";
+import { getAuthErrorMessage } from "@repo/auth/error-message";
 import { Avatar, AvatarFallback, AvatarImage } from "@repo/ui/avatar";
 import {
   DropdownMenu,
@@ -31,7 +32,7 @@ export function DashboardTopbar({ user }: DashboardTopbarProps) {
   async function handleSignOut() {
     const { error } = await authClient.signOut();
     if (error) {
-      toast.error(error.message ?? "Couldn't sign out.");
+      toast.error(getAuthErrorMessage(error, "Couldn't sign out."));
       return;
     }
     router.push("/login");

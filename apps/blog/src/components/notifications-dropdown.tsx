@@ -6,6 +6,7 @@ import {
   notificationHref,
   notificationText,
 } from "@/lib/notifications";
+import { getErrorMessage } from "@repo/trpc/error";
 import { publicApi } from "@repo/trpc/public/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@repo/ui/avatar";
 import { Button } from "@repo/ui/button";
@@ -30,7 +31,7 @@ export function NotificationsDropdown({ unreadCount }: { unreadCount: number | u
       utils.notification.list.invalidate();
       utils.notification.unreadCount.invalidate();
     },
-    onError: (error) => toast.error(error.message ?? "Couldn't update this notification."),
+    onError: (error) => toast.error(getErrorMessage(error, "Couldn't update this notification.")),
   });
 
   const markAllRead = publicApi.notification.markAllRead.useMutation({
@@ -38,7 +39,7 @@ export function NotificationsDropdown({ unreadCount }: { unreadCount: number | u
       utils.notification.list.invalidate();
       utils.notification.unreadCount.invalidate();
     },
-    onError: (error) => toast.error(error.message ?? "Couldn't mark notifications as read."),
+    onError: (error) => toast.error(getErrorMessage(error, "Couldn't mark notifications as read.")),
   });
 
   return (

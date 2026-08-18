@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { authClient } from "@repo/auth/client";
+import { getAuthErrorMessage } from "@repo/auth/error-message";
 import { Button } from "@repo/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@repo/ui/form";
@@ -32,7 +33,7 @@ export default function LoginPage() {
     const { error: signInError } = await authClient.signIn.email(values);
 
     if (signInError) {
-      toast.error(signInError.message ?? "Invalid email or password.");
+      toast.error(getAuthErrorMessage(signInError, "Invalid email or password."));
       return;
     }
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { getErrorMessage } from "@repo/trpc/error";
 import { publicApi } from "@repo/trpc/public/react";
 import { useCallback, useState } from "react";
 
@@ -158,7 +159,7 @@ export function useMediaUpload(onUploaded: (item: MediaItem) => void) {
               ? {
                   ...item,
                   status: "error",
-                  error: error instanceof Error ? error.message : "Upload failed",
+                  error: getErrorMessage(error, "Upload failed"),
                 }
               : item
           )

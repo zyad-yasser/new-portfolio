@@ -5,6 +5,7 @@ import { SiteHeader } from "@/components/site-header";
 import { VerifiedGate } from "@/components/verified-gate";
 import { isSafeHttpUrl } from "@/lib/safe-url";
 import { publicAuthClient } from "@repo/auth/public-client";
+import { getErrorMessage } from "@repo/trpc/error";
 import { publicApi } from "@repo/trpc/public/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@repo/ui/avatar";
 import { Button } from "@repo/ui/button";
@@ -51,7 +52,8 @@ export default function ProfilePage() {
       }
       utils.profile.getByUsername.invalidate({ username });
     },
-    onError: (mutationError) => toast.error(mutationError.message ?? "Couldn't follow this user."),
+    onError: (mutationError) =>
+      toast.error(getErrorMessage(mutationError, "Couldn't follow this user.")),
   });
   const unfollow = publicApi.follow.unfollow.useMutation({
     onSuccess: () => {
@@ -61,7 +63,7 @@ export default function ProfilePage() {
       utils.profile.getByUsername.invalidate({ username });
     },
     onError: (mutationError) =>
-      toast.error(mutationError.message ?? "Couldn't unfollow this user."),
+      toast.error(getErrorMessage(mutationError, "Couldn't unfollow this user.")),
   });
 
   if (isLoading) {

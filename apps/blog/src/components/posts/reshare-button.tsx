@@ -3,6 +3,7 @@
 import { VerifiedGate } from "@/components/verified-gate";
 import { publicAuthClient } from "@repo/auth/public-client";
 import type { TiptapDoc } from "@repo/db/schema";
+import { getErrorMessage } from "@repo/trpc/error";
 import { publicApi } from "@repo/trpc/public/react";
 import { Button } from "@repo/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@repo/ui/dialog";
@@ -49,7 +50,7 @@ function QuoteDialog({
       toast.success("Quote posted.");
     },
     onError: (mutationError) => {
-      toast.error(mutationError.message ?? "Couldn't quote this post.");
+      toast.error(getErrorMessage(mutationError, "Couldn't quote this post."));
     },
   });
 
@@ -132,7 +133,7 @@ export function ReshareButton({
       utils.feed.following.invalidate();
     },
     onError: (mutationError) => {
-      toast.error(mutationError.message ?? "Couldn't reshare this post.");
+      toast.error(getErrorMessage(mutationError, "Couldn't reshare this post."));
     },
   });
   const removeReshare = publicApi.reshare.remove.useMutation({
@@ -140,7 +141,7 @@ export function ReshareButton({
       utils.reshare.isReshared.invalidate({ postId: post.id });
     },
     onError: (mutationError) => {
-      toast.error(mutationError.message ?? "Couldn't undo the reshare.");
+      toast.error(getErrorMessage(mutationError, "Couldn't undo the reshare."));
     },
   });
 

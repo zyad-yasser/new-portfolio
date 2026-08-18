@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { getAuthErrorMessage } from "./error-message";
 import { publicAuthClient } from "./public-client";
 
 export const VERIFICATION_EMAIL_COOLDOWN_MS = 15 * 60 * 1000;
@@ -83,7 +84,7 @@ export function useResendVerificationEmail(email: string | undefined, callbackUR
         setLastSentAt(sentAt);
         setError("You've already requested a verification email recently.");
       } else {
-        setError(sendError.message ?? "Couldn't send the email.");
+        setError(getAuthErrorMessage(sendError, "Couldn't send the email."));
       }
       return;
     }

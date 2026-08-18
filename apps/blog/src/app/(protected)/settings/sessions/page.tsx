@@ -1,5 +1,6 @@
 "use client";
 
+import { getErrorMessage } from "@repo/trpc/error";
 import { publicApi } from "@repo/trpc/public/react";
 import { Badge } from "@repo/ui/badge";
 import { Button } from "@repo/ui/button";
@@ -58,7 +59,7 @@ export default function SessionsSettingsPage() {
       utils.session.list.invalidate();
       toast.success("Session revoked.");
     },
-    onError: (error) => toast.error(error.message ?? "Couldn't revoke this session."),
+    onError: (error) => toast.error(getErrorMessage(error, "Couldn't revoke this session.")),
   });
 
   const revokeOthers = publicApi.session.revokeOthers.useMutation({
@@ -66,7 +67,7 @@ export default function SessionsSettingsPage() {
       utils.session.list.invalidate();
       toast.success("Signed out of other devices.");
     },
-    onError: (error) => toast.error(error.message ?? "Couldn't sign out other devices."),
+    onError: (error) => toast.error(getErrorMessage(error, "Couldn't sign out other devices.")),
   });
 
   const hasOtherSessions = (sessions?.length ?? 0) > 1;
@@ -101,7 +102,7 @@ export default function SessionsSettingsPage() {
 
       {error && (
         <div className="flex flex-col items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
-          <p>Couldn't load your sessions. {error.message}</p>
+          <p>Couldn't load your sessions. Please try again.</p>
           <Button variant="outline" size="sm" onClick={() => refetch()}>
             Try again
           </Button>

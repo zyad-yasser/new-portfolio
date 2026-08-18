@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { getAuthErrorMessage } from "@repo/auth/error-message";
 import { publicAuthClient } from "@repo/auth/public-client";
 import { markVerificationEmailSent } from "@repo/auth/use-resend-verification-email";
 import { Button } from "@repo/ui/button";
@@ -53,7 +54,7 @@ export default function SignupPage() {
     setTurnstileKey((key) => key + 1);
 
     if (signUpError) {
-      toast.error(signUpError.message ?? "Couldn't create your account.");
+      toast.error(getAuthErrorMessage(signUpError, "Couldn't create your account."));
       return;
     }
 
@@ -71,7 +72,7 @@ export default function SignupPage() {
     });
 
     if (signInError) {
-      toast.error(signInError.message ?? "Couldn't sign in.");
+      toast.error(getAuthErrorMessage(signInError, "Couldn't sign in."));
       setSocialProvider(null);
     }
   }

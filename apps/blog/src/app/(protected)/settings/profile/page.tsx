@@ -2,7 +2,9 @@
 
 import { AvatarUpload } from "@/components/settings/avatar-upload";
 import { initialsFor } from "@/lib/notifications";
+import { getAuthErrorMessage } from "@repo/auth/error-message";
 import { publicAuthClient } from "@repo/auth/public-client";
+import { getErrorMessage } from "@repo/trpc/error";
 import { publicApi } from "@repo/trpc/public/react";
 import {
   AlertDialog,
@@ -44,7 +46,7 @@ export default function ProfileSettingsPage() {
   async function handleAvatarUploaded(url: string) {
     const { error } = await publicAuthClient.updateUser({ image: url });
     if (error) {
-      toast.error(error.message ?? "Couldn't update your photo.");
+      toast.error(getAuthErrorMessage(error, "Couldn't update your photo."));
     }
   }
 
@@ -55,7 +57,7 @@ export default function ProfileSettingsPage() {
     setNameSaving(false);
 
     if (error) {
-      toast.error(error.message ?? "Couldn't update your name.");
+      toast.error(getAuthErrorMessage(error, "Couldn't update your name."));
       return;
     }
 
@@ -84,7 +86,8 @@ export default function ProfileSettingsPage() {
         await utils.profile.getByUsername.invalidate({ username: updated.username });
       }
     },
-    onError: (mutationError) => toast.error(mutationError.message),
+    onError: (mutationError) =>
+      toast.error(getErrorMessage(mutationError, "Couldn't save your profile.")),
   });
 
   function handleProfileSubmit(event: React.FormEvent) {
@@ -114,7 +117,7 @@ export default function ProfileSettingsPage() {
     setPasswordSaving(false);
 
     if (changeError) {
-      toast.error(changeError.message ?? "Couldn't change your password.");
+      toast.error(getAuthErrorMessage(changeError, "Couldn't change your password."));
       return;
     }
 
@@ -134,7 +137,7 @@ export default function ProfileSettingsPage() {
     setDeleting(false);
 
     if (deleteErr) {
-      toast.error(deleteErr.message ?? "Couldn't delete your account.");
+      toast.error(getAuthErrorMessage(deleteErr, "Couldn't delete your account."));
       return;
     }
 
@@ -154,7 +157,7 @@ export default function ProfileSettingsPage() {
   if (loadError) {
     return (
       <div className="flex flex-col items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
-        <p>Couldn't load your profile. {loadError.message}</p>
+        <p>Couldn't load your profile. Please try again.</p>
         <Button variant="outline" size="sm" onClick={() => refetch()}>
           Try again
         </Button>

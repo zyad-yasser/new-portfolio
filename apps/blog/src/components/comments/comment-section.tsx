@@ -2,6 +2,7 @@
 
 import { VerifiedGate } from "@/components/verified-gate";
 import { publicAuthClient } from "@repo/auth/public-client";
+import { getErrorMessage } from "@repo/trpc/error";
 import { publicApi } from "@repo/trpc/public/react";
 import {
   AlertDialog,
@@ -73,7 +74,7 @@ function CommentActions({
       utils.comment.listByPost.invalidate({ postId });
       toast.success("Comment deleted.");
     },
-    onError: (error) => toast.error(error.message ?? "Couldn't delete this comment."),
+    onError: (error) => toast.error(getErrorMessage(error, "Couldn't delete this comment.")),
   });
 
   const blockUser = publicApi.block.block.useMutation({
@@ -82,7 +83,7 @@ function CommentActions({
       utils.post.list.invalidate();
       toast.success(`Blocked ${comment.author.name}.`);
     },
-    onError: (error) => toast.error(error.message ?? "Couldn't block this user."),
+    onError: (error) => toast.error(getErrorMessage(error, "Couldn't block this user.")),
   });
 
   const isOwner = comment.authorId === viewerId;
@@ -182,7 +183,7 @@ function CommentItem({
       utils.comment.listByPost.invalidate({ postId });
       toast.success("Comment updated.");
     },
-    onError: (error) => toast.error(error.message ?? "Couldn't update this comment."),
+    onError: (error) => toast.error(getErrorMessage(error, "Couldn't update this comment.")),
   });
 
   const isDeleted = !!comment.deletedAt;
@@ -294,7 +295,7 @@ function ReplyForm({
       onDone();
       utils.comment.listByPost.invalidate({ postId });
     },
-    onError: (error) => toast.error(error.message ?? "Couldn't post your reply."),
+    onError: (error) => toast.error(getErrorMessage(error, "Couldn't post your reply.")),
   });
 
   return (
@@ -343,7 +344,7 @@ export function CommentSection({
       setNewComment("");
       utils.comment.listByPost.invalidate({ postId });
     },
-    onError: (error) => toast.error(error.message ?? "Couldn't post your comment."),
+    onError: (error) => toast.error(getErrorMessage(error, "Couldn't post your comment.")),
   });
 
   return (

@@ -4,6 +4,7 @@ import { REACTION_EMOJI, REACTION_LABEL } from "@/lib/reactions";
 import { publicAuthClient } from "@repo/auth/public-client";
 import type { ReactionType } from "@repo/db/schema";
 import { REACTION_TYPES } from "@repo/db/schema";
+import { getErrorMessage } from "@repo/trpc/error";
 import { publicApi } from "@repo/trpc/public/react";
 import { Avatar, AvatarFallback, AvatarGroup, AvatarImage } from "@repo/ui/avatar";
 import { cn } from "@repo/ui/lib/utils";
@@ -100,7 +101,7 @@ export function ReactionBar({ postId }: { postId: string }) {
       utils.reaction.summary.invalidate({ postId });
       utils.reaction.mine.invalidate({ postId });
     },
-    onError: (error) => toast.error(error.message ?? "Couldn't react to this post."),
+    onError: (error) => toast.error(getErrorMessage(error, "Couldn't react to this post.")),
   });
 
   return (

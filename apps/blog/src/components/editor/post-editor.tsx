@@ -5,6 +5,7 @@ import { VerifiedGate } from "@/components/verified-gate";
 import { categoryColorClasses } from "@/lib/category-colors";
 import { publicAuthClient } from "@repo/auth/public-client";
 import type { TiptapDoc } from "@repo/db/schema";
+import { getErrorMessage } from "@repo/trpc/error";
 import { publicApi } from "@repo/trpc/public/react";
 import { Badge } from "@repo/ui/badge";
 import { Button } from "@repo/ui/button";
@@ -169,7 +170,7 @@ function NewSeriesDialog({ onCreated }: { onCreated: (id: string) => void }) {
       onCreated(created.id);
       toast.success("Series created.");
     },
-    onError: (error) => toast.error(error.message ?? "Couldn't create this series."),
+    onError: (error) => toast.error(getErrorMessage(error, "Couldn't create this series.")),
   });
 
   return (
@@ -276,7 +277,7 @@ export function PostEditor({
         router.push(`/post/${result.slug}`);
       }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Couldn't publish this post.");
+      toast.error(getErrorMessage(error, "Couldn't publish this post."));
     }
   }
 
@@ -284,7 +285,7 @@ export function PostEditor({
     <Card>
       <CardHeader className="flex flex-row items-center justify-between gap-3">
         <div>
-          <CardTitle>{mode === "edit" ? "Edit post" : "Write a post"}</CardTitle>
+          <CardTitle>{mode === "edit" ? "Edit article" : "Write an article"}</CardTitle>
           <CardDescription>Changes save automatically as you write.</CardDescription>
         </div>
         <SavingIndicator status={autosave.status} />
@@ -356,7 +357,7 @@ export function PostEditor({
           {mode === "create" && (
             <VerifiedGate
               verified={!!session?.user.emailVerified}
-              message="Verify your email to publish a post"
+              message="Verify your email to publish an article"
             >
               <Button
                 className="btn-glow"

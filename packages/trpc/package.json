@@ -5,6 +5,7 @@
   "exports": {
     ".": "./src/init.ts",
     "./context": "./src/context.ts",
+    "./error": "./src/error.ts",
     "./routers/_app": "./src/routers/_app.ts",
     "./react": "./src/provider.tsx",
     "./public/init": "./src/public/init.ts",

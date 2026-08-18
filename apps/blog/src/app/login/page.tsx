@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { getAuthErrorMessage } from "@repo/auth/error-message";
 import { publicAuthClient } from "@repo/auth/public-client";
 import { Button } from "@repo/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui/card";
@@ -40,7 +41,7 @@ export default function LoginPage() {
     const { error: signInError } = await publicAuthClient.signIn.email(values);
 
     if (signInError) {
-      toast.error(signInError.message ?? "Invalid email or password.");
+      toast.error(getAuthErrorMessage(signInError, "Invalid email or password."));
       return;
     }
 
@@ -57,7 +58,7 @@ export default function LoginPage() {
     });
 
     if (signInError) {
-      toast.error(signInError.message ?? "Couldn't sign in.");
+      toast.error(getAuthErrorMessage(signInError, "Couldn't sign in."));
       setSocialProvider(null);
     }
   }

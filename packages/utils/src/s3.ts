@@ -49,3 +49,14 @@ export async function createPresignedUploadUrl({
 export async function deleteObject(key: string) {
   await getS3Client().send(new DeleteObjectCommand({ Bucket: requireEnv("S3_BUCKET"), Key: key }));
 }
+
+export async function uploadObjectDirect(key: string, body: Buffer, contentType: string) {
+  await getS3Client().send(
+    new PutObjectCommand({
+      Bucket: requireEnv("S3_BUCKET"),
+      Key: key,
+      Body: body,
+      ContentType: contentType,
+    })
+  );
+}

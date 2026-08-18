@@ -7,6 +7,7 @@ import {
   notificationHref,
   notificationText,
 } from "@/lib/notifications";
+import { getErrorMessage } from "@repo/trpc/error";
 import { publicApi } from "@repo/trpc/public/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@repo/ui/avatar";
 import { Button } from "@repo/ui/button";
@@ -31,7 +32,7 @@ export default function NotificationsPage() {
       utils.notification.unreadCount.invalidate();
     },
     onError: (mutationError) =>
-      toast.error(mutationError.message ?? "Couldn't update this notification."),
+      toast.error(getErrorMessage(mutationError, "Couldn't update this notification.")),
   });
 
   const markAllRead = publicApi.notification.markAllRead.useMutation({
@@ -40,7 +41,7 @@ export default function NotificationsPage() {
       utils.notification.unreadCount.invalidate();
     },
     onError: (mutationError) =>
-      toast.error(mutationError.message ?? "Couldn't mark notifications as read."),
+      toast.error(getErrorMessage(mutationError, "Couldn't mark notifications as read.")),
   });
 
   const notifications = useMemo(() => data?.pages.flatMap((page) => page.items), [data]);
@@ -70,7 +71,7 @@ export default function NotificationsPage() {
 
           {error && (
             <div className="flex flex-col items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
-              <p>Couldn't load notifications. {error.message}</p>
+              <p>Couldn't load notifications. Please try again.</p>
               <Button variant="outline" size="sm" onClick={() => refetch()}>
                 Try again
               </Button>

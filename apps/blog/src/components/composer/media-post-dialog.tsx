@@ -3,6 +3,7 @@
 import { MediaPickerDialog } from "@/components/media/media-picker-dialog";
 import type { MediaItem } from "@/components/media/use-media-upload";
 import type { TiptapDoc } from "@repo/db/schema";
+import { getErrorMessage } from "@repo/trpc/error";
 import { publicApi } from "@repo/trpc/public/react";
 import { Button } from "@repo/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@repo/ui/dialog";
@@ -51,7 +52,7 @@ export function MediaPostDialog({
       router.refresh();
     },
     onError: (mutationError) => {
-      toast.error(mutationError.message ?? "Couldn't create your post.");
+      toast.error(getErrorMessage(mutationError, "Couldn't create your post."));
     },
   });
 

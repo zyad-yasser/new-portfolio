@@ -4,6 +4,7 @@ import { ReshareButton } from "@/components/posts/reshare-button";
 import { categoryColorClasses } from "@/lib/category-colors";
 import { publicAuthClient } from "@repo/auth/public-client";
 import type { TiptapDoc } from "@repo/db/schema";
+import { getErrorMessage } from "@repo/trpc/error";
 import { publicApi } from "@repo/trpc/public/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@repo/ui/avatar";
 import { Badge } from "@repo/ui/badge";
@@ -128,7 +129,7 @@ function BookmarkButton({ postId }: { postId: string }) {
       utils.bookmark.isBookmarked.invalidate({ postId });
       utils.bookmark.mine.invalidate();
     },
-    onError: (error) => toast.error(error.message ?? "Couldn't save this post."),
+    onError: (error) => toast.error(getErrorMessage(error, "Couldn't save this post.")),
   });
 
   const disabledReason = !session

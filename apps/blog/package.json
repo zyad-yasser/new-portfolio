@@ -24,6 +24,7 @@
     "@repo/db": "workspace:*",
     "@repo/trpc": "workspace:^",
     "@repo/ui": "workspace:*",
+    "@repo/utils": "workspace:*",
     "@tiptap/core": "^3.29.2",
     "@tiptap/extension-character-count": "^3.29.2",
     "@tiptap/extension-image": "^3.29.2",

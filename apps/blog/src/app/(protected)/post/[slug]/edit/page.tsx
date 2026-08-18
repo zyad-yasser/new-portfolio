@@ -31,7 +31,7 @@ export default function EditPostPage() {
         <SiteHeader />
         <main className="mx-auto flex max-w-3xl flex-col items-center gap-4 px-6 py-24 text-center">
           <h1 className="text-2xl font-semibold">Couldn't load this post</h1>
-          <p className="text-muted-foreground">{error.message}</p>
+          <p className="text-muted-foreground">Please try again.</p>
           <Button variant="outline" onClick={() => refetch()}>
             Try again
           </Button>

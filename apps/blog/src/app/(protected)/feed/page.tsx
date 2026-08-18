@@ -35,10 +35,10 @@ function useInfiniteScrollSentinel(hasNextPage: boolean | undefined, fetchNextPa
   return ref;
 }
 
-function FeedError({ message, onRetry }: { message: string; onRetry: () => void }) {
+function FeedError({ onRetry }: { onRetry: () => void }) {
   return (
     <div className="flex flex-col items-center gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-center text-sm text-destructive">
-      <p>Couldn't load your feed. {message}</p>
+      <p>Couldn't load your feed. Please try again.</p>
       <Button variant="outline" size="sm" onClick={onRetry}>
         Try again
       </Button>
@@ -81,7 +81,7 @@ function FollowingFeed() {
   const loadMoreRef = useInfiniteScrollSentinel(hasNextPage, fetchNextPage);
 
   if (error) {
-    return <FeedError message={error.message} onRetry={() => refetch()} />;
+    return <FeedError onRetry={() => refetch()} />;
   }
 
   if (!isLoading && items?.length === 0) {
@@ -140,7 +140,7 @@ function AllFeed() {
   const loadMoreRef = useInfiniteScrollSentinel(hasNextPage, fetchNextPage);
 
   if (error) {
-    return <FeedError message={error.message} onRetry={() => refetch()} />;
+    return <FeedError onRetry={() => refetch()} />;
   }
 
   if (!isLoading && posts?.length === 0) {

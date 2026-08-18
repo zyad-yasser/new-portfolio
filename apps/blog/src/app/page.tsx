@@ -92,7 +92,7 @@ export default function BlogHomePage() {
           <TooltipProvider>
             {error && (
               <div className="flex flex-col items-center gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-center text-sm text-destructive">
-                <p>Couldn't load posts. {error.message}</p>
+                <p>Couldn't load posts. Please try again.</p>
                 <Button variant="outline" size="sm" onClick={() => refetch()}>
                   Try again
                 </Button>
@@ -157,17 +157,17 @@ export default function BlogHomePage() {
                   : "Sign up to write, comment, and react to posts."}
               </p>
               {session && !session.user.emailVerified ? (
-                <VerifiedGate verified={false} message="Verify your email to write a post">
+                <VerifiedGate verified={false} message="Verify your email to write an article">
                   <Button size="sm" className="gap-2" disabled>
                     <PenLine className="size-4" />
-                    Write a post
+                    Write an article
                   </Button>
                 </VerifiedGate>
               ) : (
                 <Button asChild size="sm" className="gap-2">
                   <Link href={session ? "/new" : "/signup"}>
                     <PenLine className="size-4" />
-                    {session ? "Write a post" : "Sign up"}
+                    {session ? "Write an article" : "Sign up"}
                   </Link>
                 </Button>
               )}

@@ -1,14 +1,32 @@
 import { randomUUID } from "node:crypto";
+import { getPublicUrl, uploadObjectDirect } from "@repo/utils/storage";
 import { hashPassword } from "better-auth/crypto";
 import { and, eq } from "drizzle-orm";
 import { db } from "../src";
-import { account, category, post, postTag, tag, user } from "../src/schema";
+import type { NotificationType } from "../src/schema";
+import {
+  account,
+  category,
+  media,
+  notification,
+  post,
+  postReshare,
+  postTag,
+  tag,
+  user,
+  userFollow,
+} from "../src/schema";
 
 const TEST_USER_PASSWORD = "SeedUser-Pass123!";
 
+// A minimal valid 1x1 red PNG, embedded so the sample media post has a real, working image
+// with no network dependency at seed time.
+const SEED_SAMPLE_PNG_BASE64 =
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4z8AAAAMBAQAY3Y2wAAAAAElFTkSuQmCC";
+
 const testUsers = [
-  { name: "Seed Writer", email: "seed.writer@example.com" },
-  { name: "Seed Reviewer", email: "seed.reviewer@example.com" },
+  { name: "Seed Writer", email: "seed.writer@example.com", emailVerified: true },
+  { name: "Seed Reviewer", email: "seed.reviewer@example.com", emailVerified: false },
 ];
 
 const blogSeedCategories = [
@@ -138,30 +156,38 @@ async function seedBlogPosts(adminId: string) {
   }
 }
 
-// Reset (not just create-if-missing) so the documented password stays valid across reseeds,
-// even if a prior run or manual signup already created the row with a different password.
+// Reset (not just create-if-missing) so the documented password and verification status stay
+// as documented across reseeds, even if a prior run or manual testing changed them.
 async function seedTestUsers() {
   const hash = await hashPassword(TEST_USER_PASSWORD);
+  const ids: Record<string, string> = {};
 
   for (const testUser of testUsers) {
     const existing = await db.query.user.findFirst({ where: eq(user.email, testUser.email) });
 
     if (existing) {
+      ids[testUser.email] = existing.id;
+
       await db
         .update(account)
         .set({ password: hash })
         .where(and(eq(account.userId, existing.id), eq(account.providerId, "credential")));
-      console.log(`Reset password for test user: ${testUser.email}`);
+      await db
+        .update(user)
+        .set({ emailVerified: testUser.emailVerified })
+        .where(eq(user.id, existing.id));
+      console.log(`Reset password/verification for test user: ${testUser.email}`);
       continue;
     }
 
     const id = randomUUID();
+    ids[testUser.email] = id;
 
     await db.insert(user).values({
       id,
       name: testUser.name,
       email: testUser.email,
-      emailVerified: false,
+      emailVerified: testUser.emailVerified,
       role: "user",
     });
 
@@ -175,6 +201,205 @@ async function seedTestUsers() {
 
     console.log(`Created test user: ${testUser.email}`);
   }
+
+  return ids;
+}
+
+async function createNotificationIfMissing(input: {
+  recipientId: string;
+  actorId: string;
+  type: NotificationType;
+  postId?: string;
+}) {
+  const conditions = [
+    eq(notification.recipientId, input.recipientId),
+    eq(notification.actorId, input.actorId),
+    eq(notification.type, input.type),
+  ];
+  if (input.postId) {
+    conditions.push(eq(notification.postId, input.postId));
+  }
+
+  const existing = await db.query.notification.findFirst({ where: and(...conditions) });
+  if (existing) {
+    return;
+  }
+
+  await db.insert(notification).values({
+    id: randomUUID(),
+    recipientId: input.recipientId,
+    actorId: input.actorId,
+    type: input.type,
+    postId: input.postId ?? null,
+  });
+}
+
+async function seedFollow(followerId: string, followingId: string) {
+  const existing = await db.query.userFollow.findFirst({
+    where: and(eq(userFollow.followerId, followerId), eq(userFollow.followingId, followingId)),
+  });
+
+  if (existing) {
+    console.log("Sample follow relationship already exists");
+    return;
+  }
+
+  await db.insert(userFollow).values({ followerId, followingId });
+  await createNotificationIfMissing({
+    recipientId: followingId,
+    actorId: followerId,
+    type: "follow",
+  });
+
+  console.log("Created sample follow relationship");
+}
+
+async function seedMediaPost(writerId: string) {
+  let mediaRow = await db.query.media.findFirst({
+    where: eq(media.originalName, "seed-sample-cover.png"),
+  });
+
+  if (!mediaRow) {
+    const key = `media/${writerId}/seed-sample-cover.png`;
+    const body = Buffer.from(SEED_SAMPLE_PNG_BASE64, "base64");
+
+    try {
+      await uploadObjectDirect(key, body, "image/png");
+    } catch {
+      console.log("Skipping sample media post: storage isn't configured");
+      return null;
+    }
+
+    const rows = await db
+      .insert(media)
+      .values({
+        id: randomUUID(),
+        ownerId: writerId,
+        storageKey: key,
+        url: getPublicUrl(key),
+        originalName: "seed-sample-cover.png",
+        mimeType: "image/png",
+        size: body.length,
+      })
+      .returning();
+
+    mediaRow = rows[0];
+    console.log("Created sample media file");
+  } else {
+    console.log("Sample media file already exists");
+  }
+
+  if (!mediaRow) {
+    return null;
+  }
+
+  const existingPost = await db.query.post.findFirst({
+    where: and(eq(post.authorId, writerId), eq(post.type, "media")),
+  });
+
+  if (existingPost) {
+    console.log("Sample media post already exists");
+    return existingPost.id;
+  }
+
+  const caption = "A quick look behind the scenes.";
+  const slug = await uniqueSlug(caption);
+  const postId = randomUUID();
+
+  await db.insert(post).values({
+    id: postId,
+    authorId: writerId,
+    type: "media",
+    title: null,
+    slug,
+    excerptText: caption,
+    contentJson: {
+      type: "doc",
+      content: [
+        { type: "paragraph", content: [{ type: "text", text: caption }] },
+        { type: "image", attrs: { src: mediaRow.url, alt: mediaRow.originalName } },
+      ],
+    },
+    published: true,
+  });
+
+  console.log("Created sample media post");
+  return postId;
+}
+
+async function seedReshare(reviewerId: string) {
+  const target = await db.query.post.findFirst({ where: eq(post.title, "Welcome to the Blog") });
+  if (!target) {
+    console.log("Skipping sample reshare: target post not found");
+    return;
+  }
+
+  const existing = await db.query.postReshare.findFirst({
+    where: and(eq(postReshare.userId, reviewerId), eq(postReshare.postId, target.id)),
+  });
+
+  if (existing) {
+    console.log("Sample reshare already exists");
+    return;
+  }
+
+  await db.insert(postReshare).values({ userId: reviewerId, postId: target.id });
+  await createNotificationIfMissing({
+    recipientId: target.authorId,
+    actorId: reviewerId,
+    type: "reshare",
+    postId: target.id,
+  });
+
+  console.log("Created sample reshare");
+}
+
+async function seedQuote(reviewerId: string, mediaPostId: string | null) {
+  if (!mediaPostId) {
+    return;
+  }
+
+  const existing = await db.query.post.findFirst({
+    where: and(eq(post.authorId, reviewerId), eq(post.type, "quote")),
+  });
+
+  if (existing) {
+    console.log("Sample quote already exists");
+    return;
+  }
+
+  const mediaPost = await db.query.post.findFirst({ where: eq(post.id, mediaPostId) });
+  if (!mediaPost) {
+    return;
+  }
+
+  const opinion = "Love this shot.";
+  const slug = await uniqueSlug(opinion);
+  const postId = randomUUID();
+
+  await db.insert(post).values({
+    id: postId,
+    authorId: reviewerId,
+    type: "quote",
+    quotedPostId: mediaPost.id,
+    title: null,
+    slug,
+    excerptText: opinion,
+    contentJson: {
+      type: "doc",
+      content: [{ type: "paragraph", content: [{ type: "text", text: opinion }] }],
+    },
+    published: true,
+  });
+
+  await createNotificationIfMissing({
+    recipientId: mediaPost.authorId,
+    actorId: reviewerId,
+    type: "quote",
+    postId,
+  });
+
+  console.log("Created sample quote post");
 }
 
 // Inserts directly rather than calling @repo/auth's `auth.api.signUpEmail` so this package
@@ -227,7 +452,16 @@ async function main() {
   const isLocalDatabase = /localhost|127\.0\.0\.1/.test(process.env.DATABASE_URL ?? "");
 
   if (isLocalDatabase) {
-    await seedTestUsers();
+    const testUserIds = await seedTestUsers();
+    const writerId = testUserIds["seed.writer@example.com"];
+    const reviewerId = testUserIds["seed.reviewer@example.com"];
+
+    if (writerId && reviewerId) {
+      await seedFollow(writerId, reviewerId);
+      const mediaPostId = await seedMediaPost(writerId);
+      await seedReshare(reviewerId);
+      await seedQuote(reviewerId, mediaPostId);
+    }
   } else {
     console.log("Skipping test user seeding: DATABASE_URL is not local");
   }

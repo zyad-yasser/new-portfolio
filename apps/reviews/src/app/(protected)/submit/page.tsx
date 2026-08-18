@@ -1,7 +1,9 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { getAuthErrorMessage } from "@repo/auth/error-message";
 import { publicAuthClient } from "@repo/auth/public-client";
+import { getErrorMessage } from "@repo/trpc/error";
 import { publicApi } from "@repo/trpc/public/react";
 import { Button } from "@repo/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui/card";
@@ -39,7 +41,8 @@ export default function SubmitReviewPage() {
       setSubmitted(true);
       await utils.review.list.invalidate();
     },
-    onError: (mutationError) => toast.error(mutationError.message),
+    onError: (mutationError) =>
+      toast.error(getErrorMessage(mutationError, "Couldn't submit your review.")),
   });
 
   async function onSubmit(values: ReviewValues) {
@@ -49,7 +52,7 @@ export default function SubmitReviewPage() {
   async function handleSignOut() {
     const { error } = await publicAuthClient.signOut();
     if (error) {
-      toast.error(error.message ?? "Couldn't sign out.");
+      toast.error(getAuthErrorMessage(error, "Couldn't sign out."));
       return;
     }
     router.push("/login");

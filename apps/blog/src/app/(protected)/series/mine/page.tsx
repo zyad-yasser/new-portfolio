@@ -1,6 +1,7 @@
 "use client";
 
 import { SiteHeader } from "@/components/site-header";
+import { getErrorMessage } from "@repo/trpc/error";
 import { publicApi } from "@repo/trpc/public/react";
 import {
   AlertDialog,
@@ -110,25 +111,25 @@ export default function MySeriesPage() {
       utils.series.mine.invalidate();
       toast.success("Series created.");
     },
-    onError: (error) => toast.error(error.message ?? "Couldn't create this series."),
+    onError: (error) => toast.error(getErrorMessage(error, "Couldn't create this series.")),
   });
   const updateSeries = publicApi.series.update.useMutation({
     onSuccess: () => {
       utils.series.mine.invalidate();
       toast.success("Series updated.");
     },
-    onError: (error) => toast.error(error.message ?? "Couldn't update this series."),
+    onError: (error) => toast.error(getErrorMessage(error, "Couldn't update this series.")),
   });
   const deleteSeries = publicApi.series.delete.useMutation({
     onSuccess: () => {
       utils.series.mine.invalidate();
       toast.success("Series deleted.");
     },
-    onError: (error) => toast.error(error.message ?? "Couldn't delete this series."),
+    onError: (error) => toast.error(getErrorMessage(error, "Couldn't delete this series.")),
   });
   const reorder = publicApi.series.reorder.useMutation({
     onSuccess: () => utils.series.mine.invalidate(),
-    onError: (error) => toast.error(error.message ?? "Couldn't reorder this series."),
+    onError: (error) => toast.error(getErrorMessage(error, "Couldn't reorder this series.")),
   });
 
   function movePost(seriesId: string, postIds: string[], index: number, direction: -1 | 1) {
@@ -176,7 +177,7 @@ export default function MySeriesPage() {
 
           {error && (
             <div className="flex flex-col items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
-              <p>Couldn't load your series. {error.message}</p>
+              <p>Couldn't load your series. Please try again.</p>
               <Button variant="outline" size="sm" onClick={() => refetch()}>
                 Try again
               </Button>

@@ -1,6 +1,7 @@
 "use client";
 
 import type { TiptapDoc } from "@repo/db/schema";
+import { getErrorMessage } from "@repo/trpc/error";
 import { publicApi } from "@repo/trpc/public/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -81,7 +82,7 @@ export function useAutosavePost(initialPostId?: string) {
         return postIdRef.current;
       } catch (err) {
         if (statusRef.current !== "error") {
-          toast.error(err instanceof Error ? err.message : "Couldn't save your changes.");
+          toast.error(getErrorMessage(err, "Couldn't save your changes."));
         }
         setStatus("error");
         return postIdRef.current;

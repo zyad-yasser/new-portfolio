@@ -8,6 +8,7 @@ import { ReactionBar } from "@/components/reactions/reaction-bar";
 import { SiteHeader } from "@/components/site-header";
 import { categoryColorClasses } from "@/lib/category-colors";
 import { publicAuthClient } from "@repo/auth/public-client";
+import { getErrorMessage } from "@repo/trpc/error";
 import { publicApi } from "@repo/trpc/public/react";
 import { Badge } from "@repo/ui/badge";
 import { Button } from "@repo/ui/button";
@@ -32,7 +33,7 @@ export function PostDetailView({ slug }: { slug: string }) {
       utils.post.list.invalidate();
       toast.success("User blocked.");
     },
-    onError: (error) => toast.error(error.message ?? "Couldn't block this user."),
+    onError: (error) => toast.error(getErrorMessage(error, "Couldn't block this user.")),
   });
 
   const headings = useMemo(() => (post ? extractHeadings(post.contentJson) : []), [post]);
