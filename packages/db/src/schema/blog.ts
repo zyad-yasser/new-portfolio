@@ -9,6 +9,7 @@ import {
   jsonb,
   pgTable,
   primaryKey,
+  real,
   text,
   timestamp,
   unique,
@@ -165,6 +166,83 @@ export const comment = pgTable(
   (table) => [
     index("comment_post_id_idx").on(table.postId),
     index("comment_parent_comment_id_idx").on(table.parentCommentId),
+  ]
+);
+
+export const HIGHLIGHT_COLORS = ["yellow", "green", "blue", "pink"] as const;
+export type HighlightColor = (typeof HIGHLIGHT_COLORS)[number];
+
+export const postHighlight = pgTable(
+  "post_highlight",
+  {
+    id: text("id").primaryKey(),
+    postId: text("post_id")
+      .notNull()
+      .references(() => post.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    quoteText: text("quote_text").notNull(),
+    prefixText: text("prefix_text").notNull().default(""),
+    suffixText: text("suffix_text").notNull().default(""),
+    startOffset: integer("start_offset").notNull(),
+    endOffset: integer("end_offset").notNull(),
+    color: text("color").notNull().default("yellow").$type<HighlightColor>(),
+    noteJson: jsonb("note_json").$type<TiptapDoc>(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (table) => [
+    index("post_highlight_post_id_user_id_idx").on(table.postId, table.userId),
+    index("post_highlight_user_id_idx").on(table.userId),
+  ]
+);
+
+export const postVideoComment = pgTable(
+  "post_video_comment",
+  {
+    id: text("id").primaryKey(),
+    postId: text("post_id")
+      .notNull()
+      .references(() => post.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    videoSrc: text("video_src").notNull(),
+    timestampSeconds: real("timestamp_seconds").notNull(),
+    color: text("color").notNull().default("yellow").$type<HighlightColor>(),
+    noteJson: jsonb("note_json").$type<TiptapDoc>(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (table) => [
+    index("post_video_comment_post_id_user_id_idx").on(table.postId, table.userId),
+    index("post_video_comment_user_id_idx").on(table.userId),
+  ]
+);
+
+export const postImageAnnotation = pgTable(
+  "post_image_annotation",
+  {
+    id: text("id").primaryKey(),
+    postId: text("post_id")
+      .notNull()
+      .references(() => post.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    imageSrc: text("image_src").notNull(),
+    xPercent: real("x_percent").notNull(),
+    yPercent: real("y_percent").notNull(),
+    radiusPercent: real("radius_percent").notNull(),
+    color: text("color").notNull().default("yellow").$type<HighlightColor>(),
+    noteJson: jsonb("note_json").$type<TiptapDoc>(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (table) => [
+    index("post_image_annotation_post_id_user_id_idx").on(table.postId, table.userId),
+    index("post_image_annotation_user_id_idx").on(table.userId),
   ]
 );
 

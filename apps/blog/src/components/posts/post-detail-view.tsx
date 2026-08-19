@@ -6,6 +6,13 @@ import { extractHeadings } from "@/components/editor/toc";
 import { AuthorCard } from "@/components/profile/author-card";
 import { ReactionBar } from "@/components/reactions/reaction-bar";
 import { SiteHeader } from "@/components/site-header";
+import type { ResolvedHighlight } from "@/components/study-mode/highlight-extension";
+import { HighlightNoteComposer } from "@/components/study-mode/highlight-note-composer";
+import { HighlightsTimeline } from "@/components/study-mode/highlights-timeline";
+import { ImageAnnotationsList } from "@/components/study-mode/image-annotations-list";
+import { MediaAnnotationsLayer } from "@/components/study-mode/media-annotations-layer";
+import { SelectionToolbar } from "@/components/study-mode/selection-toolbar";
+import { VideoCommentsList } from "@/components/study-mode/video-comments-list";
 import { categoryColorClasses } from "@/lib/category-colors";
 import { publicAuthClient } from "@repo/auth/public-client";
 import { getErrorMessage } from "@repo/trpc/error";
@@ -13,12 +20,26 @@ import { publicApi } from "@repo/trpc/public/react";
 import { Badge } from "@repo/ui/badge";
 import { Button } from "@repo/ui/button";
 import { Card } from "@repo/ui/card";
+import { Label } from "@repo/ui/label";
 import { cn } from "@repo/ui/lib/utils";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@repo/ui/sheet";
 import { Skeleton } from "@repo/ui/skeleton";
-import { Calendar, ChevronLeft, ChevronRight, Clock, Eye, Library, UserX } from "lucide-react";
+import { Switch } from "@repo/ui/switch";
+import {
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  Circle,
+  Clock,
+  Eye,
+  Highlighter,
+  Library,
+  NotebookPen,
+  UserX,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 export function PostDetailView({ slug }: { slug: string }) {
@@ -27,6 +48,14 @@ export function PostDetailView({ slug }: { slug: string }) {
   const { data: post, isLoading, error } = publicApi.post.getBySlug.useQuery({ slug });
   const incrementView = publicApi.post.incrementView.useMutation();
   const hasTrackedView = useRef(false);
+  const articleRef = useRef<HTMLDivElement>(null);
+
+  const [studyMode, setStudyMode] = useState(false);
+  const [activeTool, setActiveTool] = useState<"highlight" | "circle">("highlight");
+  const [resolvedMap, setResolvedMap] = useState<Record<string, boolean>>({});
+  const [activeHighlightId, setActiveHighlightId] = useState<string | null>(null);
+  const [composerAnchor, setComposerAnchor] = useState<HTMLElement | null>(null);
+  const [timelineSheetOpen, setTimelineSheetOpen] = useState(false);
 
   const blockAuthor = publicApi.block.block.useMutation({
     onSuccess: () => {
@@ -36,6 +65,53 @@ export function PostDetailView({ slug }: { slug: string }) {
     onError: (error) => toast.error(getErrorMessage(error, "Couldn't block this user.")),
   });
 
+  const highlightsQuery = publicApi.highlight.listMineForPost.useQuery(
+    { postId: post?.id ?? "" },
+    { enabled: studyMode && !!session && !!post }
+  );
+  const highlights = useMemo(() => highlightsQuery.data ?? [], [highlightsQuery.data]);
+
+  const anchoredHighlights = useMemo(
+    () =>
+      highlights.map((highlight) => ({
+        id: highlight.id,
+        quoteText: highlight.quoteText,
+        prefixText: highlight.prefixText,
+        suffixText: highlight.suffixText,
+        startOffset: highlight.startOffset,
+        color: highlight.color,
+      })),
+    [highlights]
+  );
+
+  const activeHighlight = useMemo(() => {
+    if (!activeHighlightId) return null;
+    const found = highlights.find((highlight) => highlight.id === activeHighlightId);
+    return found
+      ? {
+          id: found.id,
+          quoteText: found.quoteText,
+          color: found.color,
+          noteJson: found.noteJson,
+        }
+      : null;
+  }, [activeHighlightId, highlights]);
+
+  const videoCommentsQuery = publicApi.videoComment.listMineForPost.useQuery(
+    { postId: post?.id ?? "" },
+    { enabled: studyMode && !!session && !!post }
+  );
+  const videoComments = useMemo(() => videoCommentsQuery.data ?? [], [videoCommentsQuery.data]);
+
+  const circleAnnotationsQuery = publicApi.imageAnnotation.listMineForPost.useQuery(
+    { postId: post?.id ?? "" },
+    { enabled: studyMode && !!session && !!post }
+  );
+  const circleAnnotations = useMemo(
+    () => circleAnnotationsQuery.data ?? [],
+    [circleAnnotationsQuery.data]
+  );
+
   const headings = useMemo(() => (post ? extractHeadings(post.contentJson) : []), [post]);
 
   useEffect(() => {
@@ -44,6 +120,50 @@ export function PostDetailView({ slug }: { slug: string }) {
       incrementView.mutate({ id: post.id });
     }
   }, [post, incrementView]);
+
+  function openHighlight(id: string, attempt = 0) {
+    const element = document.querySelector<HTMLElement>(`[data-highlight-id="${id}"]`);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "center" });
+      setComposerAnchor(element);
+      setActiveHighlightId(id);
+      return;
+    }
+    if (attempt < 60) {
+      requestAnimationFrame(() => openHighlight(id, attempt + 1));
+      return;
+    }
+    setComposerAnchor(null);
+    setActiveHighlightId(id);
+  }
+
+  function closeComposer() {
+    setActiveHighlightId(null);
+    setComposerAnchor(null);
+  }
+
+  function handleHighlightCreated(created: { id: string }) {
+    if (!post) return;
+    utils.highlight.listMineForPost.invalidate({ postId: post.id });
+    openHighlight(created.id);
+  }
+
+  function handleHighlightsResolved(resolved: ResolvedHighlight[]) {
+    setResolvedMap(Object.fromEntries(resolved.map((entry) => [entry.id, entry.found])));
+  }
+
+  function jumpToVideo(videoSrc: string, timestampSeconds: number) {
+    const videos = articleRef.current?.querySelectorAll("video") ?? [];
+    const target = [...videos].find((video) => (video.currentSrc || video.src) === videoSrc);
+    if (!target) return;
+    target.scrollIntoView({ behavior: "smooth", block: "center" });
+    target.currentTime = timestampSeconds;
+  }
+
+  function jumpToCircle(id: string) {
+    const target = document.querySelector<SVGCircleElement>(`[data-annotation-id="${id}"]`);
+    target?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
 
   if (isLoading) {
     return (
@@ -161,12 +281,64 @@ export function PostDetailView({ slug }: { slug: string }) {
             </span>
           </div>
 
-          <ReactionBar postId={post.id} />
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <ReactionBar postId={post.id} />
+            <div className="flex items-center gap-3">
+              {studyMode && (
+                <div className="flex items-center gap-1 rounded-md border border-input p-0.5">
+                  <Button
+                    type="button"
+                    variant={activeTool === "highlight" ? "secondary" : "ghost"}
+                    size="icon"
+                    className="size-7"
+                    aria-label="Highlight tool"
+                    aria-pressed={activeTool === "highlight"}
+                    onClick={() => setActiveTool("highlight")}
+                  >
+                    <Highlighter className="size-3.5" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={activeTool === "circle" ? "secondary" : "ghost"}
+                    size="icon"
+                    className="size-7"
+                    aria-label="Circle tool"
+                    aria-pressed={activeTool === "circle"}
+                    onClick={() => setActiveTool("circle")}
+                  >
+                    <Circle className="size-3.5" />
+                  </Button>
+                </div>
+              )}
+              <div className="flex items-center gap-2">
+                <Label htmlFor="study-mode" className="text-sm text-muted-foreground">
+                  Study mode
+                </Label>
+                <Switch id="study-mode" checked={studyMode} onCheckedChange={setStudyMode} />
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_280px]">
-          <div className="flex min-w-0 flex-col gap-4">
-            <TiptapContent json={post.contentJson} />
+          <div ref={articleRef} className="relative flex min-w-0 flex-col gap-4">
+            <TiptapContent
+              json={post.contentJson}
+              studyMode={studyMode}
+              highlights={anchoredHighlights}
+              onHighlightClick={(id) => openHighlight(id)}
+              onHighlightsResolved={handleHighlightsResolved}
+            />
+
+            <MediaAnnotationsLayer
+              postId={post.id}
+              articleRef={articleRef}
+              studyMode={studyMode}
+              activeTool={activeTool}
+              videoComments={videoComments}
+              circleAnnotations={circleAnnotations}
+              session={session ?? null}
+            />
 
             {post.type === "quote" &&
               (post.quotedPost ? (
@@ -191,93 +363,191 @@ export function PostDetailView({ slug }: { slug: string }) {
               ))}
           </div>
 
-          <aside className="flex flex-col gap-4">
-            {post.author.profile && <AuthorCard username={post.author.profile.username} />}
-
-            {post.series && post.seriesContext && (
-              <Card className="glass flex flex-col gap-3 p-4">
-                <Link
-                  href={`/series/${post.series.slug}`}
-                  className="flex items-center gap-2 text-sm font-medium hover:underline"
-                >
-                  <Library className="size-4 shrink-0 text-muted-foreground" />
-                  {post.series.title}
-                </Link>
-                <span className="text-xs text-muted-foreground">
-                  Part {post.seriesContext.position} of {post.seriesContext.total}
-                </span>
-                <div className="flex items-center justify-between gap-2">
-                  {post.seriesContext.prevSlug ? (
-                    <Button asChild variant="outline" size="sm" className="gap-1">
-                      <Link href={`/post/${post.seriesContext.prevSlug}`}>
-                        <ChevronLeft className="size-3.5" />
-                        Prev
-                      </Link>
-                    </Button>
-                  ) : (
-                    <Button variant="outline" size="sm" className="gap-1" disabled>
-                      <ChevronLeft className="size-3.5" />
-                      Prev
-                    </Button>
-                  )}
-                  {post.seriesContext.nextSlug ? (
-                    <Button asChild variant="outline" size="sm" className="gap-1">
-                      <Link href={`/post/${post.seriesContext.nextSlug}`}>
-                        Next
-                        <ChevronRight className="size-3.5" />
-                      </Link>
-                    </Button>
-                  ) : (
-                    <Button variant="outline" size="sm" className="gap-1" disabled>
-                      Next
-                      <ChevronRight className="size-3.5" />
-                    </Button>
-                  )}
-                </div>
-              </Card>
-            )}
-
-            {post.tags.length > 0 && (
-              <Card className="glass flex flex-col gap-2 p-4">
+          <aside className={cn("flex-col gap-4", studyMode ? "hidden lg:flex" : "flex")}>
+            {studyMode ? (
+              <>
                 <span className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-                  Tags
+                  Highlights
                 </span>
-                <div className="flex flex-wrap gap-1.5">
-                  {post.tags.map((tag) => (
-                    <Badge key={tag.id} variant="secondary">
-                      {tag.name}
-                    </Badge>
-                  ))}
-                </div>
-              </Card>
-            )}
+                <HighlightsTimeline
+                  postId={post.id}
+                  highlights={highlights}
+                  resolvedMap={resolvedMap}
+                  hasSession={!!session}
+                  onJumpTo={openHighlight}
+                  onEditNote={openHighlight}
+                />
+                <VideoCommentsList
+                  postId={post.id}
+                  comments={videoComments}
+                  onJumpTo={jumpToVideo}
+                />
+                <ImageAnnotationsList
+                  postId={post.id}
+                  annotations={circleAnnotations}
+                  onJumpTo={jumpToCircle}
+                />
+              </>
+            ) : (
+              <>
+                {post.author.profile && <AuthorCard username={post.author.profile.username} />}
 
-            {headings.length >= 2 && (
-              <Card className="glass flex flex-col gap-2 p-4">
-                <span className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-                  On this page
-                </span>
-                <nav className="flex flex-col gap-1.5 text-sm">
-                  {headings.map((heading) => (
-                    <a
-                      key={heading.id}
-                      href={`#${heading.id}`}
-                      className={cn(
-                        "text-muted-foreground hover:text-foreground hover:underline",
-                        heading.level === 3 && "pl-3"
-                      )}
+                {post.series && post.seriesContext && (
+                  <Card className="glass flex flex-col gap-3 p-4">
+                    <Link
+                      href={`/series/${post.series.slug}`}
+                      className="flex items-center gap-2 text-sm font-medium hover:underline"
                     >
-                      {heading.text}
-                    </a>
-                  ))}
-                </nav>
-              </Card>
+                      <Library className="size-4 shrink-0 text-muted-foreground" />
+                      {post.series.title}
+                    </Link>
+                    <span className="text-xs text-muted-foreground">
+                      Part {post.seriesContext.position} of {post.seriesContext.total}
+                    </span>
+                    <div className="flex items-center justify-between gap-2">
+                      {post.seriesContext.prevSlug ? (
+                        <Button asChild variant="outline" size="sm" className="gap-1">
+                          <Link href={`/post/${post.seriesContext.prevSlug}`}>
+                            <ChevronLeft className="size-3.5" />
+                            Prev
+                          </Link>
+                        </Button>
+                      ) : (
+                        <Button variant="outline" size="sm" className="gap-1" disabled>
+                          <ChevronLeft className="size-3.5" />
+                          Prev
+                        </Button>
+                      )}
+                      {post.seriesContext.nextSlug ? (
+                        <Button asChild variant="outline" size="sm" className="gap-1">
+                          <Link href={`/post/${post.seriesContext.nextSlug}`}>
+                            Next
+                            <ChevronRight className="size-3.5" />
+                          </Link>
+                        </Button>
+                      ) : (
+                        <Button variant="outline" size="sm" className="gap-1" disabled>
+                          Next
+                          <ChevronRight className="size-3.5" />
+                        </Button>
+                      )}
+                    </div>
+                  </Card>
+                )}
+
+                {post.tags.length > 0 && (
+                  <Card className="glass flex flex-col gap-2 p-4">
+                    <span className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                      Tags
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {post.tags.map((tag) => (
+                        <Badge key={tag.id} variant="secondary">
+                          {tag.name}
+                        </Badge>
+                      ))}
+                    </div>
+                  </Card>
+                )}
+
+                {headings.length >= 2 && (
+                  <Card className="glass flex flex-col gap-2 p-4">
+                    <span className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                      On this page
+                    </span>
+                    <nav className="flex flex-col gap-1.5 text-sm">
+                      {headings.map((heading) => (
+                        <a
+                          key={heading.id}
+                          href={`#${heading.id}`}
+                          className={cn(
+                            "text-muted-foreground hover:text-foreground hover:underline",
+                            heading.level === 3 && "pl-3"
+                          )}
+                        >
+                          {heading.text}
+                        </a>
+                      ))}
+                    </nav>
+                  </Card>
+                )}
+              </>
             )}
           </aside>
         </div>
 
         <CommentSection postId={post.id} postAuthorId={post.authorId} />
       </main>
+
+      {studyMode && (
+        <>
+          {activeTool === "highlight" && (
+            <SelectionToolbar
+              postId={post.id}
+              containerRef={articleRef}
+              session={session ?? null}
+              onHighlightCreated={handleHighlightCreated}
+            />
+          )}
+
+          <HighlightNoteComposer
+            postId={post.id}
+            highlight={activeHighlight}
+            anchorElement={composerAnchor}
+            onClose={closeComposer}
+          />
+
+          <Button
+            className="fixed right-6 bottom-6 z-40 gap-2 shadow-lg lg:hidden"
+            onClick={() => setTimelineSheetOpen(true)}
+          >
+            <NotebookPen className="size-4" />
+            {highlights.length + videoComments.length + circleAnnotations.length > 0
+              ? highlights.length + videoComments.length + circleAnnotations.length
+              : "Notes"}
+          </Button>
+
+          <Sheet open={timelineSheetOpen} onOpenChange={setTimelineSheetOpen}>
+            <SheetContent side="right" className="overflow-y-auto">
+              <SheetHeader>
+                <SheetTitle>Your notes</SheetTitle>
+              </SheetHeader>
+              <div className="flex flex-col gap-3 overflow-y-auto px-4 pb-4">
+                <HighlightsTimeline
+                  postId={post.id}
+                  highlights={highlights}
+                  resolvedMap={resolvedMap}
+                  hasSession={!!session}
+                  onJumpTo={(id) => {
+                    setTimelineSheetOpen(false);
+                    openHighlight(id);
+                  }}
+                  onEditNote={(id) => {
+                    setTimelineSheetOpen(false);
+                    openHighlight(id);
+                  }}
+                />
+                <VideoCommentsList
+                  postId={post.id}
+                  comments={videoComments}
+                  onJumpTo={(src, ts) => {
+                    setTimelineSheetOpen(false);
+                    jumpToVideo(src, ts);
+                  }}
+                />
+                <ImageAnnotationsList
+                  postId={post.id}
+                  annotations={circleAnnotations}
+                  onJumpTo={(id) => {
+                    setTimelineSheetOpen(false);
+                    jumpToCircle(id);
+                  }}
+                />
+              </div>
+            </SheetContent>
+          </Sheet>
+        </>
+      )}
     </>
   );
 }

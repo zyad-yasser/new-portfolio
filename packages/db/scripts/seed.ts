@@ -3,7 +3,7 @@ import { getPublicUrl, uploadObjectDirect } from "@repo/utils/storage";
 import { hashPassword } from "better-auth/crypto";
 import { and, eq } from "drizzle-orm";
 import { db } from "../src";
-import type { NotificationType } from "../src/schema";
+import type { NotificationType, TiptapDoc } from "../src/schema";
 import {
   account,
   category,
@@ -35,13 +35,84 @@ const blogSeedCategories = [
   { name: "Notes", color: "slate", description: "Short-form notes and updates" },
 ];
 
-const blogSeedPosts = [
+function heading(level: 2 | 3, text: string): TiptapDoc {
+  return { type: "heading", attrs: { level }, content: [{ type: "text", text }] };
+}
+
+function paragraph(text: string): TiptapDoc {
+  return { type: "paragraph", content: [{ type: "text", text }] };
+}
+
+function bulletList(items: string[]): TiptapDoc {
+  return {
+    type: "bulletList",
+    content: items.map((item) => ({
+      type: "listItem",
+      content: [paragraph(item)],
+    })),
+  };
+}
+
+function blockquote(text: string): TiptapDoc {
+  return { type: "blockquote", content: [paragraph(text)] };
+}
+
+const longArticleBody: TiptapDoc[] = [
+  paragraph(
+    "This blog's editor and reader are both built on Tiptap, a headless wrapper around ProseMirror. Every post is stored as a ProseMirror document tree, serialized to JSON, rather than as an HTML blob or a Markdown string. That single decision quietly shapes a lot of what became possible later, including a feature that has nothing to do with writing at all: study mode, a personal highlighting and note-taking layer readers can turn on for any article."
+  ),
+  heading(2, "Why Not Just Store HTML"),
+  paragraph(
+    "The obvious alternative to a structured document format is to let the editor serialize straight to HTML and store that string in the database. It works, right up until you need to do anything besides display it verbatim. Extracting a table of contents from a blob of HTML means re-parsing markup with regular expressions or a DOM parser at read time. Rendering the same content in a smaller, read-only preview means fighting the editor's own inline styles. And any feature that needs to reason about the document's structure, like counting headings, extracting plain text for search indexing, or figuring out where a heading actually starts, ends up re-implementing a tiny HTML parser from scratch."
+  ),
+  paragraph(
+    "A ProseMirror document, by contrast, is already a tree of typed nodes: doc, heading, paragraph, bulletList, image, and so on, each with explicit attributes. Walking that tree to extract headings, count characters, or flatten it to plain text is a short recursive function, not a parsing project. The `extractHeadings` helper that powers this article's own table of contents in the sidebar is about a dozen lines long specifically because the input is already structured."
+  ),
+  heading(2, "Choosing Tiptap Over Raw ProseMirror"),
+  paragraph(
+    "ProseMirror itself is a low-level toolkit: a document model, a transaction system, and a view layer, with no batteries included. Tiptap sits on top of it and packages the common pieces, marks, extensions, a React binding, and a starter kit of nodes, into something that doesn't require writing a schema by hand before the first paragraph can be typed. For a single-author blog editor, that tradeoff was an easy call. A few reasons stood out in particular:"
+  ),
+  bulletList([
+    "The extension system means the exact same list of nodes and marks (StarterKit, images, a custom video node, character counting) can be reused for both the writer's editor and the read-only renderer, so the two never drift apart.",
+    "Extensions can register arbitrary ProseMirror plugins, which is what eventually made it possible to overlay per-reader highlights on top of a shared, read-only document without touching the document itself.",
+    "The React bindings (useEditor, EditorContent) make mounting either an editable or a non-editable instance a one-line difference in configuration, not two separate code paths.",
+  ]),
+  heading(2, "A Document Shared By Every Reader"),
+  paragraph(
+    "Here's the detail that made study mode interesting rather than trivial: a post's contentJson is one row in one table, fetched by every visitor who opens that post. It's the same document for the author re-reading their own writing, for a logged-out visitor, and for a signed-in reader who wants to mark up a paragraph to come back to later. Naively, adding highlighting would mean writing marks directly into that shared document, which immediately raises an uncomfortable question: whose highlight is it, and why would every other reader suddenly see it too?"
+  ),
+  blockquote(
+    "The moment a feature is personal rather than public, it has no business living inside the one document everyone shares."
+  ),
+  paragraph(
+    "The fix follows directly from treating the editor as a rendering surface rather than as the source of truth. A ProseMirror view can be decorated: given a set of ranges, it can paint background colors, add classes, or attach click handlers to specific spans of text, entirely at render time, without those decorations ever being written into the document the editor was initialized with. Reload the page and the decorations vanish unless something re-applies them from outside. That's exactly the property a private, per-reader annotation layer needs: computed fresh for whoever is looking, from data that lives in its own table, keyed to that one reader."
+  ),
+  heading(2, "The Part That Isn't Free: Anchoring"),
+  paragraph(
+    "Decorations solve where to draw a highlight, but not where a highlight still is after the underlying content has changed. A post can be edited after someone highlights a sentence in it. Storing a highlight as raw character offsets into the document breaks the instant a single character is added anywhere before it. The more durable approach, borrowed from web annotation tools that have solved this exact problem for plain HTML pages, is to store the highlighted text itself, plus a little surrounding context, rather than its coordinates. Finding it again becomes a text search instead of a position lookup: look for the quoted text, and if it appears more than once, use the saved context on either side to pick the right occurrence."
+  ),
+  paragraph(
+    "It's not bulletproof. If a highlighted sentence gets rewritten entirely, the search comes up empty, and the honest answer is to say so rather than silently guessing at the wrong paragraph. A highlight that can no longer find its anchor should still show up wherever a reader's notes are listed, just marked as orphaned, instead of disappearing outright and quietly discarding a note someone wrote."
+  ),
+  heading(2, "What This Adds Up To"),
+  paragraph(
+    "None of this required touching how posts are written or how the underlying editor works. It required treating the reading view as something that can be decorated independently of what's stored, and treating a highlight's location as a description of text rather than a coordinate in a specific version of a document. Both of those ideas exist because the content was structured JSON from the start, not a wall of HTML that happened to render correctly in a browser."
+  ),
+];
+
+const blogSeedPosts: {
+  title: string;
+  excerptText: string;
+  categorySlug: string;
+  tagNames: string[];
+  body?: TiptapDoc[];
+}[] = [
   {
     title: "Welcome to the Blog",
     excerptText:
       "This is the first post on this blog. More posts about software engineering, side projects, and lessons learned are coming soon.",
     categorySlug: "notes",
-    tagNames: [] as string[],
+    tagNames: [],
   },
   {
     title: "Building a Monorepo with Turborepo and pnpm",
@@ -56,6 +127,14 @@ const blogSeedPosts = [
       "Why splitting authentication into an admin instance and a public instance, each with its own secret, is a clean way to keep a single-owner admin app and a public multi-user app on the same Postgres tables without trusting each other's sessions.",
     categorySlug: "engineering",
     tagNames: ["typescript", "postgres"],
+  },
+  {
+    title: "Building a Rich Text Editor for a Personal Blog",
+    excerptText:
+      "Notes on Tiptap, ProseMirror, and why storing posts as structured JSON instead of HTML is what eventually made a private, per-reader highlighting and note-taking layer possible without ever touching the shared document.",
+    categorySlug: "engineering",
+    tagNames: ["typescript", "tiptap", "editor"],
+    body: longArticleBody,
   },
 ];
 
@@ -142,7 +221,7 @@ async function seedBlogPosts(adminId: string) {
       excerptText: seedPost.excerptText,
       contentJson: {
         type: "doc",
-        content: [{ type: "paragraph", content: [{ type: "text", text: seedPost.excerptText }] }],
+        content: seedPost.body ?? [paragraph(seedPost.excerptText)],
       },
       published: true,
     });

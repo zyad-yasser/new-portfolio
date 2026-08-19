@@ -5,6 +5,8 @@ import { categoryRouter } from "./category";
 import { commentRouter } from "./comment";
 import { feedRouter } from "./feed";
 import { followRouter } from "./follow";
+import { highlightRouter } from "./highlight";
+import { imageAnnotationRouter } from "./image-annotation";
 import { mediaRouter } from "./media";
 import { mediaFolderRouter } from "./media-folder";
 import { mediaQuotaRouter } from "./media-quota";
@@ -18,6 +20,7 @@ import { searchRouter } from "./search";
 import { seriesRouter } from "./series";
 import { sessionRouter } from "./session";
 import { tagRouter } from "./tag";
+import { videoCommentRouter } from "./video-comment";
 
 export const publicAppRouter = createPublicTRPCRouter({
   health: publicProcedure.query(() => ({
@@ -34,6 +37,9 @@ export const publicAppRouter = createPublicTRPCRouter({
   profile: profileRouter,
   follow: followRouter,
   bookmark: bookmarkRouter,
+  highlight: highlightRouter,
+  videoComment: videoCommentRouter,
+  imageAnnotation: imageAnnotationRouter,
   reshare: reshareRouter,
   feed: feedRouter,
   media: mediaRouter,

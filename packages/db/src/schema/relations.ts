@@ -8,9 +8,12 @@ import {
   notification,
   post,
   postBookmark,
+  postHighlight,
+  postImageAnnotation,
   postReaction,
   postReshare,
   postTag,
+  postVideoComment,
   series,
   tag,
   userBlock,
@@ -41,6 +44,9 @@ export const postRelations = relations(post, ({ one, many }) => ({
   comments: many(comment),
   reactions: many(postReaction),
   reshares: many(postReshare),
+  highlights: many(postHighlight),
+  videoComments: many(postVideoComment),
+  imageAnnotations: many(postImageAnnotation),
 }));
 
 export const userRelations = relations(user, ({ many, one }) => ({
@@ -55,6 +61,9 @@ export const userRelations = relations(user, ({ many, one }) => ({
   notificationsReceived: many(notification, { relationName: "notificationsReceived" }),
   notificationsSent: many(notification, { relationName: "notificationsSent" }),
   storageQuota: one(userStorageQuota),
+  highlights: many(postHighlight),
+  videoComments: many(postVideoComment),
+  imageAnnotations: many(postImageAnnotation),
 }));
 
 export const seriesRelations = relations(series, ({ one, many }) => ({
@@ -121,6 +130,39 @@ export const postReactionRelations = relations(postReaction, ({ one }) => ({
   }),
   user: one(user, {
     fields: [postReaction.userId],
+    references: [user.id],
+  }),
+}));
+
+export const postHighlightRelations = relations(postHighlight, ({ one }) => ({
+  post: one(post, {
+    fields: [postHighlight.postId],
+    references: [post.id],
+  }),
+  user: one(user, {
+    fields: [postHighlight.userId],
+    references: [user.id],
+  }),
+}));
+
+export const postVideoCommentRelations = relations(postVideoComment, ({ one }) => ({
+  post: one(post, {
+    fields: [postVideoComment.postId],
+    references: [post.id],
+  }),
+  user: one(user, {
+    fields: [postVideoComment.userId],
+    references: [user.id],
+  }),
+}));
+
+export const postImageAnnotationRelations = relations(postImageAnnotation, ({ one }) => ({
+  post: one(post, {
+    fields: [postImageAnnotation.postId],
+    references: [post.id],
+  }),
+  user: one(user, {
+    fields: [postImageAnnotation.userId],
     references: [user.id],
   }),
 }));

@@ -100,3 +100,26 @@
 body {
   min-height: 100svh;
 }
+
+.study-highlight {
+  cursor: pointer;
+  border-radius: 2px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.study-highlight-yellow {
+  background-color: rgb(253 224 71 / 55%);
+}
+
+.study-highlight-green {
+  background-color: rgb(134 239 172 / 55%);
+}
+
+.study-highlight-blue {
+  background-color: rgb(147 197 253 / 55%);
+}
+
+.study-highlight-pink {
+  background-color: rgb(249 168 212 / 55%);
+}
