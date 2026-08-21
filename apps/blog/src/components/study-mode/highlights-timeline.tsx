@@ -51,11 +51,22 @@ export function HighlightsTimeline({
   const utils = publicApi.useUtils();
 
   const deleteHighlight = publicApi.highlight.delete.useMutation({
-    onSuccess: () => {
-      utils.highlight.listMineForPost.invalidate({ postId });
+    onMutate: async (input) => {
+      await utils.highlight.listMineForPost.cancel({ postId });
+      const previous = utils.highlight.listMineForPost.getData({ postId });
+      utils.highlight.listMineForPost.setData({ postId }, (old) =>
+        old?.filter((item) => item.id !== input.id)
+      );
       toast.success("Highlight deleted.");
+      return { previous };
     },
-    onError: (error) => toast.error(getErrorMessage(error, "Couldn't delete this highlight.")),
+    onError: (error, _input, context) => {
+      if (context?.previous) {
+        utils.highlight.listMineForPost.setData({ postId }, context.previous);
+      }
+      toast.error(getErrorMessage(error, "Couldn't delete this highlight."));
+    },
+    onSettled: () => utils.highlight.listMineForPost.invalidate({ postId }),
   });
 
   if (!hasSession) {

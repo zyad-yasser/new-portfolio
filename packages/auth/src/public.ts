@@ -5,7 +5,7 @@ import { requireEnv } from "@repo/utils";
 import { createSecondaryStorage } from "@repo/utils/secondary-storage";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { captcha } from "better-auth/plugins";
+import { captcha, twoFactor } from "better-auth/plugins";
 import { roleField } from "./shared";
 
 const appName = requireEnv("APP_NAME");
@@ -65,6 +65,9 @@ export const publicAuth = betterAuth({
     },
   },
   secondaryStorage: createSecondaryStorage("public"),
+  session: {
+    freshAge: 0,
+  },
   rateLimit: {
     enabled: true,
     storage: "secondary-storage",
@@ -82,6 +85,9 @@ export const publicAuth = betterAuth({
       provider: "cloudflare-turnstile",
       secretKey: requireEnv("TURNSTILE_SECRET_KEY"),
       endpoints: ["/sign-up/email"],
+    }),
+    twoFactor({
+      issuer: appName,
     }),
   ],
   user: {

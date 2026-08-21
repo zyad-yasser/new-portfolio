@@ -23,6 +23,7 @@ export function SelectionToolbar({
   containerRef,
   session,
   onHighlightCreated,
+  onHighlightPersisted,
 }: {
   postId: string;
   containerRef: React.RefObject<HTMLDivElement | null>;
@@ -35,11 +36,62 @@ export function SelectionToolbar({
     startOffset: number;
     color: HighlightColor;
   }) => void;
+  onHighlightPersisted: (optimisticId: string, realId: string) => void;
 }) {
   const [pending, setPending] = useState<PendingSelection | null>(null);
+  const utils = publicApi.useUtils();
 
   const createHighlight = publicApi.highlight.create.useMutation({
-    onError: (error) => toast.error(getErrorMessage(error, "Couldn't save this highlight.")),
+    onMutate: async (input) => {
+      await utils.highlight.listMineForPost.cancel({ postId: input.postId });
+      const previous = utils.highlight.listMineForPost.getData({ postId: input.postId });
+      const optimisticId = `optimistic-${crypto.randomUUID()}`;
+      const optimisticHighlight = {
+        id: optimisticId,
+        postId: input.postId,
+        userId: "",
+        quoteText: input.quoteText,
+        prefixText: input.prefixText,
+        suffixText: input.suffixText,
+        startOffset: input.startOffset,
+        endOffset: input.endOffset,
+        color: input.color ?? "yellow",
+        noteJson: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      utils.highlight.listMineForPost.setData({ postId: input.postId }, (old) =>
+        old ? [...old, optimisticHighlight] : [optimisticHighlight]
+      );
+
+      window.getSelection()?.removeAllRanges();
+      setPending(null);
+      toast.success("Highlight added.");
+      onHighlightCreated({
+        id: optimisticId,
+        quoteText: input.quoteText,
+        prefixText: input.prefixText,
+        suffixText: input.suffixText,
+        startOffset: input.startOffset,
+        color: optimisticHighlight.color,
+      });
+
+      return { previous, optimisticId, postId: input.postId };
+    },
+    onSuccess: (created, _input, context) => {
+      if (!created || !context) return;
+      utils.highlight.listMineForPost.setData({ postId: context.postId }, (old) =>
+        old?.map((item) => (item.id === context.optimisticId ? created : item))
+      );
+      onHighlightPersisted(context.optimisticId, created.id);
+    },
+    onError: (error, _input, context) => {
+      if (context) {
+        utils.highlight.listMineForPost.setData({ postId: context.postId }, context.previous);
+      }
+      toast.error(getErrorMessage(error, "Couldn't save this highlight."));
+    },
   });
 
   useEffect(() => {
@@ -79,34 +131,16 @@ export function SelectionToolbar({
       pending.to
     );
 
-    createHighlight.mutate(
-      {
-        postId,
-        quoteText,
-        prefixText,
-        suffixText,
-        startOffset: pending.from,
-        endOffset: pending.to,
-        color,
-        noteJson: null,
-      },
-      {
-        onSuccess: (created) => {
-          if (!created) return;
-          toast.success("Highlight added.");
-          window.getSelection()?.removeAllRanges();
-          setPending(null);
-          onHighlightCreated({
-            id: created.id,
-            quoteText: created.quoteText,
-            prefixText: created.prefixText,
-            suffixText: created.suffixText,
-            startOffset: created.startOffset,
-            color: created.color,
-          });
-        },
-      }
-    );
+    createHighlight.mutate({
+      postId,
+      quoteText,
+      prefixText,
+      suffixText,
+      startOffset: pending.from,
+      endOffset: pending.to,
+      color,
+      noteJson: null,
+    });
   }
 
   if (!pending) return null;

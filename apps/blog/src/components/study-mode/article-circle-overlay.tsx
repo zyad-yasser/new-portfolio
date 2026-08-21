@@ -69,6 +69,11 @@ export function ArticleCircleOverlay({
   const [drag, setDrag] = useState<DragState | null>(null);
   const dragRef = useRef<DragState | null>(null);
   dragRef.current = drag;
+  const [pendingPositions, setPendingPositions] = useState<
+    Record<string, { xPercent: number; yPercent: number }>
+  >({});
+  const pendingPositionsRef = useRef(pendingPositions);
+  pendingPositionsRef.current = pendingPositions;
   const [active, setActive] = useState<{
     mode: "create" | "edit";
     id?: string;
@@ -82,6 +87,29 @@ export function ArticleCircleOverlay({
 
   const utils = publicApi.useUtils();
   const canDraw = !!session?.user.emailVerified;
+
+  useEffect(() => {
+    setPendingPositions((current) => {
+      const ids = Object.keys(current);
+      if (ids.length === 0) return current;
+      let changed = false;
+      const next = { ...current };
+      for (const id of ids) {
+        const annotation = annotations.find((item) => item.id === id);
+        const pending = current[id];
+        if (
+          annotation &&
+          pending &&
+          Math.abs(annotation.xPercent - pending.xPercent) < 0.01 &&
+          Math.abs(annotation.yPercent - pending.yPercent) < 0.01
+        ) {
+          delete next[id];
+          changed = true;
+        }
+      }
+      return changed ? next : current;
+    });
+  }, [annotations]);
 
   useEffect(() => {
     const el = svgRef.current;
@@ -256,23 +284,27 @@ export function ArticleCircleOverlay({
         }
 
         if (current.moved) {
-          updatePosition.mutate({
-            id: current.id,
-            xPercent: current.currentXPercent,
-            yPercent: current.currentYPercent,
-          });
+          const { id, currentXPercent, currentYPercent } = current;
+          setPendingPositions((prev) => ({
+            ...prev,
+            [id]: { xPercent: currentXPercent, yPercent: currentYPercent },
+          }));
+          updatePosition.mutate({ id, xPercent: currentXPercent, yPercent: currentYPercent });
         } else {
           const annotation = annotationsRef.current.find((item) => item.id === current.id);
           if (annotation) {
+            const pending = pendingPositionsRef.current[annotation.id];
+            const xPercent = pending?.xPercent ?? annotation.xPercent;
+            const yPercent = pending?.yPercent ?? annotation.yPercent;
             setActive({
               mode: "edit",
               id: annotation.id,
-              xPercent: annotation.xPercent,
-              yPercent: annotation.yPercent,
+              xPercent,
+              yPercent,
               radiusPercent: annotation.radiusPercent,
               color: annotation.color,
               noteJson: annotation.noteJson,
-              anchorPoint: pointToClient(annotation.xPercent, annotation.yPercent),
+              anchorPoint: pointToClient(xPercent, yPercent),
             });
           }
         }
@@ -299,33 +331,38 @@ export function ArticleCircleOverlay({
   }
 
   function handleCircleMouseDown(annotation: CircleAnnotation, event: React.MouseEvent) {
-    if (!toolActive) return;
+    if (!canDraw) return;
     event.stopPropagation();
+    const pending = pendingPositions[annotation.id];
+    const xPercent = pending?.xPercent ?? annotation.xPercent;
+    const yPercent = pending?.yPercent ?? annotation.yPercent;
     const startPoint = toLocalPoint(event.clientX, event.clientY);
-    const center = fromPercent(annotation.xPercent, annotation.yPercent);
+    const center = fromPercent(xPercent, yPercent);
     setDrag({
       kind: "move",
       id: annotation.id,
       startPoint,
       offset: { x: center.x - startPoint.x, y: center.y - startPoint.y },
-      currentXPercent: annotation.xPercent,
-      currentYPercent: annotation.yPercent,
+      currentXPercent: xPercent,
+      currentYPercent: yPercent,
       moved: false,
     });
   }
 
-  function openView(annotation: CircleAnnotation, event: React.MouseEvent | React.KeyboardEvent) {
-    if (toolActive) return;
+  function openView(annotation: CircleAnnotation, event: React.KeyboardEvent) {
     event.stopPropagation();
+    const pending = pendingPositions[annotation.id];
+    const xPercent = pending?.xPercent ?? annotation.xPercent;
+    const yPercent = pending?.yPercent ?? annotation.yPercent;
     setActive({
       mode: "edit",
       id: annotation.id,
-      xPercent: annotation.xPercent,
-      yPercent: annotation.yPercent,
+      xPercent,
+      yPercent,
       radiusPercent: annotation.radiusPercent,
       color: annotation.color,
       noteJson: annotation.noteJson,
-      anchorPoint: pointToClient(annotation.xPercent, annotation.yPercent),
+      anchorPoint: pointToClient(xPercent, yPercent),
     });
   }
 
@@ -349,10 +386,14 @@ export function ArticleCircleOverlay({
           <title>Circle annotations</title>
           {annotations.map((annotation) => {
             const isMoving = drag?.kind === "move" && drag.id === annotation.id;
-            const point = fromPercent(
-              isMoving ? drag.currentXPercent : annotation.xPercent,
-              isMoving ? drag.currentYPercent : annotation.yPercent
-            );
+            const pending = pendingPositions[annotation.id];
+            const effectiveXPercent = isMoving
+              ? drag.currentXPercent
+              : (pending?.xPercent ?? annotation.xPercent);
+            const effectiveYPercent = isMoving
+              ? drag.currentYPercent
+              : (pending?.yPercent ?? annotation.yPercent);
+            const point = fromPercent(effectiveXPercent, effectiveYPercent);
             const radiusPx = (annotation.radiusPercent / 100) * size.width;
             return (
               <circle
@@ -366,13 +407,12 @@ export function ArticleCircleOverlay({
                 strokeWidth={2}
                 style={{
                   pointerEvents: "auto",
-                  cursor: toolActive ? "grab" : "pointer",
+                  cursor: canDraw ? "grab" : "pointer",
                 }}
                 role="button"
                 tabIndex={0}
                 aria-label="Open note"
                 onMouseDown={(event) => handleCircleMouseDown(annotation, event)}
-                onClick={(event) => openView(annotation, event)}
                 onKeyDown={(event) => {
                   if (event.key === "Enter" || event.key === " ") {
                     event.preventDefault();

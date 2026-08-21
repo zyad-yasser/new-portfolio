@@ -68,17 +68,45 @@ export function HighlightNoteComposer({
   }, [highlight, anchorElement]);
 
   const saveNote = publicApi.highlight.updateNote.useMutation({
-    onSuccess: () => {
+    onMutate: async (input) => {
+      await utils.highlight.listMineForPost.cancel({ postId });
+      const previous = utils.highlight.listMineForPost.getData({ postId });
+      utils.highlight.listMineForPost.setData({ postId }, (old) =>
+        old?.map((item) =>
+          item.id === input.id
+            ? { ...item, noteJson: input.noteJson as TiptapDoc | null, updatedAt: new Date() }
+            : item
+        )
+      );
       toast.success("Note saved.");
-      utils.highlight.listMineForPost.invalidate({ postId });
       onClose();
+      return { previous };
     },
-    onError: (error) => toast.error(getErrorMessage(error, "Couldn't save this note.")),
+    onError: (error, _input, context) => {
+      if (context?.previous) {
+        utils.highlight.listMineForPost.setData({ postId }, context.previous);
+      }
+      toast.error(getErrorMessage(error, "Couldn't save this note."));
+    },
+    onSettled: () => utils.highlight.listMineForPost.invalidate({ postId }),
   });
 
   const updateColor = publicApi.highlight.updateColor.useMutation({
-    onSuccess: () => utils.highlight.listMineForPost.invalidate({ postId }),
-    onError: (error) => toast.error(getErrorMessage(error, "Couldn't update the color.")),
+    onMutate: async (input) => {
+      await utils.highlight.listMineForPost.cancel({ postId });
+      const previous = utils.highlight.listMineForPost.getData({ postId });
+      utils.highlight.listMineForPost.setData({ postId }, (old) =>
+        old?.map((item) => (item.id === input.id ? { ...item, color: input.color } : item))
+      );
+      return { previous };
+    },
+    onError: (error, _input, context) => {
+      if (context?.previous) {
+        utils.highlight.listMineForPost.setData({ postId }, context.previous);
+      }
+      toast.error(getErrorMessage(error, "Couldn't update the color."));
+    },
+    onSettled: () => utils.highlight.listMineForPost.invalidate({ postId }),
   });
 
   if (!highlight) return null;

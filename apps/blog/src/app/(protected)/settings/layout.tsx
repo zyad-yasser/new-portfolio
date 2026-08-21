@@ -2,14 +2,14 @@
 
 import { SiteHeader } from "@/components/site-header";
 import { cn } from "@repo/ui/lib/utils";
-import { Ban, KeyRound, User } from "lucide-react";
+import { ShieldCheck, User, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const NAV_ITEMS = [
   { href: "/settings/profile", label: "Profile", icon: User },
-  { href: "/settings/sessions", label: "Sessions", icon: KeyRound },
-  { href: "/settings/blocked", label: "Blocked users", icon: Ban },
+  { href: "/settings/security", label: "Privacy & Security", icon: ShieldCheck },
+  { href: "/settings/connections", label: "Connections", icon: Users },
 ];
 
 export default function SettingsLayout({ children }: { children: React.ReactNode }) {

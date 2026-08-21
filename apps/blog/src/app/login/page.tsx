@@ -31,6 +31,10 @@ const POST_LOGIN_PATH = "/mine";
 export default function LoginPage() {
   const router = useRouter();
   const [socialProvider, setSocialProvider] = useState<"google" | "github" | null>(null);
+  const [needsTwoFactor, setNeedsTwoFactor] = useState(false);
+  const [useBackupCode, setUseBackupCode] = useState(false);
+  const [twoFactorCode, setTwoFactorCode] = useState("");
+  const [verifyingTwoFactor, setVerifyingTwoFactor] = useState(false);
 
   const form = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
@@ -38,10 +42,39 @@ export default function LoginPage() {
   });
 
   async function onSubmit(values: LoginValues) {
-    const { error: signInError } = await publicAuthClient.signIn.email(values);
+    const { data, error: signInError } = await publicAuthClient.signIn.email(values);
 
     if (signInError) {
       toast.error(getAuthErrorMessage(signInError, "Invalid email or password."));
+      return;
+    }
+
+    if (data && "twoFactorRedirect" in data && data.twoFactorRedirect) {
+      setNeedsTwoFactor(true);
+      return;
+    }
+
+    router.push(POST_LOGIN_PATH);
+    router.refresh();
+  }
+
+  async function onVerifyTwoFactor(event: React.FormEvent) {
+    event.preventDefault();
+    setVerifyingTwoFactor(true);
+
+    const { error: verifyError } = useBackupCode
+      ? await publicAuthClient.twoFactor.verifyBackupCode({ code: twoFactorCode })
+      : await publicAuthClient.twoFactor.verifyTotp({ code: twoFactorCode });
+
+    setVerifyingTwoFactor(false);
+
+    if (verifyError) {
+      toast.error(
+        getAuthErrorMessage(
+          verifyError,
+          useBackupCode ? "Invalid backup code." : "Invalid code. Try again."
+        )
+      );
       return;
     }
 
@@ -81,105 +114,159 @@ export default function LoginPage() {
       </div>
 
       <Card className="glass w-full max-w-sm shadow-xl shadow-black/5">
-        <CardHeader>
-          <CardTitle className="text-2xl">Login</CardTitle>
-          <CardDescription>Log in to write or manage your posts</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full gap-2"
-              disabled={isSocialLoading}
-              onClick={() => onSocialSignIn("google")}
-            >
-              {socialProvider === "google" ? (
-                <Loader2 className="size-4 animate-spin" />
-              ) : (
-                <GoogleIcon className="size-4" />
-              )}
-              Continue with Google
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full gap-2"
-              disabled={isSocialLoading}
-              onClick={() => onSocialSignIn("github")}
-            >
-              {socialProvider === "github" ? (
-                <Loader2 className="size-4 animate-spin" />
-              ) : (
-                <Github className="size-4" />
-              )}
-              Continue with GitHub
-            </Button>
-          </div>
-
-          <div className="flex items-center gap-3 text-xs text-muted-foreground">
-            <div className="h-px flex-1 bg-border" />
-            Or continue with email
-            <div className="h-px flex-1 bg-border" />
-          </div>
-
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="name@example.com"
-                        autoComplete="email"
-                        autoFocus
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <PasswordInput autoComplete="current-password" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="rememberMe"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center gap-2 space-y-0">
-                    <FormControl>
-                      <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                    </FormControl>
-                    <FormLabel className="text-sm font-normal">Remember me</FormLabel>
-                  </FormItem>
-                )}
-              />
+        {needsTwoFactor ? (
+          <>
+            <CardHeader>
+              <CardTitle className="text-2xl">Two-factor authentication</CardTitle>
+              <CardDescription>
+                {useBackupCode
+                  ? "Enter one of your backup codes."
+                  : "Enter the code from your authenticator app."}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <form onSubmit={onVerifyTwoFactor} className="space-y-4">
+                <Input
+                  autoFocus
+                  inputMode={useBackupCode ? "text" : "numeric"}
+                  autoComplete="one-time-code"
+                  maxLength={useBackupCode ? undefined : 6}
+                  placeholder={useBackupCode ? "Backup code" : "6-digit code"}
+                  className="text-center text-lg tracking-[0.3em]"
+                  value={twoFactorCode}
+                  onChange={(event) =>
+                    setTwoFactorCode(
+                      useBackupCode
+                        ? event.target.value
+                        : event.target.value.replace(/\D/g, "").slice(0, 6)
+                    )
+                  }
+                />
+                <Button
+                  type="submit"
+                  className="btn-glow w-full gap-2"
+                  disabled={verifyingTwoFactor || !twoFactorCode}
+                >
+                  {verifyingTwoFactor && <Loader2 className="size-4 animate-spin" />}
+                  Verify
+                </Button>
+              </form>
               <Button
-                type="submit"
-                className="btn-glow w-full gap-2"
-                disabled={isSubmitting || isSocialLoading}
+                type="button"
+                variant="ghost"
+                className="w-full text-xs text-muted-foreground"
+                onClick={() => {
+                  setUseBackupCode(!useBackupCode);
+                  setTwoFactorCode("");
+                }}
               >
-                {isSubmitting && <Loader2 className="size-4 animate-spin" />}
-                {isSubmitting ? "Logging in..." : "Login"}
+                {useBackupCode ? "Use authenticator code instead" : "Use a backup code instead"}
               </Button>
-            </form>
-          </Form>
-        </CardContent>
+            </CardContent>
+          </>
+        ) : (
+          <>
+            <CardHeader>
+              <CardTitle className="text-2xl">Login</CardTitle>
+              <CardDescription>Log in to write or manage your posts</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full gap-2"
+                  disabled={isSocialLoading}
+                  onClick={() => onSocialSignIn("google")}
+                >
+                  {socialProvider === "google" ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <GoogleIcon className="size-4" />
+                  )}
+                  Continue with Google
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full gap-2"
+                  disabled={isSocialLoading}
+                  onClick={() => onSocialSignIn("github")}
+                >
+                  {socialProvider === "github" ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <Github className="size-4" />
+                  )}
+                  Continue with GitHub
+                </Button>
+              </div>
+
+              <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                <div className="h-px flex-1 bg-border" />
+                Or continue with email
+                <div className="h-px flex-1 bg-border" />
+              </div>
+
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="email"
+                            placeholder="name@example.com"
+                            autoComplete="email"
+                            autoFocus
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Password</FormLabel>
+                        <FormControl>
+                          <PasswordInput autoComplete="current-password" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="rememberMe"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center gap-2 space-y-0">
+                        <FormControl>
+                          <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                        </FormControl>
+                        <FormLabel className="text-sm font-normal">Remember me</FormLabel>
+                      </FormItem>
+                    )}
+                  />
+                  <Button
+                    type="submit"
+                    className="btn-glow w-full gap-2"
+                    disabled={isSubmitting || isSocialLoading}
+                  >
+                    {isSubmitting && <Loader2 className="size-4 animate-spin" />}
+                    {isSubmitting ? "Logging in..." : "Login"}
+                  </Button>
+                </form>
+              </Form>
+            </CardContent>
+          </>
+        )}
       </Card>
 
       <p className="text-xs text-muted-foreground">

@@ -50,7 +50,7 @@ function formatDateTime(date: Date | string) {
   });
 }
 
-export default function SessionsSettingsPage() {
+export function SessionsTab() {
   const utils = publicApi.useUtils();
   const { data: sessions, isLoading, error, refetch } = publicApi.session.list.useQuery();
 
@@ -76,7 +76,7 @@ export default function SessionsSettingsPage() {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold">Sessions</h1>
+          <h2 className="text-lg font-semibold">Sessions</h2>
           <p className="text-sm text-muted-foreground">
             Devices currently signed in to your account.
           </p>

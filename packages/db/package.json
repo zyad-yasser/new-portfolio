@@ -13,6 +13,7 @@
     "db:baseline": "dotenv -e ../../apps/admin/.env -- tsx scripts/baseline-migrations.ts",
     "db:backfill-usernames": "dotenv -e ../../apps/admin/.env -- tsx scripts/backfill-usernames.ts",
     "seed": "dotenv -e ../../apps/admin/.env -e ../../apps/blog/.env -- tsx scripts/seed.ts",
+    "seed:posts": "dotenv -e ../../apps/admin/.env -e ../../apps/blog/.env -- tsx scripts/seed-posts.ts",
     "lint": "biome lint .",
     "check": "biome check .",
     "type-check": "tsc"

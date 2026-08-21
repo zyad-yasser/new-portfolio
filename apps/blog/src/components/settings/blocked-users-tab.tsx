@@ -9,7 +9,7 @@ import { Card } from "@repo/ui/card";
 import { Skeleton } from "@repo/ui/skeleton";
 import { toast } from "sonner";
 
-export default function BlockedUsersPage() {
+export function BlockedUsersTab() {
   const utils = publicApi.useUtils();
   const { data: blocked, isLoading, error, refetch } = publicApi.block.list.useQuery();
 
@@ -23,7 +23,7 @@ export default function BlockedUsersPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-semibold">Blocked users</h1>
+      <h2 className="text-lg font-semibold">Blocked users</h2>
 
       {isLoading && <Skeleton className="skeleton-shimmer h-24 w-full" />}
       {error && (

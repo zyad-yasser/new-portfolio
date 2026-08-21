@@ -34,6 +34,7 @@ import {
   Eye,
   Highlighter,
   Library,
+  Loader2,
   NotebookPen,
   UserX,
 } from "lucide-react";
@@ -112,6 +113,10 @@ export function PostDetailView({ slug }: { slug: string }) {
     [circleAnnotationsQuery.data]
   );
 
+  const studyDataLoading =
+    studyMode &&
+    (highlightsQuery.isLoading || videoCommentsQuery.isLoading || circleAnnotationsQuery.isLoading);
+
   const headings = useMemo(() => (post ? extractHeadings(post.contentJson) : []), [post]);
 
   useEffect(() => {
@@ -143,9 +148,11 @@ export function PostDetailView({ slug }: { slug: string }) {
   }
 
   function handleHighlightCreated(created: { id: string }) {
-    if (!post) return;
-    utils.highlight.listMineForPost.invalidate({ postId: post.id });
     openHighlight(created.id);
+  }
+
+  function handleHighlightPersisted(optimisticId: string, realId: string) {
+    setActiveHighlightId((current) => (current === optimisticId ? realId : current));
   }
 
   function handleHighlightsResolved(resolved: ResolvedHighlight[]) {
@@ -314,6 +321,9 @@ export function PostDetailView({ slug }: { slug: string }) {
                 <Label htmlFor="study-mode" className="text-sm text-muted-foreground">
                   Study mode
                 </Label>
+                {studyDataLoading && (
+                  <Loader2 className="size-3.5 animate-spin text-muted-foreground" />
+                )}
                 <Switch id="study-mode" checked={studyMode} onCheckedChange={setStudyMode} />
               </div>
             </div>
@@ -369,24 +379,33 @@ export function PostDetailView({ slug }: { slug: string }) {
                 <span className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
                   Highlights
                 </span>
-                <HighlightsTimeline
-                  postId={post.id}
-                  highlights={highlights}
-                  resolvedMap={resolvedMap}
-                  hasSession={!!session}
-                  onJumpTo={openHighlight}
-                  onEditNote={openHighlight}
-                />
-                <VideoCommentsList
-                  postId={post.id}
-                  comments={videoComments}
-                  onJumpTo={jumpToVideo}
-                />
-                <ImageAnnotationsList
-                  postId={post.id}
-                  annotations={circleAnnotations}
-                  onJumpTo={jumpToCircle}
-                />
+                {studyDataLoading ? (
+                  <div className="flex flex-col gap-3">
+                    <Skeleton className="skeleton-shimmer h-20 w-full" />
+                    <Skeleton className="skeleton-shimmer h-20 w-full" />
+                  </div>
+                ) : (
+                  <>
+                    <HighlightsTimeline
+                      postId={post.id}
+                      highlights={highlights}
+                      resolvedMap={resolvedMap}
+                      hasSession={!!session}
+                      onJumpTo={openHighlight}
+                      onEditNote={openHighlight}
+                    />
+                    <VideoCommentsList
+                      postId={post.id}
+                      comments={videoComments}
+                      onJumpTo={jumpToVideo}
+                    />
+                    <ImageAnnotationsList
+                      postId={post.id}
+                      annotations={circleAnnotations}
+                      onJumpTo={jumpToCircle}
+                    />
+                  </>
+                )}
               </>
             ) : (
               <>
@@ -487,6 +506,7 @@ export function PostDetailView({ slug }: { slug: string }) {
               containerRef={articleRef}
               session={session ?? null}
               onHighlightCreated={handleHighlightCreated}
+              onHighlightPersisted={handleHighlightPersisted}
             />
           )}
 
@@ -501,10 +521,16 @@ export function PostDetailView({ slug }: { slug: string }) {
             className="fixed right-6 bottom-6 z-40 gap-2 shadow-lg lg:hidden"
             onClick={() => setTimelineSheetOpen(true)}
           >
-            <NotebookPen className="size-4" />
-            {highlights.length + videoComments.length + circleAnnotations.length > 0
-              ? highlights.length + videoComments.length + circleAnnotations.length
-              : "Notes"}
+            {studyDataLoading ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <NotebookPen className="size-4" />
+            )}
+            {studyDataLoading
+              ? "Loading…"
+              : highlights.length + videoComments.length + circleAnnotations.length > 0
+                ? highlights.length + videoComments.length + circleAnnotations.length
+                : "Notes"}
           </Button>
 
           <Sheet open={timelineSheetOpen} onOpenChange={setTimelineSheetOpen}>
@@ -513,36 +539,45 @@ export function PostDetailView({ slug }: { slug: string }) {
                 <SheetTitle>Your notes</SheetTitle>
               </SheetHeader>
               <div className="flex flex-col gap-3 overflow-y-auto px-4 pb-4">
-                <HighlightsTimeline
-                  postId={post.id}
-                  highlights={highlights}
-                  resolvedMap={resolvedMap}
-                  hasSession={!!session}
-                  onJumpTo={(id) => {
-                    setTimelineSheetOpen(false);
-                    openHighlight(id);
-                  }}
-                  onEditNote={(id) => {
-                    setTimelineSheetOpen(false);
-                    openHighlight(id);
-                  }}
-                />
-                <VideoCommentsList
-                  postId={post.id}
-                  comments={videoComments}
-                  onJumpTo={(src, ts) => {
-                    setTimelineSheetOpen(false);
-                    jumpToVideo(src, ts);
-                  }}
-                />
-                <ImageAnnotationsList
-                  postId={post.id}
-                  annotations={circleAnnotations}
-                  onJumpTo={(id) => {
-                    setTimelineSheetOpen(false);
-                    jumpToCircle(id);
-                  }}
-                />
+                {studyDataLoading ? (
+                  <>
+                    <Skeleton className="skeleton-shimmer h-20 w-full" />
+                    <Skeleton className="skeleton-shimmer h-20 w-full" />
+                  </>
+                ) : (
+                  <>
+                    <HighlightsTimeline
+                      postId={post.id}
+                      highlights={highlights}
+                      resolvedMap={resolvedMap}
+                      hasSession={!!session}
+                      onJumpTo={(id) => {
+                        setTimelineSheetOpen(false);
+                        openHighlight(id);
+                      }}
+                      onEditNote={(id) => {
+                        setTimelineSheetOpen(false);
+                        openHighlight(id);
+                      }}
+                    />
+                    <VideoCommentsList
+                      postId={post.id}
+                      comments={videoComments}
+                      onJumpTo={(src, ts) => {
+                        setTimelineSheetOpen(false);
+                        jumpToVideo(src, ts);
+                      }}
+                    />
+                    <ImageAnnotationsList
+                      postId={post.id}
+                      annotations={circleAnnotations}
+                      onJumpTo={(id) => {
+                        setTimelineSheetOpen(false);
+                        jumpToCircle(id);
+                      }}
+                    />
+                  </>
+                )}
               </div>
             </SheetContent>
           </Sheet>
