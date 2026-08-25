@@ -77,7 +77,7 @@ export const mediaRouter = createPublicTRPCRouter({
     }),
 
   createPresignedUrl: verifiedProcedure
-    .use(strictRateLimit({ path: "media.createPresignedUrl", limit: 30, window: "1 h" }))
+    .use(strictRateLimit({ path: "media.createPresignedUrl", limit: 300, window: "1 h" }))
     .input(
       z
         .object({

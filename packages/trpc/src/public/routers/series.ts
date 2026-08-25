@@ -100,7 +100,7 @@ export const seriesRouter = createPublicTRPCRouter({
   }),
 
   create: verifiedProcedure
-    .use(strictRateLimit({ path: "series.create", limit: 10, window: "1 h" }))
+    .use(strictRateLimit({ path: "series.create", limit: 100, window: "1 h" }))
     .input(
       z.object({
         title: z.string().trim().min(1).max(150),

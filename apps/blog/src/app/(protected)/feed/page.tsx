@@ -2,13 +2,23 @@
 
 import { PostCard } from "@/components/posts/post-card";
 import { SiteHeader } from "@/components/site-header";
+import { useScrollRestoration } from "@/hooks/use-scroll-restoration";
 import { publicApi } from "@repo/trpc/public/react";
 import { Button } from "@repo/ui/button";
 import { Skeleton } from "@repo/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui/tabs";
 import { TooltipProvider } from "@repo/ui/tooltip";
+import { useIsRestoring } from "@tanstack/react-query";
 import { Loader2, Repeat2 } from "lucide-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef } from "react";
+
+const FEED_TABS = ["following", "all"] as const;
+type FeedTab = (typeof FEED_TABS)[number];
+
+function feedScrollKey(tab: FeedTab) {
+  return `blog-feed-scroll:${tab}`;
+}
 
 function useInfiniteScrollSentinel(hasNextPage: boolean | undefined, fetchNextPage: () => void) {
   const ref = useRef<HTMLDivElement>(null);
@@ -72,19 +82,35 @@ function LoadMoreButton({
 }
 
 function FollowingFeed() {
+  const isRestoring = useIsRestoring();
   const { data, isLoading, error, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
     publicApi.feed.following.useInfiniteQuery(
       {},
-      { getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined }
+      {
+        getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+        // Mirrors the homepage feed: the persisted cache should just sit there after a
+        // refresh, not get silently re-fetched and reshuffled underneath the restored scroll
+        // position.
+        refetchOnMount: false,
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
+      }
     );
   const items = useMemo(() => data?.pages.flatMap((page) => page.items), [data]);
+  const hasItems = !!items && items.length > 0;
+  // isRestoring must count as "still loading" here too: while the persisted cache is being
+  // read, isLoading is false (the query is paused, not fetching) even though there's no data
+  // yet. Checking isLoading alone would show neither the skeleton nor real content during
+  // that window — a blank flash — since SSR has no persister and is never in this state.
+  const showSkeleton = (isLoading || isRestoring) && !hasItems;
   const loadMoreRef = useInfiniteScrollSentinel(hasNextPage, fetchNextPage);
+  useScrollRestoration(feedScrollKey("following"), !isRestoring && !isLoading);
 
   if (error) {
     return <FeedError onRetry={() => refetch()} />;
   }
 
-  if (!isLoading && items?.length === 0) {
+  if (!showSkeleton && !hasItems) {
     return (
       <p className="text-center text-muted-foreground">
         Follow people to see their posts and reshares here.
@@ -95,7 +121,7 @@ function FollowingFeed() {
   return (
     <>
       <div className="columns-1 gap-5 sm:columns-2">
-        {isLoading &&
+        {showSkeleton &&
           Array.from({ length: 6 }).map((_, i) => (
             <Skeleton
               key={i}
@@ -131,26 +157,35 @@ function FollowingFeed() {
 }
 
 function AllFeed() {
+  const isRestoring = useIsRestoring();
   const { data, isLoading, error, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
     publicApi.feed.all.useInfiniteQuery(
       {},
-      { getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined }
+      {
+        getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+        refetchOnMount: false,
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
+      }
     );
   const posts = useMemo(() => data?.pages.flatMap((page) => page.items), [data]);
+  const hasPosts = !!posts && posts.length > 0;
+  const showSkeleton = (isLoading || isRestoring) && !hasPosts;
   const loadMoreRef = useInfiniteScrollSentinel(hasNextPage, fetchNextPage);
+  useScrollRestoration(feedScrollKey("all"), !isRestoring && !isLoading);
 
   if (error) {
     return <FeedError onRetry={() => refetch()} />;
   }
 
-  if (!isLoading && posts?.length === 0) {
+  if (!showSkeleton && !hasPosts) {
     return <p className="text-center text-muted-foreground">No posts yet - be the first.</p>;
   }
 
   return (
     <>
       <div className="columns-1 gap-5 sm:columns-2">
-        {isLoading &&
+        {showSkeleton &&
           Array.from({ length: 6 }).map((_, i) => (
             <Skeleton
               key={i}
@@ -177,6 +212,20 @@ function AllFeed() {
 }
 
 export default function FeedPage() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get("tab");
+  const tab: FeedTab = FEED_TABS.includes(tabParam as FeedTab)
+    ? (tabParam as FeedTab)
+    : "following";
+
+  function handleTabChange(value: string) {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("tab", value);
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  }
+
   return (
     <>
       <SiteHeader />
@@ -187,7 +236,7 @@ export default function FeedPage() {
         </div>
 
         <TooltipProvider>
-          <Tabs defaultValue="following">
+          <Tabs value={tab} onValueChange={handleTabChange}>
             <TabsList>
               <TabsTrigger value="following">Following</TabsTrigger>
               <TabsTrigger value="all">All</TabsTrigger>

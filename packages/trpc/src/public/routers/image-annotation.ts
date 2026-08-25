@@ -38,7 +38,7 @@ export const imageAnnotationRouter = createPublicTRPCRouter({
     }),
 
   create: verifiedProcedure
-    .use(strictRateLimit({ path: "imageAnnotation.create", limit: 60, window: "1 h" }))
+    .use(strictRateLimit({ path: "imageAnnotation.create", limit: 600, window: "1 h" }))
     .input(
       z.object({
         postId: z.string(),

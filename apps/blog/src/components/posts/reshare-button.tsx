@@ -162,11 +162,11 @@ export function ReshareButton({
             <Button
               variant="ghost"
               size="icon"
-              className={cn("size-7", reshared && "text-primary")}
+              className={cn("size-9", reshared && "text-primary")}
               aria-label="Reshare post"
               disabled={!session.user.emailVerified || isPending}
             >
-              <Repeat2 className="size-3.5" />
+              <Repeat2 className="size-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">

@@ -1,8 +1,10 @@
 import { EmailVerificationBanner } from "@/components/email-verification-banner";
-import { PublicTRPCReactProvider } from "@repo/trpc/public/react";
+import { FeedCacheInvalidator } from "@/components/feed-cache-invalidator";
+import { PersistedTRPCProvider } from "@/components/persisted-trpc-provider";
 import { Toaster } from "@repo/ui/sonner";
 import { ThemeProvider } from "@repo/ui/theme-provider";
 import { TooltipProvider } from "@repo/ui/tooltip";
+import { MotionConfig } from "framer-motion";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
@@ -38,13 +40,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           enableSystem
           disableTransitionOnChange
         >
-          <PublicTRPCReactProvider>
-            <TooltipProvider>
-              <EmailVerificationBanner />
-              {children}
-              <Toaster />
-            </TooltipProvider>
-          </PublicTRPCReactProvider>
+          <MotionConfig reducedMotion="user">
+            <PersistedTRPCProvider>
+              <TooltipProvider>
+                <FeedCacheInvalidator />
+                <EmailVerificationBanner />
+                {children}
+                <Toaster />
+              </TooltipProvider>
+            </PersistedTRPCProvider>
+          </MotionConfig>
         </ThemeProvider>
       </body>
     </html>

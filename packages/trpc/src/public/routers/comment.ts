@@ -50,7 +50,7 @@ export const commentRouter = createPublicTRPCRouter({
     }),
 
   create: verifiedProcedure
-    .use(strictRateLimit({ path: "comment.create", limit: 20, window: "1 h" }))
+    .use(strictRateLimit({ path: "comment.create", limit: 200, window: "1 h" }))
     .input(
       z.object({
         postId: z.string(),

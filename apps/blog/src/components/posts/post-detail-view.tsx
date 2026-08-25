@@ -260,13 +260,13 @@ export function PostDetailView({ slug }: { slug: string }) {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="size-5 text-muted-foreground"
+                  className="size-8 text-muted-foreground"
                   title={`Block ${post.author.name}`}
                   aria-label={`Block ${post.author.name}`}
                   disabled={blockAuthor.isPending}
                   onClick={() => blockAuthor.mutate({ userId: post.authorId })}
                 >
-                  <UserX className="size-3" />
+                  <UserX className="size-3.5" />
                 </Button>
               )}
             </span>
@@ -297,23 +297,23 @@ export function PostDetailView({ slug }: { slug: string }) {
                     type="button"
                     variant={activeTool === "highlight" ? "secondary" : "ghost"}
                     size="icon"
-                    className="size-7"
+                    className="size-9"
                     aria-label="Highlight tool"
                     aria-pressed={activeTool === "highlight"}
                     onClick={() => setActiveTool("highlight")}
                   >
-                    <Highlighter className="size-3.5" />
+                    <Highlighter className="size-4" />
                   </Button>
                   <Button
                     type="button"
                     variant={activeTool === "circle" ? "secondary" : "ghost"}
                     size="icon"
-                    className="size-7"
+                    className="size-9"
                     aria-label="Circle tool"
                     aria-pressed={activeTool === "circle"}
                     onClick={() => setActiveTool("circle")}
                   >
-                    <Circle className="size-3.5" />
+                    <Circle className="size-4" />
                   </Button>
                 </div>
               )}
@@ -373,7 +373,12 @@ export function PostDetailView({ slug }: { slug: string }) {
               ))}
           </div>
 
-          <aside className={cn("flex-col gap-4", studyMode ? "hidden lg:flex" : "flex")}>
+          <aside
+            className={cn(
+              "flex-col gap-4",
+              studyMode ? "hidden lg:flex" : "order-first flex lg:order-none"
+            )}
+          >
             {studyMode ? (
               <>
                 <span className="text-xs font-medium tracking-wide text-muted-foreground uppercase">

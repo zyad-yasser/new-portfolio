@@ -286,7 +286,7 @@ export const postRouter = createPublicTRPCRouter({
     }),
 
   create: verifiedProcedure
-    .use(strictRateLimit({ path: "post.create", limit: 5, window: "1 h" }))
+    .use(strictRateLimit({ path: "post.create", limit: 50, window: "1 h" }))
     .input(
       z
         .object({
@@ -350,7 +350,7 @@ export const postRouter = createPublicTRPCRouter({
     }),
 
   createQuote: verifiedProcedure
-    .use(strictRateLimit({ path: "post.createQuote", limit: 10, window: "1 h" }))
+    .use(strictRateLimit({ path: "post.createQuote", limit: 100, window: "1 h" }))
     .input(
       z.object({
         quotedPostId: z.string(),

@@ -142,7 +142,7 @@ function BookmarkButton({ postId }: { postId: string }) {
     <Button
       variant="ghost"
       size="icon"
-      className="size-7"
+      className="size-9"
       disabled={!!disabledReason || toggle.isPending}
       aria-label={bookmarked ? "Remove bookmark" : "Save post"}
       aria-pressed={!!bookmarked}
@@ -151,7 +151,7 @@ function BookmarkButton({ postId }: { postId: string }) {
         toggle.mutate({ postId });
       }}
     >
-      <Bookmark className={cn("size-3.5", bookmarked && "fill-current")} />
+      <Bookmark className={cn("size-4", bookmarked && "fill-current")} />
     </Button>
   );
 
@@ -174,20 +174,20 @@ function BookmarkButton({ postId }: { postId: string }) {
 
 function PostCardActions({ post }: { post: PostCardData }) {
   return (
-    <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+    <div className="flex items-center gap-1 text-muted-foreground">
       <BookmarkButton postId={post.id} />
       <ReshareButton post={post} />
       <Button
         variant="ghost"
         size="icon"
-        className="size-7"
+        className="size-9"
         aria-label="Share post"
         onClick={(event) => {
           event.preventDefault();
           sharePost(post.slug, post.title ?? post.excerptText ?? "this post");
         }}
       >
-        <Share2 className="size-3.5" />
+        <Share2 className="size-4" />
       </Button>
     </div>
   );

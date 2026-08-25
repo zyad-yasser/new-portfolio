@@ -9,7 +9,9 @@ const t = initTRPC.context<PublicTRPCContext>().create({
 });
 
 const appName = requireEnv("APP_NAME");
-const baseRateLimiter = createRateLimiter({ prefix: `${appName}:trpc`, limit: 60, window: "1 m" });
+// Not an auth action — this is a generous backstop against runaway automated abuse, not a
+// throttle on normal use. Auth-specific rate limiting lives in @repo/auth's `rateLimit` config.
+const baseRateLimiter = createRateLimiter({ prefix: `${appName}:trpc`, limit: 600, window: "1 m" });
 
 const rateLimited = t.middleware(async ({ ctx, next }) => {
   const ip = getClientIp(ctx.headers);

@@ -38,7 +38,7 @@ export const videoCommentRouter = createPublicTRPCRouter({
     }),
 
   create: verifiedProcedure
-    .use(strictRateLimit({ path: "videoComment.create", limit: 60, window: "1 h" }))
+    .use(strictRateLimit({ path: "videoComment.create", limit: 600, window: "1 h" }))
     .input(
       z.object({
         postId: z.string(),

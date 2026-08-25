@@ -25,7 +25,7 @@ export const reviewRouter = createPublicTRPCRouter({
   }),
 
   create: verifiedProcedure
-    .use(strictRateLimit({ path: "review.create", limit: 5, window: "1 h" }))
+    .use(strictRateLimit({ path: "review.create", limit: 50, window: "1 h" }))
     .input(
       z.object({
         rating: z.number().int().min(1).max(5),

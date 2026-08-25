@@ -99,6 +99,10 @@
 
 body {
   min-height: 100svh;
+  /* Custom pull-to-refresh (PullToRefresh component) handles this instead — without this,
+     the browser's own native pull-to-refresh/rubber-band would also fire and reload the
+     whole page underneath our indicator. */
+  overscroll-behavior-y: contain;
 }
 
 .study-highlight {

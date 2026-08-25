@@ -38,7 +38,7 @@ export const highlightRouter = createPublicTRPCRouter({
     }),
 
   create: verifiedProcedure
-    .use(strictRateLimit({ path: "highlight.create", limit: 60, window: "1 h" }))
+    .use(strictRateLimit({ path: "highlight.create", limit: 600, window: "1 h" }))
     .input(
       z.object({
         postId: z.string(),
