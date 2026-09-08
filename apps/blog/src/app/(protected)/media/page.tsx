@@ -43,7 +43,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import { type KeyboardEvent, useMemo, useState } from "react";
+import { type KeyboardEvent, Suspense, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 const ACCEPT = "image/png,image/jpeg,image/webp,image/gif,video/mp4,video/webm,video/quicktime";
@@ -196,7 +196,7 @@ function MoveToDialog({
   );
 }
 
-export default function MediaLibraryPage() {
+function MediaLibraryContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const currentFolderId = searchParams.get("folder");
@@ -858,5 +858,25 @@ export default function MediaLibraryPage() {
         </AlertDialogContent>
       </AlertDialog>
     </>
+  );
+}
+
+function MediaLibrarySkeleton() {
+  return (
+    <>
+      <SiteHeader />
+      <main className="mx-auto flex max-w-5xl flex-col gap-6 px-6 py-16">
+        <Skeleton className="skeleton-shimmer h-9 w-48 rounded-md" />
+        <Skeleton className="skeleton-shimmer h-64 w-full rounded-xl" />
+      </main>
+    </>
+  );
+}
+
+export default function MediaLibraryPage() {
+  return (
+    <Suspense fallback={<MediaLibrarySkeleton />}>
+      <MediaLibraryContent />
+    </Suspense>
   );
 }

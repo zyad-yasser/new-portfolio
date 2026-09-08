@@ -11,7 +11,7 @@ import { TooltipProvider } from "@repo/ui/tooltip";
 import { useIsRestoring } from "@tanstack/react-query";
 import { Loader2, Repeat2 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useRef } from "react";
+import { Suspense, useEffect, useMemo, useRef } from "react";
 
 const FEED_TABS = ["following", "all"] as const;
 type FeedTab = (typeof FEED_TABS)[number];
@@ -211,7 +211,17 @@ function AllFeed() {
   );
 }
 
-export default function FeedPage() {
+function FeedTabsSkeleton() {
+  return (
+    <div className="flex flex-col gap-4">
+      <Skeleton className="skeleton-shimmer h-9 w-48 rounded-md" />
+      <Skeleton className="skeleton-shimmer h-48 w-full rounded-xl" />
+      <Skeleton className="skeleton-shimmer h-48 w-full rounded-xl" />
+    </div>
+  );
+}
+
+function FeedTabs() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -227,6 +237,26 @@ export default function FeedPage() {
   }
 
   return (
+    <TooltipProvider>
+      <Tabs value={tab} onValueChange={handleTabChange}>
+        <TabsList>
+          <TabsTrigger value="following">Following</TabsTrigger>
+          <TabsTrigger value="all">All</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="following" className="pt-4">
+          <FollowingFeed />
+        </TabsContent>
+        <TabsContent value="all" className="pt-4">
+          <AllFeed />
+        </TabsContent>
+      </Tabs>
+    </TooltipProvider>
+  );
+}
+
+export default function FeedPage() {
+  return (
     <>
       <SiteHeader />
       <main className="mx-auto flex max-w-3xl flex-col gap-8 px-6 py-16">
@@ -235,21 +265,9 @@ export default function FeedPage() {
           <p className="text-muted-foreground">Posts and reshares from people you follow.</p>
         </div>
 
-        <TooltipProvider>
-          <Tabs value={tab} onValueChange={handleTabChange}>
-            <TabsList>
-              <TabsTrigger value="following">Following</TabsTrigger>
-              <TabsTrigger value="all">All</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="following" className="pt-4">
-              <FollowingFeed />
-            </TabsContent>
-            <TabsContent value="all" className="pt-4">
-              <AllFeed />
-            </TabsContent>
-          </Tabs>
-        </TooltipProvider>
+        <Suspense fallback={<FeedTabsSkeleton />}>
+          <FeedTabs />
+        </Suspense>
       </main>
     </>
   );
