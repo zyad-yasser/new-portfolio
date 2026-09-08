@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { db } from "@repo/db";
 import { comment, post, userBlock } from "@repo/db/schema";
 import { TRPCError } from "@trpc/server";
-import { and, asc, eq, isNull, notInArray } from "drizzle-orm";
+import { and, asc, eq, gt, isNull, notInArray, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import {
   createPublicTRPCRouter,
@@ -16,11 +16,20 @@ import { ensureUserProfile } from "./profile";
 
 const authorColumns = { id: true, name: true, image: true } as const;
 const authorWith = { profile: { columns: { username: true } } } as const;
+const MAX_REPLIES_PER_COMMENT = 50;
+const cursorSchema = z.object({ createdAt: z.coerce.date(), id: z.string() });
 
 export const commentRouter = createPublicTRPCRouter({
   listByPost: publicProcedure
-    .input(z.object({ postId: z.string() }))
+    .input(
+      z.object({
+        postId: z.string(),
+        cursor: cursorSchema.optional(),
+        limit: z.number().int().min(1).max(100).default(30),
+      })
+    )
     .query(async ({ ctx, input }) => {
+      const limit = input.limit;
       const blockedIds = ctx.session
         ? (
             await db.query.userBlock.findMany({
@@ -34,19 +43,38 @@ export const commentRouter = createPublicTRPCRouter({
       if (blockedIds.length) {
         baseWhere.push(notInArray(comment.authorId, blockedIds));
       }
+      if (input.cursor) {
+        baseWhere.push(
+          or(
+            gt(comment.createdAt, input.cursor.createdAt),
+            and(eq(comment.createdAt, input.cursor.createdAt), gt(comment.id, input.cursor.id))
+          )!
+        );
+      }
 
-      return db.query.comment.findMany({
+      const rows = await db.query.comment.findMany({
         where: and(...baseWhere),
-        orderBy: asc(comment.createdAt),
+        orderBy: [asc(comment.createdAt), asc(comment.id)],
+        limit: limit + 1,
         with: {
           author: { columns: authorColumns, with: authorWith },
           replies: {
             where: blockedIds.length ? notInArray(comment.authorId, blockedIds) : undefined,
             orderBy: asc(comment.createdAt),
+            limit: MAX_REPLIES_PER_COMMENT,
             with: { author: { columns: authorColumns, with: authorWith } },
           },
         },
       });
+
+      const hasMore = rows.length > limit;
+      const items = hasMore ? rows.slice(0, limit) : rows;
+      const last = items.at(-1);
+
+      return {
+        items,
+        nextCursor: hasMore && last ? { createdAt: last.createdAt, id: last.id } : null,
+      };
     }),
 
   create: verifiedProcedure
@@ -85,18 +113,25 @@ export const commentRouter = createPublicTRPCRouter({
         await assertNotBlocked(ctx.session.user.id, parent.authorId);
       }
 
-      const rows = await db
-        .insert(comment)
-        .values({
-          id: randomUUID(),
-          postId: input.postId,
-          authorId: ctx.session.user.id,
-          parentCommentId: input.parentCommentId ?? null,
-          body: input.body,
-        })
-        .returning();
+      const created = await db.transaction(async (tx) => {
+        const rows = await tx
+          .insert(comment)
+          .values({
+            id: randomUUID(),
+            postId: input.postId,
+            authorId: ctx.session.user.id,
+            parentCommentId: input.parentCommentId ?? null,
+            body: input.body,
+          })
+          .returning();
 
-      const created = rows[0];
+        await tx
+          .update(post)
+          .set({ commentCount: sql`${post.commentCount} + 1` })
+          .where(eq(post.id, input.postId));
+
+        return rows[0];
+      });
 
       if (created) {
         await createNotification({
@@ -146,10 +181,20 @@ export const commentRouter = createPublicTRPCRouter({
         throw new TRPCError({ code: "FORBIDDEN" });
       }
 
-      await db
-        .update(comment)
-        .set({ deletedAt: new Date(), body: "" })
-        .where(eq(comment.id, input.id));
+      await db.transaction(async (tx) => {
+        const deleted = await tx
+          .update(comment)
+          .set({ deletedAt: new Date(), body: "" })
+          .where(and(eq(comment.id, input.id), isNull(comment.deletedAt)))
+          .returning({ id: comment.id });
+
+        if (deleted.length) {
+          await tx
+            .update(post)
+            .set({ commentCount: sql`greatest(${post.commentCount} - 1, 0)` })
+            .where(eq(post.id, target.postId));
+        }
+      });
 
       return { id: input.id };
     }),

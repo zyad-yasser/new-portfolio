@@ -335,7 +335,12 @@ export function CommentSection({
 }) {
   const { data: session } = publicAuthClient.useSession();
   const utils = publicApi.useUtils();
-  const { data: comments, isLoading } = publicApi.comment.listByPost.useQuery({ postId });
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    publicApi.comment.listByPost.useInfiniteQuery(
+      { postId },
+      { getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined }
+    );
+  const comments = data?.pages.flatMap((page) => page.items);
   const [newComment, setNewComment] = useState("");
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
 
@@ -343,6 +348,7 @@ export function CommentSection({
     onSuccess: () => {
       setNewComment("");
       utils.comment.listByPost.invalidate({ postId });
+      utils.post.getBySlug.invalidate();
     },
     onError: (error) => toast.error(getErrorMessage(error, "Couldn't post your comment.")),
   });
@@ -432,6 +438,18 @@ export function CommentSection({
             }
           />
         ))}
+
+        {hasNextPage && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="self-center"
+            disabled={isFetchingNextPage}
+            onClick={() => fetchNextPage()}
+          >
+            {isFetchingNextPage ? "Loading…" : "Load more comments"}
+          </Button>
+        )}
       </div>
     </div>
   );

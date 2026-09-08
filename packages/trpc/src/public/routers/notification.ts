@@ -2,9 +2,22 @@ import { randomUUID } from "node:crypto";
 import { db } from "@repo/db";
 import { notification, userBlock } from "@repo/db/schema";
 import type { NotificationType } from "@repo/db/schema";
+import { getRedis } from "@repo/utils/redis";
 import { and, desc, eq, isNull, lt, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import { authedProcedure, createPublicTRPCRouter } from "../init";
+
+const UNREAD_CACHE_TTL_SECONDS = 24 * 60 * 60;
+
+function unreadCacheKey(userId: string) {
+  return `notif:unread:${userId}`;
+}
+
+async function invalidateUnreadCount(userId: string) {
+  try {
+    await getRedis().del(unreadCacheKey(userId));
+  } catch {}
+}
 
 export async function createNotification(input: {
   recipientId: string;
@@ -36,6 +49,8 @@ export async function createNotification(input: {
     postId: input.postId ?? null,
     commentId: input.commentId ?? null,
   });
+
+  await invalidateUnreadCount(input.recipientId);
 }
 
 const actorColumns = { id: true, name: true, image: true } as const;
@@ -87,12 +102,24 @@ export const notificationRouter = createPublicTRPCRouter({
     }),
 
   unreadCount: authedProcedure.query(async ({ ctx }) => {
+    const userId = ctx.session.user.id;
+    const key = unreadCacheKey(userId);
+    const redis = getRedis();
+
+    const cached = await redis.get<number>(key).catch(() => null);
+    if (typeof cached === "number") {
+      return cached;
+    }
+
     const rows = await db
       .select({ count: sql<number>`count(*)::int` })
       .from(notification)
-      .where(and(eq(notification.recipientId, ctx.session.user.id), isNull(notification.readAt)));
+      .where(and(eq(notification.recipientId, userId), isNull(notification.readAt)));
 
-    return rows[0]?.count ?? 0;
+    const count = rows[0]?.count ?? 0;
+    await redis.set(key, count, { ex: UNREAD_CACHE_TTL_SECONDS }).catch(() => {});
+
+    return count;
   }),
 
   markRead: authedProcedure
@@ -105,6 +132,8 @@ export const notificationRouter = createPublicTRPCRouter({
           and(eq(notification.id, input.id), eq(notification.recipientId, ctx.session.user.id))
         );
 
+      await invalidateUnreadCount(ctx.session.user.id);
+
       return { id: input.id };
     }),
 
@@ -115,6 +144,10 @@ export const notificationRouter = createPublicTRPCRouter({
       .where(
         and(eq(notification.recipientId, ctx.session.user.id), isNull(notification.readAt))
       );
+
+    await getRedis()
+      .set(unreadCacheKey(ctx.session.user.id), 0, { ex: UNREAD_CACHE_TTL_SECONDS })
+      .catch(() => {});
 
     return { ok: true };
   }),

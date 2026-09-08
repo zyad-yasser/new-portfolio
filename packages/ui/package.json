@@ -8,6 +8,7 @@
     "./styles/premium.css": "./src/styles/premium.css",
     "./lib/utils": "./src/lib/utils.ts",
     "./lib/motion": "./src/lib/motion.ts",
+    "./lib/format-number": "./src/lib/format-number.ts",
     "./hooks/*": "./src/hooks/*.ts",
     "./theme-provider": "./src/components/theme-provider.tsx",
     "./theme-toggle": "./src/components/theme-toggle.tsx",
@@ -17,7 +18,9 @@
   "scripts": {
     "lint": "biome lint .",
     "check": "biome check .",
-    "type-check": "tsc"
+    "type-check": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.7.1",
@@ -39,8 +42,14 @@
     "react-dom": "^19.2.4"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^7.0.0",
+    "@testing-library/react": "^16.3.2",
+    "@types/node": "^22.10.2",
     "@types/react": "^19.0.2",
     "@types/react-dom": "^19.0.2",
-    "typescript": "^5.7.2"
+    "@vitejs/plugin-react": "^6.0.5",
+    "jsdom": "^30.0.1",
+    "typescript": "^5.7.2",
+    "vitest": "^4.1.10"
   }
 }

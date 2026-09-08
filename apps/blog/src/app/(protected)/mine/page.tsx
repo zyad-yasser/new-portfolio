@@ -25,7 +25,12 @@ import { toast } from "sonner";
 
 export default function MinePostsPage() {
   const utils = publicApi.useUtils();
-  const { data: posts, isLoading, error, refetch } = publicApi.post.mine.useQuery();
+  const { data, isLoading, error, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    publicApi.post.mine.useInfiniteQuery(
+      {},
+      { getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined }
+    );
+  const posts = data?.pages.flatMap((page) => page.items);
 
   const setPublished = publicApi.post.setPublished.useMutation({
     onSuccess: async () => {
@@ -158,6 +163,17 @@ export default function MinePostsPage() {
               </CardContent>
             </Card>
           ))}
+
+          {hasNextPage && (
+            <Button
+              variant="outline"
+              className="self-center"
+              disabled={isFetchingNextPage}
+              onClick={() => fetchNextPage()}
+            >
+              {isFetchingNextPage ? "Loading…" : "Load more"}
+            </Button>
+          )}
         </div>
       </main>
     </>

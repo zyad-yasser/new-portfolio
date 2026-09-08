@@ -230,15 +230,45 @@ export const postRouter = createPublicTRPCRouter({
       };
     }),
 
-  mine: authedProcedure.query(async ({ ctx }) => {
-    const rows = await db.query.post.findMany({
-      where: eq(post.authorId, ctx.session.user.id),
-      orderBy: desc(post.createdAt),
-      with: postWith,
-    });
+  mine: authedProcedure
+    .input(
+      z
+        .object({
+          cursor: cursorSchema.optional(),
+          limit: z.number().int().min(1).max(50).default(20),
+        })
+        .optional()
+    )
+    .query(async ({ ctx, input }) => {
+      const cursor = input?.cursor;
+      const limit = input?.limit ?? 20;
 
-    return rows.map(formatPost);
-  }),
+      const conditions = [eq(post.authorId, ctx.session.user.id)];
+      if (cursor) {
+        conditions.push(
+          or(
+            lt(post.createdAt, cursor.createdAt),
+            and(eq(post.createdAt, cursor.createdAt), lt(post.id, cursor.id))
+          )!
+        );
+      }
+
+      const rows = await db.query.post.findMany({
+        where: and(...conditions),
+        orderBy: [desc(post.createdAt), desc(post.id)],
+        limit: limit + 1,
+        with: postWith,
+      });
+
+      const hasMore = rows.length > limit;
+      const items = hasMore ? rows.slice(0, limit) : rows;
+      const last = items.at(-1);
+
+      return {
+        items: items.map(formatPost),
+        nextCursor: hasMore && last ? { createdAt: last.createdAt, id: last.id } : null,
+      };
+    }),
 
   getBySlug: publicProcedure
     .input(z.object({ slug: z.string() }))

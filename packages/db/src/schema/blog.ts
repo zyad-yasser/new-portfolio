@@ -98,6 +98,8 @@ export const post = pgTable(
     searchVector: tsvector("search_vector"),
     published: boolean("published").notNull().default(false),
     viewCount: integer("view_count").notNull().default(0),
+    reactionCount: integer("reaction_count").notNull().default(0),
+    commentCount: integer("comment_count").notNull().default(0),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
   },

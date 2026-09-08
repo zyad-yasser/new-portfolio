@@ -10,9 +10,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@repo/ui/avatar";
 import { Badge } from "@repo/ui/badge";
 import { Button } from "@repo/ui/button";
 import { Card } from "@repo/ui/card";
+import { FlipNumber } from "@repo/ui/flip-number";
 import { cn } from "@repo/ui/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@repo/ui/tooltip";
-import { Bookmark, Eye, Library, Quote, Share2 } from "lucide-react";
+import { Bookmark, Eye, Heart, Library, MessageSquare, Quote, Share2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -29,6 +30,8 @@ export type PostCardData = {
   contentJson: TiptapDoc;
   createdAt: string | Date;
   viewCount: number;
+  reactionCount: number;
+  commentCount: number;
   coverImageUrl: string | null;
   category: { name: string; color: string } | null;
   series: { title: string; slug: string } | null;
@@ -125,11 +128,20 @@ function BookmarkButton({ postId }: { postId: string }) {
   );
 
   const toggle = publicApi.bookmark.toggle.useMutation({
-    onSuccess: () => {
+    onMutate: async () => {
+      await utils.bookmark.isBookmarked.cancel({ postId });
+      const previous = utils.bookmark.isBookmarked.getData({ postId });
+      utils.bookmark.isBookmarked.setData({ postId }, !previous);
+      return { previous };
+    },
+    onError: (error, _variables, context) => {
+      utils.bookmark.isBookmarked.setData({ postId }, context?.previous);
+      toast.error(getErrorMessage(error, "Couldn't save this post."));
+    },
+    onSettled: () => {
       utils.bookmark.isBookmarked.invalidate({ postId });
       utils.bookmark.mine.invalidate();
     },
-    onError: (error) => toast.error(getErrorMessage(error, "Couldn't save this post.")),
   });
 
   const disabledReason = !session
@@ -218,8 +230,16 @@ function PostCardFooter({ post }: { post: PostCardData }) {
       <div className="flex shrink-0 items-center gap-3 whitespace-nowrap">
         <span>{formatDate(post.createdAt)}</span>
         <span className="flex items-center gap-1">
+          <Heart className="size-3.5" />
+          <FlipNumber value={post.reactionCount} label="reactions" />
+        </span>
+        <span className="flex items-center gap-1">
+          <MessageSquare className="size-3.5" />
+          <FlipNumber value={post.commentCount} label="comments" />
+        </span>
+        <span className="flex items-center gap-1">
           <Eye className="size-3.5" />
-          {post.viewCount}
+          <FlipNumber value={post.viewCount} label="views" />
         </span>
       </div>
     </div>

@@ -486,6 +486,99 @@ async function seedQuote(reviewerId: string, mediaPostId: string | null) {
 // cycle Turborepo would reject). This mirrors exactly what signUpEmail does internally for
 // the credential provider: a `user` row plus an `account` row with providerId "credential"
 // and accountId set to the user's own id (see better-auth's api/routes/sign-up.ts).
+const countFormattingFixturePosts: {
+  title: string;
+  excerptText: string;
+  categorySlug: string;
+  reactionCount: number;
+  commentCount: number;
+  viewCount: number;
+}[] = [
+  {
+    title: "Count Fixture: Plain Digits",
+    excerptText:
+      "Counts below 1,000 render as-is. Use this post to check the ungrouped, unsuffixed case.",
+    categorySlug: "notes",
+    reactionCount: 999,
+    commentCount: 7,
+    viewCount: 128,
+  },
+  {
+    title: "Count Fixture: Grouped Thousands",
+    excerptText:
+      "Counts between 1,000 and 9,999 stay exact but gain a thousands separator. This is the last bracket before compact notation kicks in.",
+    categorySlug: "notes",
+    reactionCount: 9_999,
+    commentCount: 1_024,
+    viewCount: 4_512,
+  },
+  {
+    title: "Count Fixture: Compact Thousands",
+    excerptText:
+      "At 10,000 the formatter switches to compact notation, so these render as 12K and 87K.",
+    categorySlug: "notes",
+    reactionCount: 12_400,
+    commentCount: 87_500,
+    viewCount: 250_000,
+  },
+  {
+    title: "Count Fixture: Millions",
+    excerptText:
+      "Values under ten keep one decimal place, so 1,240,000 renders as 1.2M while 34,000,000 renders as 34M.",
+    categorySlug: "notes",
+    reactionCount: 1_240_000,
+    commentCount: 34_000_000,
+    viewCount: 512_000_000,
+  },
+  {
+    title: "Count Fixture: Billions",
+    excerptText:
+      "The largest bracket an integer column can hold. Trillions are supported by the formatter but exceed Postgres int4.",
+    categorySlug: "notes",
+    reactionCount: 1_900_000_000,
+    commentCount: 2_000_000_000,
+    viewCount: 2_100_000_000,
+  },
+];
+
+async function seedCountFormattingFixtures(adminId: string) {
+  for (const fixture of countFormattingFixturePosts) {
+    const counts = {
+      reactionCount: fixture.reactionCount,
+      commentCount: fixture.commentCount,
+      viewCount: fixture.viewCount,
+    };
+
+    const existingPost = await db.query.post.findFirst({
+      where: eq(post.title, fixture.title),
+    });
+
+    if (existingPost) {
+      await db.update(post).set(counts).where(eq(post.id, existingPost.id));
+      console.log(`Reset count fixture: ${fixture.title}`);
+      continue;
+    }
+
+    const postCategory = await db.query.category.findFirst({
+      where: eq(category.slug, fixture.categorySlug),
+    });
+
+    await db.insert(post).values({
+      id: randomUUID(),
+      authorId: adminId,
+      categoryId: postCategory?.id ?? null,
+      title: fixture.title,
+      slug: await uniqueSlug(fixture.title),
+      excerptText: fixture.excerptText,
+      contentJson: { type: "doc", content: [paragraph(fixture.excerptText)] },
+      published: true,
+      ...counts,
+    });
+
+    console.log(`Created count fixture: ${fixture.title}`);
+  }
+}
+
 async function main() {
   const email = process.env.ADMIN_EMAIL;
   const password = process.env.ADMIN_PASSWORD;
@@ -541,6 +634,8 @@ async function main() {
       await seedReshare(reviewerId);
       await seedQuote(reviewerId, mediaPostId);
     }
+
+    await seedCountFormattingFixtures(adminId);
   } else {
     console.log("Skipping test user seeding: DATABASE_URL is not local");
   }

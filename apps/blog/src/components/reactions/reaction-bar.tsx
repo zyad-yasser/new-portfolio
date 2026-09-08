@@ -7,6 +7,7 @@ import { REACTION_TYPES } from "@repo/db/schema";
 import { getErrorMessage } from "@repo/trpc/error";
 import { publicApi } from "@repo/trpc/public/react";
 import { Avatar, AvatarFallback, AvatarGroup, AvatarImage } from "@repo/ui/avatar";
+import { FlipNumber } from "@repo/ui/flip-number";
 import { cn } from "@repo/ui/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@repo/ui/popover";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@repo/ui/tooltip";
@@ -48,7 +49,7 @@ function ReactionButton({
       )}
     >
       <span>{REACTION_EMOJI[type]}</span>
-      {count > 0 && <span>{count}</span>}
+      {count > 0 && <FlipNumber value={count} label={REACTION_LABEL[type]} />}
     </button>
   );
 
@@ -97,11 +98,35 @@ export function ReactionBar({ postId }: { postId: string }) {
   const { data: mine } = publicApi.reaction.mine.useQuery({ postId }, { enabled: !!session });
 
   const react = publicApi.reaction.react.useMutation({
-    onSuccess: () => {
+    onMutate: async ({ type }) => {
+      await Promise.all([
+        utils.reaction.summary.cancel({ postId }),
+        utils.reaction.mine.cancel({ postId }),
+      ]);
+
+      const previousSummary = utils.reaction.summary.getData({ postId });
+      const previousMine = utils.reaction.mine.getData({ postId }) ?? null;
+      const nextMine = previousMine === type ? null : type;
+
+      utils.reaction.mine.setData({ postId }, nextMine);
+      utils.reaction.summary.setData({ postId }, (current) =>
+        current?.map((row) => {
+          const delta = (row.type === nextMine ? 1 : 0) - (row.type === previousMine ? 1 : 0);
+          return delta === 0 ? row : { ...row, count: Math.max(0, row.count + delta) };
+        })
+      );
+
+      return { previousSummary, previousMine };
+    },
+    onError: (error, _variables, context) => {
+      utils.reaction.summary.setData({ postId }, context?.previousSummary);
+      utils.reaction.mine.setData({ postId }, context?.previousMine ?? null);
+      toast.error(getErrorMessage(error, "Couldn't react to this post."));
+    },
+    onSettled: () => {
       utils.reaction.summary.invalidate({ postId });
       utils.reaction.mine.invalidate({ postId });
     },
-    onError: (error) => toast.error(getErrorMessage(error, "Couldn't react to this post.")),
   });
 
   return (

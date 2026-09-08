@@ -10,8 +10,12 @@ import { useParams } from "next/navigation";
 
 export default function EditPostPage() {
   const { slug } = useParams<{ slug: string }>();
-  const { data: posts, isLoading, error, refetch } = publicApi.post.mine.useQuery();
-  const post = posts?.find((p) => p.slug === slug);
+  const {
+    data: post,
+    isLoading,
+    error,
+    refetch,
+  } = publicApi.post.getBySlug.useQuery({ slug }, { retry: false });
 
   if (isLoading) {
     return (
@@ -25,7 +29,7 @@ export default function EditPostPage() {
     );
   }
 
-  if (error) {
+  if (error && error.data?.code !== "NOT_FOUND") {
     return (
       <>
         <SiteHeader />

@@ -83,3 +83,80 @@ button:focus-visible {
     animation: none;
   }
 }
+
+.flip-number {
+  display: inline-flex;
+  align-items: baseline;
+}
+
+.flip-number-track {
+  display: inline-flex;
+  align-items: baseline;
+  font-variant-numeric: tabular-nums;
+}
+
+.flip-char {
+  position: relative;
+  display: inline-block;
+  min-width: 0.6ch;
+  text-align: center;
+  perspective: 320px;
+}
+
+.flip-char-active {
+  transform-style: preserve-3d;
+}
+
+.flip-char-active .flip-char-outgoing,
+.flip-char-active .flip-char-incoming {
+  display: inline-block;
+  backface-visibility: hidden;
+}
+
+.flip-char-active .flip-char-outgoing {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 100%;
+  animation: flip-char-out 0.32s ease-in forwards;
+}
+
+.flip-char-active .flip-char-incoming {
+  display: inline-block;
+  transform-origin: 50% 0%;
+  animation: flip-char-in 0.32s ease-out backwards;
+  animation-delay: 0.12s;
+}
+
+@keyframes flip-char-out {
+  0% {
+    transform: rotateX(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: rotateX(-90deg);
+    opacity: 0;
+  }
+}
+
+@keyframes flip-char-in {
+  0% {
+    transform: rotateX(90deg);
+    opacity: 0;
+  }
+  100% {
+    transform: rotateX(0deg);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flip-char-active .flip-char-outgoing {
+    animation: none;
+    opacity: 0;
+  }
+
+  .flip-char-active .flip-char-incoming {
+    animation: none;
+    opacity: 1;
+  }
+}

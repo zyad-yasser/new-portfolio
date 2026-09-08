@@ -13,6 +13,7 @@
       "**/.turbo/**",
       "out/**",
       "**/dist/**",
+      "**/drizzle/meta/**",
       "build/**",
       "**/public/**",
       "static/**",
