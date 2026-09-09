@@ -1,14 +1,23 @@
 import { db } from "@repo/db";
 import * as schema from "@repo/db/schema";
-import { sendVerificationEmail } from "@repo/email";
+import { sendPasswordResetEmail, sendVerificationEmail } from "@repo/email";
 import { requireEnv } from "@repo/utils";
+import { MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH } from "@repo/utils/schemas/password";
 import { createSecondaryStorage } from "@repo/utils/secondary-storage";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { APIError, createAuthMiddleware } from "better-auth/api";
 import { captcha, twoFactor } from "better-auth/plugins";
+import {
+  formatCooldown,
+  getResetCooldownRemainingMs,
+  replaceIssuedResetToken,
+  startResetCooldown,
+} from "./password-reset-throttle";
 import { roleField } from "./shared";
 
 const appName = requireEnv("APP_NAME");
+const publicSecondaryStorage = createSecondaryStorage("public");
 
 if (!process.env.PUBLIC_BETTER_AUTH_SECRET) {
   throw new Error("PUBLIC_BETTER_AUTH_SECRET is not set");
@@ -21,6 +30,12 @@ export const publicAuth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
+    minPasswordLength: MIN_PASSWORD_LENGTH,
+    maxPasswordLength: MAX_PASSWORD_LENGTH,
+    sendResetPassword: async ({ user, url, token }) => {
+      await replaceIssuedResetToken(user.email, token, publicSecondaryStorage);
+      await sendPasswordResetEmail({ appName, to: user.email, name: user.name, url });
+    },
   },
   emailVerification: {
     sendOnSignUp: true,
@@ -64,7 +79,7 @@ export const publicAuth = betterAuth({
       requireLocalEmailVerified: true,
     },
   },
-  secondaryStorage: createSecondaryStorage("public"),
+  secondaryStorage: publicSecondaryStorage,
   session: {
     freshAge: 0,
   },
@@ -81,6 +96,7 @@ export const publicAuth = betterAuth({
       "/sign-in/email": { window: 60, max: 5 },
       "/sign-up/email": { window: 3600, max: 3 },
       "/request-password-reset": { window: 300, max: 3 },
+      "/reset-password": { window: 300, max: 5 },
       "/send-verification-email": { window: 900, max: 1 },
       // Overrides the twoFactor plugin's own default (3 requests / 10s), which is far
       // tighter than every other rule here and trips almost immediately on a mistyped
@@ -93,6 +109,33 @@ export const publicAuth = betterAuth({
       "/change-password": { window: 60, max: 5 },
       "/change-email": { window: 60, max: 5 },
     },
+  },
+  hooks: {
+    before: createAuthMiddleware(async (ctx) => {
+      if (ctx.path !== "/request-password-reset") {
+        return;
+      }
+
+      const email = ctx.body?.email;
+      if (typeof email !== "string" || !email.trim()) {
+        return;
+      }
+
+      const remainingMs = await getResetCooldownRemainingMs(email);
+      if (remainingMs > 0) {
+        throw new APIError(
+          "TOO_MANY_REQUESTS",
+          {
+            code: "PASSWORD_RESET_COOLDOWN",
+            message: `A reset link was already sent. You can request another in ${formatCooldown(remainingMs)}.`,
+            retryAfterSeconds: Math.ceil(remainingMs / 1000),
+          },
+          { "X-Retry-After": String(Math.ceil(remainingMs / 1000)) }
+        );
+      }
+
+      await startResetCooldown(email);
+    }),
   },
   plugins: [
     captcha({

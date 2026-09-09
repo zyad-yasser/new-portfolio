@@ -60,7 +60,8 @@ const nextConfig = {
     const scriptSrc = isDev
       ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com"
       : "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com";
-    const imgSrc = ["img-src 'self' data:", ...storageConnectOrigins].join(" ");
+    const imgSrc = ["img-src 'self' data: blob:", ...storageConnectOrigins].join(" ");
+    const mediaSrc = "media-src 'self' blob:";
     const connectSrc = [
       "connect-src 'self'",
       ...(isDev ? ["ws:"] : []),
@@ -76,6 +77,7 @@ const nextConfig = {
             value: [
               "default-src 'self'",
               imgSrc,
+              mediaSrc,
               scriptSrc,
               "style-src 'self' 'unsafe-inline'",
               "font-src 'self' data:",

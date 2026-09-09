@@ -29,7 +29,7 @@ export function AvatarUpload({
         aria-label="Change photo"
         disabled={uploading}
         onClick={() => inputRef.current?.click()}
-        className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50 text-white opacity-0 transition-opacity group-hover:opacity-100 disabled:opacity-100"
+        className="absolute inset-0 flex cursor-pointer items-center justify-center rounded-full bg-black/50 text-white opacity-0 transition-opacity group-hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-100"
       >
         {uploading ? <Loader2 className="size-5 animate-spin" /> : <Pencil className="size-5" />}
       </button>

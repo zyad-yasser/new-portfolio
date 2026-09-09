@@ -27,6 +27,7 @@ const loginSchema = z.object({
 type LoginValues = z.infer<typeof loginSchema>;
 
 const POST_LOGIN_PATH = "/mine";
+const AUTH_ERROR_PATH = "/auth-error";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -88,6 +89,7 @@ export default function LoginPage() {
     const { error: signInError } = await publicAuthClient.signIn.social({
       provider,
       callbackURL: POST_LOGIN_PATH,
+      errorCallbackURL: AUTH_ERROR_PATH,
     });
 
     if (signInError) {
@@ -234,7 +236,15 @@ export default function LoginPage() {
                     name="password"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Password</FormLabel>
+                        <div className="flex items-center justify-between gap-2">
+                          <FormLabel>Password</FormLabel>
+                          <Link
+                            href="/forgot-password"
+                            className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+                          >
+                            Forgot password?
+                          </Link>
+                        </div>
                         <FormControl>
                           <PasswordInput autoComplete="current-password" {...field} />
                         </FormControl>

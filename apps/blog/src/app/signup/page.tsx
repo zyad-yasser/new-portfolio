@@ -28,6 +28,7 @@ const signupSchema = z.object({
 type SignupValues = z.infer<typeof signupSchema>;
 
 const POST_SIGNUP_PATH = "/mine";
+const AUTH_ERROR_PATH = "/auth-error";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -69,6 +70,7 @@ export default function SignupPage() {
     const { error: signInError } = await publicAuthClient.signIn.social({
       provider,
       callbackURL: POST_SIGNUP_PATH,
+      errorCallbackURL: AUTH_ERROR_PATH,
     });
 
     if (signInError) {
