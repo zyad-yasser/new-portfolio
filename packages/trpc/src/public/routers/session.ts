@@ -1,4 +1,5 @@
 import { publicAuth } from "@repo/auth/public";
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { authedProcedure, createPublicTRPCRouter } from "../init";
 
@@ -10,7 +11,6 @@ export const sessionRouter = createPublicTRPCRouter({
     return sessions
       .map((session) => ({
         id: session.id,
-        token: session.token,
         ipAddress: session.ipAddress ?? null,
         userAgent: session.userAgent ?? null,
         createdAt: new Date(session.createdAt),
@@ -25,8 +25,13 @@ export const sessionRouter = createPublicTRPCRouter({
       });
   }),
 
-  revoke: authedProcedure.input(z.object({ token: z.string() })).mutation(async ({ ctx, input }) => {
-    await publicAuth.api.revokeSession({ body: { token: input.token }, headers: ctx.headers });
+  revoke: authedProcedure.input(z.object({ id: z.string() })).mutation(async ({ ctx, input }) => {
+    const sessions = await publicAuth.api.listSessions({ headers: ctx.headers });
+    const target = sessions.find((session) => session.id === input.id);
+    if (!target) {
+      throw new TRPCError({ code: "NOT_FOUND" });
+    }
+    await publicAuth.api.revokeSession({ body: { token: target.token }, headers: ctx.headers });
     return { ok: true };
   }),
 

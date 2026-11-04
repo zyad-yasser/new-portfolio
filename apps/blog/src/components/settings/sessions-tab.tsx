@@ -135,7 +135,7 @@ export function SessionsTab() {
                   size="sm"
                   className="gap-2"
                   disabled={revoke.isPending}
-                  onClick={() => revoke.mutate({ token: session.token })}
+                  onClick={() => revoke.mutate({ id: session.id })}
                 >
                   <LogOut className="size-3.5" />
                   Revoke
