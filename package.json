@@ -4,7 +4,7 @@
   "private": true,
   "description": "Zyad Yasser's portfolio monorepo: public site, admin app, reviews app, blog app, and shared packages",
   "engines": {
-    "node": ">=22.0.0",
+    "node": "24.x",
     "pnpm": ">=10.8.0"
   },
   "scripts": {
