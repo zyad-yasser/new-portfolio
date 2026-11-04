@@ -14,6 +14,13 @@ describe("formatCompactNumber", () => {
     expect(formatCompactNumber(9_999)).toBe("9,999");
   });
 
+  it("honours a lower compact threshold", () => {
+    expect(formatCompactNumber(999, 1_000)).toBe("999");
+    expect(formatCompactNumber(1_000, 1_000)).toBe("1K");
+    expect(formatCompactNumber(1_024, 1_000)).toBe("1K");
+    expect(formatCompactNumber(9_999, 1_000)).toBe("9.9K");
+  });
+
   it("switches to compact notation at ten thousand", () => {
     expect(formatCompactNumber(10_000)).toBe("10K");
     expect(formatCompactNumber(12_400)).toBe("12K");

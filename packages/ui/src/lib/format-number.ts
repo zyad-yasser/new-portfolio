@@ -1,4 +1,4 @@
-const COMPACT_THRESHOLD = 10_000;
+const DEFAULT_COMPACT_THRESHOLD = 10_000;
 
 const UNITS = [
   { limit: 1_000_000_000_000, suffix: "T" },
@@ -11,7 +11,10 @@ function trimTrailingZero(value: string) {
   return value.endsWith(".0") ? value.slice(0, -2) : value;
 }
 
-export function formatCompactNumber(value: number): string {
+export function formatCompactNumber(
+  value: number,
+  compactFrom: number = DEFAULT_COMPACT_THRESHOLD
+): string {
   if (!Number.isFinite(value)) {
     return "0";
   }
@@ -20,7 +23,7 @@ export function formatCompactNumber(value: number): string {
   const sign = rounded < 0 ? "-" : "";
   const magnitude = Math.abs(rounded);
 
-  if (magnitude < COMPACT_THRESHOLD) {
+  if (magnitude < compactFrom) {
     return `${sign}${magnitude.toLocaleString("en-US")}`;
   }
 

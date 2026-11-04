@@ -54,16 +54,18 @@ function FlipChar({ char, animate }: FlipCharProps) {
 export function FlipNumber({
   value,
   compact = true,
+  compactFrom,
   className,
   label,
 }: {
   value: number;
   compact?: boolean;
+  compactFrom?: number | undefined;
   className?: string | undefined;
   label?: string | undefined;
 }) {
   const [mounted, setMounted] = useState(false);
-  const text = compact ? formatCompactNumber(value) : formatExactNumber(value);
+  const text = compact ? formatCompactNumber(value, compactFrom) : formatExactNumber(value);
 
   useEffect(() => {
     setMounted(true);

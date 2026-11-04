@@ -90,6 +90,17 @@ describe("FlipNumber", () => {
     expect(container.querySelector(".flip-char")?.textContent).toBe("2");
   });
 
+  it("compacts earlier when given a lower threshold", () => {
+    const { container } = renderFlip({ value: 9_999, compactFrom: 1_000, label: "reactions" });
+
+    expect(
+      Array.from(container.querySelectorAll(".flip-char"))
+        .map((node) => node.textContent)
+        .join("")
+    ).toBe("9.9K");
+    expect(screen.getByText("9,999 reactions")).toBeInTheDocument();
+  });
+
   it("keeps the accessible label in sync after a change", () => {
     const { rerender } = renderFlip({ value: 999, label: "comments" });
 

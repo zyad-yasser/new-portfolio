@@ -11,21 +11,13 @@ import { GoogleIcon } from "@repo/ui/icons";
 import { Input } from "@repo/ui/input";
 import { PasswordInput } from "@repo/ui/password-input";
 import { Turnstile } from "@repo/ui/turnstile";
+import { type SignupValues, signupSchema } from "@repo/utils/schemas/auth";
 import { Github, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { z } from "zod";
-
-const signupSchema = z.object({
-  name: z.string().trim().min(1, "Name is required").max(100),
-  email: z.string().min(1, "Email is required").email("Enter a valid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-});
-
-type SignupValues = z.infer<typeof signupSchema>;
 
 const POST_SIGNUP_PATH = "/submit";
 const AUTH_ERROR_PATH = "/auth-error";
@@ -38,6 +30,7 @@ export default function SignupPage() {
 
   const form = useForm<SignupValues>({
     resolver: zodResolver(signupSchema),
+    mode: "onTouched",
     defaultValues: { name: "", email: "", password: "" },
   });
 
@@ -140,7 +133,7 @@ export default function SignupPage() {
           </div>
 
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form noValidate onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
                 name="name"

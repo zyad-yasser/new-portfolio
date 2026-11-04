@@ -50,6 +50,7 @@ const tabsListVariants = cva(
       variant: {
         default: "bg-muted",
         line: "gap-1 bg-transparent",
+        outline: "gap-1 border border-border bg-background p-1",
       },
     },
     defaultVariants: {
@@ -108,10 +109,15 @@ function TabsList({
         className={cn(tabsListVariants({ variant }), className)}
         {...props}
       >
-        {variant === "default" && indicator && (
+        {variant !== "line" && indicator && (
           <motion.div
             aria-hidden
-            className="absolute inset-y-[3px] rounded-md bg-background shadow-sm dark:border dark:border-input dark:bg-input/30"
+            className={cn(
+              "absolute rounded-md shadow-sm",
+              variant === "outline"
+                ? "inset-y-1 bg-primary"
+                : "inset-y-[3px] bg-background dark:border dark:border-input dark:bg-input/30"
+            )}
             initial={false}
             animate={{ left: indicator.left, width: indicator.width }}
             transition={{ duration: 0.3, ease: EASE_PREMIUM }}
@@ -139,6 +145,7 @@ function TabsTrigger({
         "relative z-10 inline-flex h-[calc(100%-1px)] flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-md border border-transparent px-3 py-1 text-sm font-medium whitespace-nowrap text-foreground/60 transition-colors duration-200 group-data-[orientation=vertical]/tabs:w-full group-data-[orientation=vertical]/tabs:justify-start hover:text-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-1 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed dark:text-muted-foreground dark:hover:text-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         "group-data-[variant=line]/tabs-list:bg-transparent",
         "data-[state=active]:text-foreground dark:data-[state=active]:text-foreground",
+        "group-data-[variant=outline]/tabs-list:data-[state=active]:text-primary-foreground dark:group-data-[variant=outline]/tabs-list:data-[state=active]:text-primary-foreground",
         "after:absolute after:bg-foreground after:opacity-0 after:transition-opacity group-data-[orientation=horizontal]/tabs:after:inset-x-0 group-data-[orientation=horizontal]/tabs:after:bottom-[-5px] group-data-[orientation=horizontal]/tabs:after:h-0.5 group-data-[orientation=vertical]/tabs:after:inset-y-0 group-data-[orientation=vertical]/tabs:after:-right-1 group-data-[orientation=vertical]/tabs:after:w-0.5 group-data-[variant=line]/tabs-list:data-[state=active]:after:opacity-100",
         className
       )}

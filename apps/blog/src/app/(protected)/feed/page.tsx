@@ -239,7 +239,7 @@ function FeedTabs() {
   return (
     <TooltipProvider>
       <Tabs value={tab} onValueChange={handleTabChange}>
-        <TabsList>
+        <TabsList variant="outline">
           <TabsTrigger value="following">Following</TabsTrigger>
           <TabsTrigger value="all">All</TabsTrigger>
         </TabsList>

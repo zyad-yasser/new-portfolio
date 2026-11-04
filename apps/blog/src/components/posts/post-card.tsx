@@ -199,7 +199,7 @@ function PostCardActions({ post }: { post: PostCardData }) {
           sharePost(post.slug, post.title ?? post.excerptText ?? "this post");
         }}
       >
-        <Share2 className="size-4" />
+        <Share2 className="size-3.5" />
       </Button>
     </div>
   );
@@ -209,7 +209,7 @@ function PostCardFooter({ post }: { post: PostCardData }) {
   const authorHref = post.author.profile ? `/u/${post.author.profile.username}` : undefined;
 
   return (
-    <div className="flex items-center justify-between gap-3 border-t border-border/60 pt-3 text-xs text-muted-foreground">
+    <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-t border-border/60 pt-3 text-xs text-muted-foreground">
       <div className="flex min-w-0 items-center gap-2">
         <Avatar size="sm" className="shrink-0">
           <AvatarImage src={post.author.image ?? undefined} alt={post.author.name} />
@@ -226,20 +226,25 @@ function PostCardFooter({ post }: { post: PostCardData }) {
         ) : (
           <span className="truncate">{post.author.name}</span>
         )}
+        <span aria-hidden className="shrink-0">
+          &middot;
+        </span>
+        <time dateTime={new Date(post.createdAt).toISOString()} className="shrink-0">
+          {formatDate(post.createdAt)}
+        </time>
       </div>
       <div className="flex shrink-0 items-center gap-3 whitespace-nowrap">
-        <span>{formatDate(post.createdAt)}</span>
         <span className="flex items-center gap-1">
           <Heart className="size-3.5" />
-          <FlipNumber value={post.reactionCount} label="reactions" />
+          <FlipNumber value={post.reactionCount} compactFrom={1_000} label="reactions" />
         </span>
         <span className="flex items-center gap-1">
           <MessageSquare className="size-3.5" />
-          <FlipNumber value={post.commentCount} label="comments" />
+          <FlipNumber value={post.commentCount} compactFrom={1_000} label="comments" />
         </span>
         <span className="flex items-center gap-1">
           <Eye className="size-3.5" />
-          <FlipNumber value={post.viewCount} label="views" />
+          <FlipNumber value={post.viewCount} compactFrom={1_000} label="views" />
         </span>
       </div>
     </div>

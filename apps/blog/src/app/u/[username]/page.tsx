@@ -147,11 +147,11 @@ export default function ProfilePage() {
         </div>
 
         <Tabs defaultValue="posts" className="gap-4">
-          <TabsList className="w-full sm:w-fit">
+          <TabsList variant="outline" className="w-full sm:w-fit">
             <TabsTrigger value="posts" className="gap-1.5">
               <FileText className="size-3.5" />
               Posts
-              <span className="text-xs text-muted-foreground">{profile.postCount}</span>
+              <span className="text-xs opacity-70">{profile.postCount}</span>
             </TabsTrigger>
             <TabsTrigger value="about" className="gap-1.5">
               <User className="size-3.5" />

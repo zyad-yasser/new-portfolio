@@ -16,7 +16,7 @@ export default function PrivacySecurityPage() {
       </div>
 
       <Tabs defaultValue="two-factor">
-        <TabsList>
+        <TabsList variant="outline">
           <TabsTrigger value="two-factor">Two-factor auth</TabsTrigger>
           <TabsTrigger value="linked-accounts">Linked accounts</TabsTrigger>
           <TabsTrigger value="sessions">Sessions</TabsTrigger>

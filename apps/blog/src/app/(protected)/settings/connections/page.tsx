@@ -16,7 +16,7 @@ export default function ConnectionsPage() {
       </div>
 
       <Tabs defaultValue="following">
-        <TabsList>
+        <TabsList variant="outline">
           <TabsTrigger value="following">Following</TabsTrigger>
           <TabsTrigger value="followers">Followers</TabsTrigger>
           <TabsTrigger value="blocked">Blocked</TabsTrigger>

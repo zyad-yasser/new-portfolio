@@ -10,21 +10,13 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { GoogleIcon } from "@repo/ui/icons";
 import { Input } from "@repo/ui/input";
 import { PasswordInput } from "@repo/ui/password-input";
+import { type LoginValues, loginSchema } from "@repo/utils/schemas/auth";
 import { Github, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { z } from "zod";
-
-const loginSchema = z.object({
-  email: z.string().min(1, "Email is required").email("Enter a valid email address"),
-  password: z.string().min(1, "Password is required"),
-  rememberMe: z.boolean(),
-});
-
-type LoginValues = z.infer<typeof loginSchema>;
 
 const POST_LOGIN_PATH = "/submit";
 const AUTH_ERROR_PATH = "/auth-error";
@@ -35,6 +27,7 @@ export default function LoginPage() {
 
   const form = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
+    mode: "onTouched",
     defaultValues: { email: "", password: "", rememberMe: true },
   });
 
@@ -126,7 +119,7 @@ export default function LoginPage() {
           </div>
 
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form noValidate onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
                 name="email"
