@@ -1,6 +1,6 @@
 "use client";
 
-import { containerVariants, itemVariants, viewportOnce } from "@/lib/motion";
+import { containerVariants, itemVariants, viewportOnce } from "@repo/ui/lib/motion";
 import { cn } from "@repo/ui/lib/utils";
 import { motion } from "framer-motion";
 

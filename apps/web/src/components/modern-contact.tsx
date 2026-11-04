@@ -1,12 +1,12 @@
 "use client";
 
-import { containerVariants, itemVariants } from "@/lib/motion";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Badge } from "@repo/ui/badge";
 import { Button } from "@repo/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@repo/ui/form";
 import { Input } from "@repo/ui/input";
+import { containerVariants, itemVariants } from "@repo/ui/lib/motion";
 import { Textarea } from "@repo/ui/textarea";
 import { Turnstile } from "@repo/ui/turnstile";
 import { type ContactFormValues, contactFormSchema } from "@repo/utils/schemas/contact";

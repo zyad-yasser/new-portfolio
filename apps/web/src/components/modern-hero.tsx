@@ -1,9 +1,9 @@
 "use client";
 
+import { AmbientGradient } from "@repo/ui/ambient-gradient";
 import { Button } from "@repo/ui/button";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowDown, Github, Linkedin, Mail } from "lucide-react";
-import { AmbientGradient } from "./ambient-gradient";
 
 export function ModernHero() {
   const shouldReduceMotion = useReducedMotion();
