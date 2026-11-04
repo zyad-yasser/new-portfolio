@@ -3,7 +3,12 @@
   "version": "0.0.0",
   "private": true,
   "exports": {
-    "./login-screen": "./src/login-screen.tsx"
+    "./auth-error-screen": "./src/auth-error-screen.tsx",
+    "./email-verification-banner": "./src/email-verification-banner.tsx",
+    "./forgot-password-screen": "./src/forgot-password-screen.tsx",
+    "./login-screen": "./src/login-screen.tsx",
+    "./reset-password-screen": "./src/reset-password-screen.tsx",
+    "./signup-screen": "./src/signup-screen.tsx"
   },
   "scripts": {
     "lint": "biome lint .",

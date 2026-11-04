@@ -10,7 +10,7 @@ import { Mail } from "lucide-react";
 import { useEffect } from "react";
 import { toast } from "sonner";
 
-export function EmailVerificationBanner() {
+export function EmailVerificationBanner({ message }: { message: string }) {
   const { data: session, isPending } = publicAuthClient.useSession();
   const { resend, sending, error, onCooldown, remainingMs } = useResendVerificationEmail(
     session?.user.email,
@@ -32,7 +32,7 @@ export function EmailVerificationBanner() {
       <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
         <span className="flex items-center gap-1.5">
           <Mail className="size-4 shrink-0" />
-          Verify your email to write posts, comment, and react.
+          {message}
         </span>
         <Button
           type="button"
