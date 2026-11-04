@@ -8,7 +8,7 @@ import {
   getPublicUrl,
 } from "@repo/utils/storage";
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq, ilike, isNull } from "drizzle-orm";
+import { and, desc, eq, ilike, inArray, isNull } from "drizzle-orm";
 import { z } from "zod";
 import { authedProcedure, createPublicTRPCRouter, strictRateLimit, verifiedProcedure } from "../init";
 import { getQuota, releaseQuota, tryReserveQuota } from "./media-quota";
@@ -256,26 +256,21 @@ export const mediaRouter = createPublicTRPCRouter({
   bulkDelete: verifiedProcedure
     .input(z.object({ ids: z.array(z.string()).min(1).max(200) }))
     .mutation(async ({ ctx, input }) => {
-      const deletedIds: string[] = [];
-      let releasedBytes = 0;
-
-      for (const id of input.ids) {
-        const rows = await db
+      const deleted = await db.transaction(async (tx) => {
+        const rows = await tx
           .delete(media)
-          .where(and(eq(media.id, id), eq(media.ownerId, ctx.session.user.id)))
-          .returning();
+          .where(and(inArray(media.id, input.ids), eq(media.ownerId, ctx.session.user.id)))
+          .returning({ id: media.id, storageKey: media.storageKey, size: media.size });
 
-        const deleted = rows[0];
-        if (deleted) {
-          await deleteObject(deleted.storageKey);
-          deletedIds.push(deleted.id);
-          releasedBytes += deleted.size;
-        }
-      }
+        const releasedBytes = rows.reduce((total, row) => total + row.size, 0);
+        await releaseQuota(ctx.session.user.id, releasedBytes, tx);
 
-      if (releasedBytes > 0) {
-        await releaseQuota(ctx.session.user.id, releasedBytes);
-      }
+        return rows;
+      });
+
+      await Promise.allSettled(deleted.map((row) => deleteObject(row.storageKey)));
+
+      const deletedIds = deleted.map((row) => row.id);
 
       return { ids: deletedIds };
     }),

@@ -183,27 +183,22 @@ export const mediaFolderRouter = createPublicTRPCRouter({
 
       const descendantIds = await getDescendantFolderIds(input.id);
 
-      const containedMedia = await db.query.media.findMany({
-        where: inArray(media.folderId, descendantIds),
-        columns: { id: true, storageKey: true, size: true },
+      const containedMedia = await db.transaction(async (tx) => {
+        const rows = await tx
+          .delete(media)
+          .where(
+            and(inArray(media.folderId, descendantIds), eq(media.ownerId, ctx.session.user.id))
+          )
+          .returning({ storageKey: media.storageKey, size: media.size });
+
+        const releasedBytes = rows.reduce((sum, item) => sum + item.size, 0);
+        await releaseQuota(ctx.session.user.id, releasedBytes, tx);
+        await tx.delete(mediaFolder).where(eq(mediaFolder.id, input.id));
+
+        return rows;
       });
 
-      for (const item of containedMedia) {
-        await deleteObject(item.storageKey);
-      }
-
-      if (containedMedia.length) {
-        await db.delete(media).where(
-          inArray(
-            media.id,
-            containedMedia.map((item) => item.id)
-          )
-        );
-        const releasedBytes = containedMedia.reduce((sum, item) => sum + item.size, 0);
-        await releaseQuota(ctx.session.user.id, releasedBytes);
-      }
-
-      await db.delete(mediaFolder).where(eq(mediaFolder.id, input.id));
+      await Promise.allSettled(containedMedia.map((item) => deleteObject(item.storageKey)));
 
       return { id: input.id, deletedFileCount: containedMedia.length };
     }),
