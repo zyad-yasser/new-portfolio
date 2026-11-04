@@ -14,7 +14,8 @@
     "./turnstile": "./src/turnstile.ts",
     "./s3": "./src/s3.ts",
     "./firebase-storage": "./src/firebase-storage.ts",
-    "./storage": "./src/storage.ts"
+    "./storage": "./src/storage.ts",
+    "./security-headers": "./security-headers.cjs"
   },
   "scripts": {
     "lint": "biome lint .",

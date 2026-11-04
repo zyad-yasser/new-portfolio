@@ -25,6 +25,7 @@
     "@repo/auth": "workspace:*",
     "@repo/trpc": "workspace:^",
     "@repo/ui": "workspace:*",
+    "@repo/utils": "workspace:*",
     "@trpc/server": "^11.24.0",
     "better-auth": "^1.7.17",
     "lucide-react": "^0.469.0",

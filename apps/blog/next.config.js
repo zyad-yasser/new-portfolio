@@ -1,3 +1,5 @@
+const { buildSecurityHeaders } = require("@repo/utils/security-headers");
+
 function parseUrl(urlString) {
   try {
     return new URL(urlString);
@@ -57,49 +59,13 @@ const nextConfig = {
     dangerouslyAllowLocalIP: isDev,
   },
   async headers() {
-    const scriptSrc = isDev
-      ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com"
-      : "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com";
-    const imgSrc = ["img-src 'self' data: blob:", ...storageConnectOrigins].join(" ");
-    const mediaSrc = "media-src 'self' blob:";
-    const connectSrc = [
-      "connect-src 'self'",
-      ...(isDev ? ["ws:"] : []),
-      "https://challenges.cloudflare.com",
-      ...storageConnectOrigins,
-    ].join(" ");
-    return [
-      {
-        source: "/:path*",
-        headers: [
-          {
-            key: "Content-Security-Policy",
-            value: [
-              "default-src 'self'",
-              imgSrc,
-              mediaSrc,
-              scriptSrc,
-              "style-src 'self' 'unsafe-inline'",
-              "font-src 'self' data:",
-              connectSrc,
-              "frame-src https://challenges.cloudflare.com",
-              "form-action 'self'",
-              "frame-ancestors 'none'",
-              "base-uri 'self'",
-              "object-src 'none'",
-            ].join("; "),
-          },
-          { key: "X-Frame-Options", value: "DENY" },
-          { key: "X-Content-Type-Options", value: "nosniff" },
-          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
-          {
-            key: "Strict-Transport-Security",
-            value: "max-age=63072000; includeSubDomains; preload",
-          },
-        ],
-      },
-    ];
+    return buildSecurityHeaders({
+      isDev,
+      turnstile: true,
+      imgSources: ["blob:", ...storageConnectOrigins],
+      connectSources: storageConnectOrigins,
+      mediaSources: ["blob:"],
+    });
   },
 };
 
