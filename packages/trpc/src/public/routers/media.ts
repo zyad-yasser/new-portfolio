@@ -8,10 +8,11 @@ import {
   getPublicUrl,
 } from "@repo/utils/storage";
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq, ilike, isNull, lt, or } from "drizzle-orm";
+import { and, desc, eq, ilike, isNull } from "drizzle-orm";
 import { z } from "zod";
 import { authedProcedure, createPublicTRPCRouter, strictRateLimit, verifiedProcedure } from "../init";
 import { getQuota, releaseQuota, tryReserveQuota } from "./media-quota";
+import { afterCursor, byOwnCursor, createdAtCursorSchema, toPage } from "../pagination";
 
 const ALLOWED_MEDIA_TYPES: Record<string, string> = {
   "image/png": "png",
@@ -38,7 +39,6 @@ function maxBytesFor(contentType: string) {
   return contentType.startsWith("video/") ? MAX_VIDEO_BYTES : MAX_IMAGE_BYTES;
 }
 
-const cursorSchema = z.object({ createdAt: z.coerce.date(), id: z.string() });
 
 export const mediaRouter = createPublicTRPCRouter({
   list: authedProcedure
@@ -47,7 +47,7 @@ export const mediaRouter = createPublicTRPCRouter({
         .object({
           folderId: z.string().nullable().optional(),
           search: z.string().trim().max(100).optional(),
-          cursor: cursorSchema.optional(),
+          cursor: createdAtCursorSchema.optional(),
           limit: z.number().int().min(1).max(100).default(60),
         })
         .optional()
@@ -66,14 +66,9 @@ export const mediaRouter = createPublicTRPCRouter({
         conditions.push(folderId ? eq(media.folderId, folderId) : isNull(media.folderId));
       }
 
-      if (cursor) {
-        const cursorCondition = or(
-          lt(media.createdAt, cursor.createdAt),
-          and(eq(media.createdAt, cursor.createdAt), lt(media.id, cursor.id))
-        );
-        if (cursorCondition) {
-          conditions.push(cursorCondition);
-        }
+      const cursorCondition = afterCursor(media, cursor);
+      if (cursorCondition) {
+        conditions.push(cursorCondition);
       }
 
       const rows = await db.query.media.findMany({
@@ -82,14 +77,7 @@ export const mediaRouter = createPublicTRPCRouter({
         limit: limit + 1,
       });
 
-      const hasMore = rows.length > limit;
-      const items = hasMore ? rows.slice(0, limit) : rows;
-      const last = items.at(-1);
-
-      return {
-        items,
-        nextCursor: hasMore && last ? { createdAt: last.createdAt, id: last.id } : null,
-      };
+      return toPage(rows, limit, byOwnCursor);
     }),
 
   createPresignedUrl: verifiedProcedure

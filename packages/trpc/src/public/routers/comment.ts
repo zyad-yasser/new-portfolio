@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { db } from "@repo/db";
 import { comment, post } from "@repo/db/schema";
 import { TRPCError } from "@trpc/server";
-import { and, asc, eq, gt, isNull, notInArray, or, sql } from "drizzle-orm";
+import { and, asc, eq, isNull, notInArray, sql } from "drizzle-orm";
 import { z } from "zod";
 import {
   createPublicTRPCRouter,
@@ -14,18 +14,18 @@ import { assertNotBlocked, getBlockedUserIds } from "./block";
 import { createNotification } from "./notification";
 import { ensureUserProfile } from "./profile";
 import { assertReadablePost } from "./readable-post";
+import { afterCursor, byOwnCursor, createdAtCursorSchema, toPage } from "../pagination";
 
 const authorColumns = { id: true, name: true, image: true } as const;
 const authorWith = { profile: { columns: { username: true } } } as const;
 const MAX_REPLIES_PER_COMMENT = 50;
-const cursorSchema = z.object({ createdAt: z.coerce.date(), id: z.string() });
 
 export const commentRouter = createPublicTRPCRouter({
   listByPost: publicProcedure
     .input(
       z.object({
         postId: z.string(),
-        cursor: cursorSchema.optional(),
+        cursor: createdAtCursorSchema.optional(),
         limit: z.number().int().min(1).max(100).default(30),
       })
     )
@@ -38,13 +38,9 @@ export const commentRouter = createPublicTRPCRouter({
       if (blockedIds.length) {
         baseWhere.push(notInArray(comment.authorId, blockedIds));
       }
-      if (input.cursor) {
-        baseWhere.push(
-          or(
-            gt(comment.createdAt, input.cursor.createdAt),
-            and(eq(comment.createdAt, input.cursor.createdAt), gt(comment.id, input.cursor.id))
-          )!
-        );
+      const cursorCondition = afterCursor(comment, input.cursor, "asc");
+      if (cursorCondition) {
+        baseWhere.push(cursorCondition);
       }
 
       const rows = await db.query.comment.findMany({
@@ -62,14 +58,7 @@ export const commentRouter = createPublicTRPCRouter({
         },
       });
 
-      const hasMore = rows.length > limit;
-      const items = hasMore ? rows.slice(0, limit) : rows;
-      const last = items.at(-1);
-
-      return {
-        items,
-        nextCursor: hasMore && last ? { createdAt: last.createdAt, id: last.id } : null,
-      };
+      return toPage(rows, limit, byOwnCursor);
     }),
 
   create: verifiedProcedure

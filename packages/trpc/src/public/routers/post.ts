@@ -6,7 +6,7 @@ import { requireEnv } from "@repo/utils";
 import { createRateLimiter, getClientIp, safeLimit } from "@repo/utils/rate-limit";
 import { getPublicUrl } from "@repo/utils/storage";
 import { TRPCError } from "@trpc/server";
-import { and, asc, desc, eq, lt, ne, notInArray, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, ne, notInArray, sql } from "drizzle-orm";
 import type { PgUpdateSetSource } from "drizzle-orm/pg-core";
 import { z } from "zod";
 import {
@@ -20,6 +20,7 @@ import { assertNotBlocked, getBlockedUserIds } from "./block";
 import { createNotification } from "./notification";
 import { ensureUserProfile } from "./profile";
 import { assertReadablePost } from "./readable-post";
+import { afterCursor, byOwnCursor, createdAtCursorSchema, toPage } from "../pagination";
 
 const appName = requireEnv("APP_NAME");
 const viewRateLimiter = createRateLimiter({
@@ -205,14 +206,12 @@ export function formatPost(row: PostRow) {
   };
 }
 
-const cursorSchema = z.object({ createdAt: z.coerce.date(), id: z.string() });
-
 export const postRouter = createPublicTRPCRouter({
   list: publicProcedure
     .input(
       z
         .object({
-          cursor: cursorSchema.optional(),
+          cursor: createdAtCursorSchema.optional(),
           limit: z.number().int().min(1).max(50).default(20),
         })
         .optional()
@@ -227,14 +226,9 @@ export const postRouter = createPublicTRPCRouter({
       if (blockedIds.length) {
         conditions.push(notInArray(post.authorId, blockedIds));
       }
-      if (cursor) {
-        const cursorCondition = or(
-          lt(post.createdAt, cursor.createdAt),
-          and(eq(post.createdAt, cursor.createdAt), lt(post.id, cursor.id))
-        );
-        if (cursorCondition) {
-          conditions.push(cursorCondition);
-        }
+      const cursorCondition = afterCursor(post, cursor);
+      if (cursorCondition) {
+        conditions.push(cursorCondition);
       }
 
       const rows = await db.query.post.findMany({
@@ -244,21 +238,15 @@ export const postRouter = createPublicTRPCRouter({
         with: postWith,
       });
 
-      const hasMore = rows.length > limit;
-      const items = hasMore ? rows.slice(0, limit) : rows;
-      const last = items.at(-1);
-
-      return {
-        items: items.map(formatPost),
-        nextCursor: hasMore && last ? { createdAt: last.createdAt, id: last.id } : null,
-      };
+      const page = toPage(rows, limit, byOwnCursor);
+      return { ...page, items: page.items.map(formatPost) };
     }),
 
   mine: authedProcedure
     .input(
       z
         .object({
-          cursor: cursorSchema.optional(),
+          cursor: createdAtCursorSchema.optional(),
           limit: z.number().int().min(1).max(50).default(20),
         })
         .optional()
@@ -268,13 +256,9 @@ export const postRouter = createPublicTRPCRouter({
       const limit = input?.limit ?? 20;
 
       const conditions = [eq(post.authorId, ctx.session.user.id)];
-      if (cursor) {
-        conditions.push(
-          or(
-            lt(post.createdAt, cursor.createdAt),
-            and(eq(post.createdAt, cursor.createdAt), lt(post.id, cursor.id))
-          )!
-        );
+      const cursorCondition = afterCursor(post, cursor);
+      if (cursorCondition) {
+        conditions.push(cursorCondition);
       }
 
       const rows = await db.query.post.findMany({
@@ -284,14 +268,8 @@ export const postRouter = createPublicTRPCRouter({
         with: postWith,
       });
 
-      const hasMore = rows.length > limit;
-      const items = hasMore ? rows.slice(0, limit) : rows;
-      const last = items.at(-1);
-
-      return {
-        items: items.map(formatPost),
-        nextCursor: hasMore && last ? { createdAt: last.createdAt, id: last.id } : null,
-      };
+      const page = toPage(rows, limit, byOwnCursor);
+      return { ...page, items: page.items.map(formatPost) };
     }),
 
   getBySlug: publicProcedure
