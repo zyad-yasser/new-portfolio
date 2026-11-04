@@ -2,6 +2,7 @@ import { db } from "@repo/db";
 import * as schema from "@repo/db/schema";
 import { sendPasswordResetEmail, sendVerificationEmail } from "@repo/email";
 import { requireEnv } from "@repo/utils";
+import { nameSchema } from "@repo/utils/schemas/auth";
 import { MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH } from "@repo/utils/schemas/password";
 import { createSecondaryStorage } from "@repo/utils/secondary-storage";
 import { betterAuth } from "better-auth";
@@ -17,6 +18,7 @@ import {
 import { roleField } from "./shared";
 
 const appName = requireEnv("APP_NAME");
+const NAME_VALIDATED_PATHS = new Set(["/sign-up/email", "/update-user"]);
 const publicSecondaryStorage = createSecondaryStorage("public");
 
 if (!process.env.PUBLIC_BETTER_AUTH_SECRET) {
@@ -113,6 +115,17 @@ export const publicAuth = betterAuth({
   },
   hooks: {
     before: createAuthMiddleware(async (ctx) => {
+      if (NAME_VALIDATED_PATHS.has(ctx.path) && ctx.body?.name !== undefined) {
+        const parsed = nameSchema.safeParse(ctx.body.name);
+        if (!parsed.success) {
+          throw new APIError("BAD_REQUEST", {
+            code: "INVALID_NAME",
+            message: parsed.error.issues[0]?.message ?? "Invalid name",
+          });
+        }
+        return;
+      }
+
       if (ctx.path !== "/request-password-reset") {
         return;
       }
