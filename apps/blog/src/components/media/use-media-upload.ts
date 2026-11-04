@@ -84,7 +84,12 @@ function captureMediaDimensions(file: File): Promise<{ width?: number; height?: 
     : captureImageDimensions(file);
 }
 
-function uploadWithProgress(uploadUrl: string, file: File, onProgress: (fraction: number) => void) {
+function uploadWithProgress(
+  uploadUrl: string,
+  uploadHeaders: Record<string, string>,
+  file: File,
+  onProgress: (fraction: number) => void
+) {
   return new Promise<void>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.upload.addEventListener("progress", (event) => {
@@ -94,6 +99,9 @@ function uploadWithProgress(uploadUrl: string, file: File, onProgress: (fraction
     });
     xhr.open("PUT", uploadUrl);
     xhr.setRequestHeader("Content-Type", file.type);
+    for (const [name, value] of Object.entries(uploadHeaders)) {
+      xhr.setRequestHeader(name, value);
+    }
     xhr.onload = () =>
       xhr.status < 300 ? resolve() : reject(new Error(`Upload failed (${xhr.status})`));
     xhr.onerror = () => reject(new Error("Network error"));
@@ -124,12 +132,12 @@ export function useMediaUpload(onUploaded: (item: MediaItem) => void) {
 
       try {
         const dims = await captureMediaDimensions(file);
-        const { uploadUrl, publicUrl, key } = await createPresignedUrl.mutateAsync({
+        const { uploadUrl, uploadHeaders, key } = await createPresignedUrl.mutateAsync({
           contentType: file.type,
           size: file.size,
         });
 
-        await uploadWithProgress(uploadUrl, file, (fraction) => {
+        await uploadWithProgress(uploadUrl, uploadHeaders, file, (fraction) => {
           setItems((prev) =>
             prev.map((item) => (item.id === id ? { ...item, progress: fraction } : item))
           );
@@ -137,10 +145,7 @@ export function useMediaUpload(onUploaded: (item: MediaItem) => void) {
 
         const confirmed = await confirm.mutateAsync({
           key,
-          url: publicUrl,
           originalName: file.name,
-          mimeType: file.type,
-          size: file.size,
           folderId,
           ...dims,
         });

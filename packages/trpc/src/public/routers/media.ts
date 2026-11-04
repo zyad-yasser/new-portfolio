@@ -1,7 +1,12 @@
 import { randomUUID } from "node:crypto";
 import { db } from "@repo/db";
 import { media, mediaFolder } from "@repo/db/schema";
-import { createPresignedUploadUrl, deleteObject } from "@repo/utils/storage";
+import {
+  createPresignedUploadUrl,
+  deleteObject,
+  getObjectInfo,
+  getPublicUrl,
+} from "@repo/utils/storage";
 import { TRPCError } from "@trpc/server";
 import { and, desc, eq, ilike, isNull, lt, or } from "drizzle-orm";
 import { z } from "zod";
@@ -21,6 +26,10 @@ const ALLOWED_MEDIA_TYPES: Record<string, string> = {
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 const MAX_VIDEO_BYTES = 200 * 1024 * 1024;
 const VIDEO_PRESIGN_EXPIRY_SECONDS = 1200;
+
+function maxBytesFor(contentType: string) {
+  return contentType.startsWith("video/") ? MAX_VIDEO_BYTES : MAX_IMAGE_BYTES;
+}
 
 const cursorSchema = z.object({ createdAt: z.coerce.date(), id: z.string() });
 
@@ -85,12 +94,7 @@ export const mediaRouter = createPublicTRPCRouter({
           size: z.number().int().positive(),
         })
         .refine(
-          (input) => {
-            const maxBytes = input.contentType.startsWith("video/")
-              ? MAX_VIDEO_BYTES
-              : MAX_IMAGE_BYTES;
-            return input.size <= maxBytes;
-          },
+          (input) => input.size <= maxBytesFor(input.contentType),
           { message: "File is too large", path: ["size"] }
         )
     )
@@ -107,23 +111,21 @@ export const mediaRouter = createPublicTRPCRouter({
 
       const isVideo = input.contentType.startsWith("video/");
       const key = `media/${ctx.session.user.id}/${randomUUID()}.${ext}`;
-      const { uploadUrl, publicUrl } = await createPresignedUploadUrl({
+      const { uploadUrl, publicUrl, uploadHeaders } = await createPresignedUploadUrl({
         key,
         contentType: input.contentType,
+        contentLength: input.size,
         ...(isVideo ? { expiresInSeconds: VIDEO_PRESIGN_EXPIRY_SECONDS } : {}),
       });
 
-      return { uploadUrl, publicUrl, key };
+      return { uploadUrl, publicUrl, uploadHeaders, key };
     }),
 
   confirm: verifiedProcedure
     .input(
       z.object({
         key: z.string(),
-        url: z.string().url(),
         originalName: z.string().trim().min(1).max(255),
-        mimeType: z.string(),
-        size: z.number().int().positive(),
         width: z.number().int().positive().optional(),
         height: z.number().int().positive().optional(),
         folderId: z.string().nullable().optional(),
@@ -146,8 +148,20 @@ export const mediaRouter = createPublicTRPCRouter({
         }
       }
 
+      const object = await getObjectInfo(input.key);
+      if (!object) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Upload not found" });
+      }
+
+      const expectedExt = input.key.split(".").pop();
+      const typeMatchesKey = ALLOWED_MEDIA_TYPES[object.contentType] === expectedExt;
+      if (!typeMatchesKey || object.size <= 0 || object.size > maxBytesFor(object.contentType)) {
+        await deleteObject(input.key);
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Uploaded file was rejected" });
+      }
+
       const inserted = await db.transaction(async (tx) => {
-        const reserved = await tryReserveQuota(ctx.session.user.id, input.size, tx);
+        const reserved = await tryReserveQuota(ctx.session.user.id, object.size, tx);
         if (!reserved) {
           return null;
         }
@@ -159,10 +173,10 @@ export const mediaRouter = createPublicTRPCRouter({
             ownerId: ctx.session.user.id,
             folderId: input.folderId ?? null,
             storageKey: input.key,
-            url: input.url,
+            url: getPublicUrl(input.key),
             originalName: input.originalName,
-            mimeType: input.mimeType,
-            size: input.size,
+            mimeType: object.contentType,
+            size: object.size,
             width: input.width ?? null,
             height: input.height ?? null,
           })

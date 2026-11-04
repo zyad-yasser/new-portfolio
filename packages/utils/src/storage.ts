@@ -12,6 +12,7 @@ export function getPublicUrl(key: string) {
 export function createPresignedUploadUrl(args: {
   key: string;
   contentType: string;
+  contentLength: number;
   expiresInSeconds?: number;
 }) {
   return getProvider().createPresignedUploadUrl(args);
@@ -23,4 +24,8 @@ export function deleteObject(key: string) {
 
 export function uploadObjectDirect(key: string, body: Buffer, contentType: string) {
   return getProvider().uploadObjectDirect(key, body, contentType);
+}
+
+export function getObjectInfo(key: string) {
+  return getProvider().getObjectInfo(key);
 }
