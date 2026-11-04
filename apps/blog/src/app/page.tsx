@@ -57,10 +57,6 @@ export default function BlogHomePage() {
       {},
       {
         getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
-        // The feed is restored from the persisted cache on refresh and otherwise only
-        // moves forward via fetchNextPage. Automatic refetches would re-fetch page 1 with
-        // whatever is newest right now, silently shifting already-visible posts around —
-        // new content should only ever appear through the "new posts" banner below.
         refetchOnMount: false,
         refetchOnWindowFocus: false,
         refetchOnReconnect: false,
@@ -74,11 +70,6 @@ export default function BlogHomePage() {
   const posts = useMemo(() => data?.pages.flatMap((page) => page.items), [data]);
   const latestPostId = posts?.[0]?.id;
   const hasPosts = !!posts && posts.length > 0;
-  // isRestoring must count as "still loading" here too: while the persisted cache is being
-  // read, isLoading is false (the query is paused, not fetching) even though there's no data
-  // yet — SSR never has a persister, so it never pauses this way and isLoading is always true
-  // in the equivalent state there. Without isRestoring here, the server would render this
-  // skeleton block while the client's first paint renders nothing, a hydration mismatch.
   const showSkeleton = (isLoading || isRestoring) && !hasPosts;
 
   const newestPeek = publicApi.post.list.useQuery(
@@ -94,14 +85,6 @@ export default function BlogHomePage() {
   const hasNewPosts =
     !!latestPostId && !!newestPeek.data?.items[0] && newestPeek.data.items[0].id !== latestPostId;
 
-  // Re-fetches just the first page in place rather than utils.post.list.reset(), which
-  // clears `data` before refetching and briefly shows the loading skeleton — jarring for a
-  // "refresh" gesture that should feel seamless, not like the feed emptied out and reloaded.
-  // React Query v5 dropped per-page refetch selection, and refetch() with multiple loaded
-  // pages re-fetches every one of them using their old cursors — if the freshly-fetched page
-  // 1 now covers different posts, page 2's old cursor no longer lines up, risking duplicates.
-  // Truncating to a single page first sidesteps that: refetch() then only has that one page
-  // to redo, and `data` is never undefined in between.
   async function refreshLatest() {
     utils.post.list.setInfiniteData({}, (old) =>
       old && old.pages.length > 1
@@ -122,15 +105,6 @@ export default function BlogHomePage() {
 
   useScrollRestoration(HOME_SCROLL_KEY, !isRestoring && !isLoading);
 
-  // The grid itself always renders based on isLoading/posts (matching what SSR renders,
-  // since there's no persister — and so no isRestoring pause — on the server). Gating this
-  // decision below on isRestoring instead of on whether the grid renders avoids a hydration
-  // mismatch: isRestoring is only ever true on the client's first paint, never on the server.
-  // Once restoration resolves, if posts are already sitting in the cache there was never a
-  // loading phase to reveal *from*, so the entrance animation is skipped entirely and the
-  // feed just appears, the way reloading a normal page looks. A genuine first-ever fetch (no
-  // cached data) still animates in. This is a deliberate one-time render-phase capture (not
-  // an effect) so the first paint after restoring already has the right answer.
   const revealDecided = useRef(false);
   const skipEntranceAnimationRef = useRef(false);
   const initialPostIdsRef = useRef<Set<string> | null>(null);

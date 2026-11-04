@@ -18,9 +18,6 @@ export function createRateLimiter({
   });
 }
 
-// Fails open: if the rate limiter's own Redis/Upstash backend is unreachable or errors, that's an
-// infra problem, not the caller's fault — every request should not start failing just because the
-// rate limiter can't be reached. Errors are logged so the outage is still visible.
 export async function safeLimit(limiter: Ratelimit, key: string) {
   try {
     return await limiter.limit(key);

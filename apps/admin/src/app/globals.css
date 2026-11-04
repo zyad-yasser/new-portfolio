@@ -2,11 +2,6 @@
 @import "@repo/ui/styles/theme.css";
 @source "../../../../packages/ui/src";
 
-/* Admin gets its own accent + surface palette layered on top of @repo/ui's shared tokens
-   (flat/minimal, amber accent - modeled after shadcnblocks-admin's "amber" theme) rather than
-   web's coral/gradient brand identity. Every component (Button, Card, Sidebar, etc.) reads
-   these same CSS variables, so overriding just the tokens here is enough - no component
-   changes needed. Same :root=dark/.light=light inversion as the shared theme (see theme.css). */
 :root {
   --background: 20 14% 5%;
   --foreground: 40 10% 96%;

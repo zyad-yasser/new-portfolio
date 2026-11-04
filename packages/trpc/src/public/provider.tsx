@@ -19,9 +19,7 @@ export function PublicTRPCReactProvider({
   maxAge,
 }: {
   children: React.ReactNode;
-  /** Opt-in: when provided, the query cache survives a hard refresh via this persister. */
   persister?: Persister;
-  /** Discards persisted data older than this (ms) instead of treating it as fresh. */
   maxAge?: number;
 }) {
   const [queryClient] = useState(

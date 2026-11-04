@@ -26,7 +26,6 @@ async function generateFavicons() {
     console.log(`✓ Generated ${name}`);
   }
 
-  // Generate ICO (using 32x32)
   await sharp(svgBuffer)
     .resize(32, 32)
     .toFormat("png")

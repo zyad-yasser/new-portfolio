@@ -88,9 +88,6 @@ function FollowingFeed() {
       {},
       {
         getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
-        // Mirrors the homepage feed: the persisted cache should just sit there after a
-        // refresh, not get silently re-fetched and reshuffled underneath the restored scroll
-        // position.
         refetchOnMount: false,
         refetchOnWindowFocus: false,
         refetchOnReconnect: false,
@@ -98,10 +95,6 @@ function FollowingFeed() {
     );
   const items = useMemo(() => data?.pages.flatMap((page) => page.items), [data]);
   const hasItems = !!items && items.length > 0;
-  // isRestoring must count as "still loading" here too: while the persisted cache is being
-  // read, isLoading is false (the query is paused, not fetching) even though there's no data
-  // yet. Checking isLoading alone would show neither the skeleton nor real content during
-  // that window — a blank flash — since SSR has no persister and is never in this state.
   const showSkeleton = (isLoading || isRestoring) && !hasItems;
   const loadMoreRef = useInfiniteScrollSentinel(hasNextPage, fetchNextPage);
   useScrollRestoration(feedScrollKey("following"), !isRestoring && !isLoading);

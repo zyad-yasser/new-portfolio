@@ -12,10 +12,6 @@ const nextConfig = {
   },
   async headers() {
     const isDev = process.env.NODE_ENV !== "production";
-    // 'unsafe-inline' is required for Next/React's own inline bootstrap/hydration scripts
-    // (e.g. the streaming data script). 'unsafe-eval' is additionally needed in dev for
-    // Turbopack's HMR/source-map runtime. Without these, the browser blocks hydration
-    // entirely and the page stays frozen at its server-rendered (pre-animation) state.
     const scriptSrc = isDev
       ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com"
       : "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com";

@@ -1,8 +1,3 @@
-/* Opt-in "premium" surface/motion utilities, shared across @repo/ui consumers.
-   Hue-agnostic — every color reference goes through theme.css's tokens, so each
-   consuming app renders these with its own palette. Import explicitly per app
-   (not bundled into theme.css) since not every consumer wants them. */
-
 .card-hover {
   transition: transform 0.4s var(--ease-premium), box-shadow 0.4s var(--ease-premium), border-color
     0.4s var(--ease-premium);

@@ -3,8 +3,6 @@ const nextConfig = {
   transpilePackages: ["@repo/ui", "@repo/auth", "@repo/auth-ui", "@repo/trpc"],
   async headers() {
     const isDev = process.env.NODE_ENV !== "production";
-    // 'unsafe-inline' is required for Next/React's own inline bootstrap/hydration scripts.
-    // 'unsafe-eval' is additionally needed in dev for Turbopack's HMR/source-map runtime.
     const scriptSrc = isDev
       ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com"
       : "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com";

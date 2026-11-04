@@ -10,12 +10,6 @@ const SCROLL_STORAGE_KEYS = [
   "blog-feed-scroll:all",
 ];
 
-// The feeds' query caches are meant to survive a hard refresh (see the persisted-query-client
-// setup in layout.tsx) but not an in-app navigation — leaving a feed for another page and
-// coming back shouldn't show whatever was on screen (or scrolled to) minutes ago.
-// `previousPathname` is seeded from the first render, so this only clears on an actual route
-// change, never on the initial mount (which would otherwise immediately wipe the just-restored
-// persisted cache).
 export function FeedCacheInvalidator() {
   const pathname = usePathname();
   const utils = publicApi.useUtils();

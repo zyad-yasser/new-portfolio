@@ -21,8 +21,6 @@ export default defineConfig({
     },
   ],
   webServer: {
-    // Dev server for fast local iteration (reused automatically if `pnpm dev` is already
-    // running). CI should build first and point this at `pnpm start` for a prod-accurate run.
     command: "pnpm dev",
     url: baseURL,
     reuseExistingServer: !process.env.CI,

@@ -2,10 +2,6 @@ import { sql } from "drizzle-orm";
 import { readMigrationFiles } from "drizzle-orm/migrator";
 import { db } from "../src";
 
-// Marks every migration currently in drizzle/ as already applied, without running their SQL.
-// Needed the one time a database's schema was created by `drizzle-kit push` (no migration
-// history) and is now being adopted into the generate+migrate workflow - running `db:migrate`
-// against such a database would otherwise try to CREATE TABLE things that already exist.
 async function main() {
   const migrations = readMigrationFiles({ migrationsFolder: "./drizzle" });
   const last = migrations.at(-1);
