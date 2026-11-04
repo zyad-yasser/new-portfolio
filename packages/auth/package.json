@@ -24,15 +24,15 @@
     "@repo/db": "workspace:*",
     "@repo/email": "workspace:*",
     "@repo/utils": "workspace:*",
-    "better-auth": "^1.6.25"
+    "better-auth": "^1.7.17"
   },
   "peerDependencies": {
     "react": "^19.2.4"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
-    "@types/react": "^19.0.2",
+    "@types/react": "^19.3.0",
     "typescript": "^5.7.2",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.12"
   }
 }

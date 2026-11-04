@@ -6,6 +6,7 @@ export function createSecondaryStorage(prefix: string) {
 
   return {
     get: (k: string) => redis.get<string>(key(k)),
+    getAndDelete: (k: string) => redis.getdel<string>(key(k)),
     set: (k: string, value: string, ttl?: number) =>
       ttl ? redis.set(key(k), value, { ex: ttl }) : redis.set(key(k), value),
     delete: async (k: string) => {

@@ -69,7 +69,6 @@ export function LinkedAccountsTab() {
     setPendingProvider(account.providerId);
 
     const { error } = await publicAuthClient.unlinkAccount({
-      providerId: account.providerId,
       accountId: account.accountId,
     });
 

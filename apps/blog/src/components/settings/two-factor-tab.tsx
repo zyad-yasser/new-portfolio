@@ -55,7 +55,7 @@ export function TwoFactorTab() {
     const { data, error } = await publicAuthClient.twoFactor.enable({ password: enroll.password });
     setEnrolling(false);
 
-    if (error || !data) {
+    if (error || !data || data.method !== "totp") {
       toast.error(getAuthErrorMessage(error, "Couldn't start two-factor setup."));
       return;
     }
