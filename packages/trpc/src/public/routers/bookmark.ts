@@ -2,7 +2,7 @@ import { db } from "@repo/db";
 import { postBookmark } from "@repo/db/schema";
 import { and, desc, eq } from "drizzle-orm";
 import { z } from "zod";
-import { authedProcedure, createPublicTRPCRouter, verifiedProcedure } from "../init";
+import { authedProcedure, createPublicTRPCRouter, strictRateLimit, verifiedProcedure } from "../init";
 import { formatPost, postWith } from "./post";
 import { assertReadablePost, isReadableBy } from "./readable-post";
 
@@ -33,6 +33,7 @@ export const bookmarkRouter = createPublicTRPCRouter({
     }),
 
   toggle: verifiedProcedure
+    .use(strictRateLimit({ path: "bookmark.toggle", limit: 300, window: "1 h" }))
     .input(z.object({ postId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const where = and(

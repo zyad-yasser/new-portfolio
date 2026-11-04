@@ -4,7 +4,7 @@ import type { ReactionType } from "@repo/db/schema";
 import { REACTION_TYPES, post, postReaction, user } from "@repo/db/schema";
 import { and, eq, lte, sql } from "drizzle-orm";
 import { z } from "zod";
-import { authedProcedure, createPublicTRPCRouter, publicProcedure, verifiedProcedure } from "../init";
+import { authedProcedure, createPublicTRPCRouter, publicProcedure, strictRateLimit, verifiedProcedure } from "../init";
 import { createNotification } from "./notification";
 import { assertReadablePost } from "./readable-post";
 
@@ -75,6 +75,7 @@ export const reactionRouter = createPublicTRPCRouter({
     }),
 
   react: verifiedProcedure
+    .use(strictRateLimit({ path: "reaction.react", limit: 300, window: "1 h" }))
     .input(z.object({ postId: z.string(), type: z.enum(REACTION_TYPES) }))
     .mutation(async ({ ctx, input }) => {
       const existing = await db.query.postReaction.findFirst({

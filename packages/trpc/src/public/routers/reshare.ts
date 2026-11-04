@@ -3,7 +3,7 @@ import { post, postReshare } from "@repo/db/schema";
 import { TRPCError } from "@trpc/server";
 import { and, desc, eq } from "drizzle-orm";
 import { z } from "zod";
-import { authedProcedure, createPublicTRPCRouter, verifiedProcedure } from "../init";
+import { authedProcedure, createPublicTRPCRouter, strictRateLimit, verifiedProcedure } from "../init";
 import { assertNotBlocked } from "./block";
 import { createNotification } from "./notification";
 import { formatPost, postWith } from "./post";
@@ -36,6 +36,7 @@ export const reshareRouter = createPublicTRPCRouter({
     }),
 
   create: verifiedProcedure
+    .use(strictRateLimit({ path: "reshare.create", limit: 100, window: "1 h" }))
     .input(z.object({ postId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const target = await db.query.post.findFirst({ where: eq(post.id, input.postId) });

@@ -3,7 +3,7 @@ import { userFollow } from "@repo/db/schema";
 import { TRPCError } from "@trpc/server";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
-import { authedProcedure, createPublicTRPCRouter, publicProcedure, verifiedProcedure } from "../init";
+import { authedProcedure, createPublicTRPCRouter, publicProcedure, strictRateLimit, verifiedProcedure } from "../init";
 import { assertNotBlocked } from "./block";
 import { createNotification } from "./notification";
 
@@ -46,6 +46,7 @@ export const followRouter = createPublicTRPCRouter({
     }),
 
   follow: verifiedProcedure
+    .use(strictRateLimit({ path: "follow.follow", limit: 100, window: "1 h" }))
     .input(z.object({ userId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       if (input.userId === ctx.session.user.id) {

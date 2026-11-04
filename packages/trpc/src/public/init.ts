@@ -63,11 +63,16 @@ export function strictRateLimit({
   const limiter = createRateLimiter({ prefix: `${appName}:trpc:${path}`, limit, window });
 
   return t.middleware(async ({ ctx, next }) => {
-    const ip = getClientIp(ctx.headers);
-    const { success } = await safeLimit(limiter, ip);
+    const keys = [getClientIp(ctx.headers)];
+    if (ctx.session) {
+      keys.push(`user:${ctx.session.user.id}`);
+    }
 
-    if (!success) {
-      throw new TRPCError({ code: "TOO_MANY_REQUESTS" });
+    for (const key of keys) {
+      const { success } = await safeLimit(limiter, key);
+      if (!success) {
+        throw new TRPCError({ code: "TOO_MANY_REQUESTS" });
+      }
     }
 
     return next();
