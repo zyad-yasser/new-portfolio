@@ -18,6 +18,7 @@ import {
 import { assertNotBlocked } from "./block";
 import { createNotification } from "./notification";
 import { ensureUserProfile } from "./profile";
+import { assertReadablePost } from "./readable-post";
 
 const appName = requireEnv("APP_NAME");
 const viewRateLimiter = createRateLimiter({
@@ -170,7 +171,7 @@ export function formatPost(row: PostRow) {
   return {
     ...rest,
     tags: postTags.map((postTag) => postTag.tag),
-    quotedPost: quotedPost ? formatQuotedPost(quotedPost) : null,
+    quotedPost: quotedPost?.published ? formatQuotedPost(quotedPost) : null,
   };
 }
 
@@ -538,6 +539,8 @@ export const postRouter = createPublicTRPCRouter({
   incrementView: publicProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
+      await assertReadablePost(input.id, ctx.session?.user.id, { checkBlock: false });
+
       const ip = getClientIp(ctx.headers);
       const { success } = await safeLimit(viewRateLimiter, `${ip}:${input.id}`);
 

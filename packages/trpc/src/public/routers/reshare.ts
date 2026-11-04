@@ -7,6 +7,7 @@ import { authedProcedure, createPublicTRPCRouter, verifiedProcedure } from "../i
 import { assertNotBlocked } from "./block";
 import { createNotification } from "./notification";
 import { formatPost, postWith } from "./post";
+import { isReadableBy } from "./readable-post";
 
 export const reshareRouter = createPublicTRPCRouter({
   mine: authedProcedure.query(async ({ ctx }) => {
@@ -16,7 +17,9 @@ export const reshareRouter = createPublicTRPCRouter({
       with: { post: { with: postWith } },
     });
 
-    return rows.map((row) => formatPost(row.post));
+    return rows
+      .filter((row) => isReadableBy(row.post, ctx.session.user.id))
+      .map((row) => formatPost(row.post));
   }),
 
   isReshared: authedProcedure

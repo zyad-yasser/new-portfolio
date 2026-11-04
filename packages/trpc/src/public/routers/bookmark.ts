@@ -4,6 +4,7 @@ import { and, desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { authedProcedure, createPublicTRPCRouter, verifiedProcedure } from "../init";
 import { formatPost, postWith } from "./post";
+import { assertReadablePost, isReadableBy } from "./readable-post";
 
 export const bookmarkRouter = createPublicTRPCRouter({
   mine: authedProcedure.query(async ({ ctx }) => {
@@ -13,7 +14,9 @@ export const bookmarkRouter = createPublicTRPCRouter({
       with: { post: { with: postWith } },
     });
 
-    return rows.map((row) => formatPost(row.post));
+    return rows
+      .filter((row) => isReadableBy(row.post, ctx.session.user.id))
+      .map((row) => formatPost(row.post));
   }),
 
   isBookmarked: authedProcedure
@@ -42,6 +45,8 @@ export const bookmarkRouter = createPublicTRPCRouter({
         await db.delete(postBookmark).where(where);
         return { bookmarked: false };
       }
+
+      await assertReadablePost(input.postId, ctx.session.user.id);
 
       await db
         .insert(postBookmark)

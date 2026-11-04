@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { db } from "@repo/db";
-import { HIGHLIGHT_COLORS, post, postImageAnnotation } from "@repo/db/schema";
+import { HIGHLIGHT_COLORS, postImageAnnotation } from "@repo/db/schema";
 import type { TiptapDoc } from "@repo/db/schema";
 import { TRPCError } from "@trpc/server";
 import { and, asc, eq } from "drizzle-orm";
@@ -11,6 +11,7 @@ import {
   strictRateLimit,
   verifiedProcedure,
 } from "../init";
+import { assertReadablePost } from "./readable-post";
 
 const tiptapNodeSchema: z.ZodType<TiptapDoc> = z.lazy(() =>
   z.object({
@@ -51,11 +52,7 @@ export const imageAnnotationRouter = createPublicTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const targetPost = await db.query.post.findFirst({ where: eq(post.id, input.postId) });
-
-      if (!targetPost) {
-        throw new TRPCError({ code: "NOT_FOUND" });
-      }
+      await assertReadablePost(input.postId, ctx.session.user.id);
 
       const rows = await db
         .insert(postImageAnnotation)

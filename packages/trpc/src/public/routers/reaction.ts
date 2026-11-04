@@ -6,6 +6,7 @@ import { and, eq, lte, sql } from "drizzle-orm";
 import { z } from "zod";
 import { authedProcedure, createPublicTRPCRouter, publicProcedure, verifiedProcedure } from "../init";
 import { createNotification } from "./notification";
+import { assertReadablePost } from "./readable-post";
 
 const MAX_REACTORS_SHOWN = 6;
 
@@ -14,7 +15,9 @@ type Reactor = { id: string; name: string; image: string | null };
 export const reactionRouter = createPublicTRPCRouter({
   summary: publicProcedure
     .input(z.object({ postId: z.string() }))
-    .query(async ({ input }) => {
+    .query(async ({ ctx, input }) => {
+      await assertReadablePost(input.postId, ctx.session?.user.id, { checkBlock: false });
+
       const ranked = db
         .select({
           type: postReaction.type,
@@ -91,6 +94,8 @@ export const reactionRouter = createPublicTRPCRouter({
         });
         return { type: null };
       }
+
+      await assertReadablePost(input.postId, ctx.session.user.id);
 
       if (existing) {
         await db

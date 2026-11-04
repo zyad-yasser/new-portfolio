@@ -13,6 +13,7 @@ import {
 import { assertNotBlocked } from "./block";
 import { createNotification } from "./notification";
 import { ensureUserProfile } from "./profile";
+import { assertReadablePost } from "./readable-post";
 
 const authorColumns = { id: true, name: true, image: true } as const;
 const authorWith = { profile: { columns: { username: true } } } as const;
@@ -29,6 +30,7 @@ export const commentRouter = createPublicTRPCRouter({
       })
     )
     .query(async ({ ctx, input }) => {
+      await assertReadablePost(input.postId, ctx.session?.user.id, { checkBlock: false });
       const limit = input.limit;
       const blockedIds = ctx.session
         ? (
@@ -88,13 +90,7 @@ export const commentRouter = createPublicTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       await ensureUserProfile(ctx.session.user.id);
-      const targetPost = await db.query.post.findFirst({ where: eq(post.id, input.postId) });
-
-      if (!targetPost) {
-        throw new TRPCError({ code: "NOT_FOUND" });
-      }
-
-      await assertNotBlocked(ctx.session.user.id, targetPost.authorId);
+      const targetPost = await assertReadablePost(input.postId, ctx.session.user.id);
 
       let parent: typeof comment.$inferSelect | undefined;
 
