@@ -6,14 +6,29 @@ import { z } from "zod";
 import { createPublicTRPCRouter, publicProcedure } from "../init";
 import { formatPost, postWith } from "./post";
 
+function publishedTagIds() {
+  return db
+    .selectDistinct({ id: postTag.tagId })
+    .from(postTag)
+    .innerJoin(post, and(eq(post.id, postTag.postId), eq(post.published, true)));
+}
+
 export const tagRouter = createPublicTRPCRouter({
-  list: publicProcedure.query(() => db.query.tag.findMany({ orderBy: asc(tag.name) })),
+  list: publicProcedure.query(() =>
+    db.query.tag.findMany({
+      where: inArray(tag.id, publishedTagIds()),
+      orderBy: asc(tag.name),
+    })
+  ),
 
   search: publicProcedure
     .input(z.object({ query: z.string().trim().max(30) }))
     .query(({ input }) =>
       db.query.tag.findMany({
-        where: input.query ? ilike(tag.name, `%${input.query}%`) : undefined,
+        where: and(
+          inArray(tag.id, publishedTagIds()),
+          input.query ? ilike(tag.name, `%${input.query}%`) : undefined
+        ),
         orderBy: asc(tag.name),
         limit: 20,
       })
@@ -41,6 +56,10 @@ export const tagRouter = createPublicTRPCRouter({
         orderBy: desc(post.createdAt),
         with: postWith,
       });
+
+      if (!rows.length) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
 
       return { ...found, posts: rows.map(formatPost) };
     }),
