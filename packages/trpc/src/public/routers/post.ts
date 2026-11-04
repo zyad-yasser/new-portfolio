@@ -4,6 +4,7 @@ import { post, postTag, series, tag, userBlock } from "@repo/db/schema";
 import type { PostType, TiptapDoc } from "@repo/db/schema";
 import { requireEnv } from "@repo/utils";
 import { createRateLimiter, getClientIp, safeLimit } from "@repo/utils/rate-limit";
+import { getPublicUrl } from "@repo/utils/storage";
 import { TRPCError } from "@trpc/server";
 import { and, asc, desc, eq, lt, ne, notInArray, or, sql } from "drizzle-orm";
 import type { PgUpdateSetSource } from "drizzle-orm/pg-core";
@@ -28,6 +29,35 @@ const viewRateLimiter = createRateLimiter({
 });
 
 const WORDS_PER_MINUTE = 200;
+const STORAGE_URL_PROBE = "__probe__";
+
+const canonicalUrlSchema = z
+  .string()
+  .url()
+  .refine((value) => value.startsWith("https://"), "Canonical URL must use https");
+
+function isOwnMediaUrl(url: string, userId: string) {
+  const [prefix = "", suffix = ""] = getPublicUrl(`media/${userId}/${STORAGE_URL_PROBE}`).split(
+    STORAGE_URL_PROBE
+  );
+  const name = url.slice(prefix.length, url.length - suffix.length);
+  return (
+    !!prefix &&
+    url.startsWith(prefix) &&
+    url.endsWith(suffix) &&
+    name.length > 0 &&
+    !/[/\\]|%2f|%5c/i.test(name)
+  );
+}
+
+function assertOwnCoverImage(url: string | null | undefined, userId: string) {
+  if (url && !isOwnMediaUrl(url, userId)) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "Cover image must come from your media library.",
+    });
+  }
+}
 const MAX_TAGS = 5;
 
 function slugifyBase(value: string) {
@@ -328,7 +358,7 @@ export const postRouter = createPublicTRPCRouter({
           seriesId: z.string().nullable().optional(),
           tagNames: z.array(z.string().trim().min(1).max(30)).max(MAX_TAGS).optional(),
           coverImageUrl: z.string().url().nullable().optional(),
-          canonicalUrl: z.string().url().nullable().optional(),
+          canonicalUrl: canonicalUrlSchema.nullable().optional(),
           published: z.boolean().default(false),
         })
         .refine((value) => value.type !== "article" || !!value.title?.length, {
@@ -337,6 +367,7 @@ export const postRouter = createPublicTRPCRouter({
         })
     )
     .mutation(async ({ ctx, input }) => {
+      assertOwnCoverImage(input.coverImageUrl, ctx.session.user.id);
       await ensureUserProfile(ctx.session.user.id);
       const title = input.title?.length ? input.title : null;
       const slug = await uniqueSlug(title);
@@ -443,13 +474,13 @@ export const postRouter = createPublicTRPCRouter({
         seriesId: z.string().nullable().optional(),
         tagNames: z.array(z.string().trim().min(1).max(30)).max(MAX_TAGS).optional(),
         coverImageUrl: z.string().url().nullable().optional(),
-        canonicalUrl: z.string().url().nullable().optional(),
+        canonicalUrl: canonicalUrlSchema.nullable().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
       const current = await db.query.post.findFirst({
         where: and(eq(post.id, input.id), eq(post.authorId, ctx.session.user.id)),
-        columns: { title: true, contentJson: true, seriesId: true },
+        columns: { title: true, contentJson: true, seriesId: true, coverImageUrl: true },
       });
 
       if (!current) {
@@ -476,6 +507,9 @@ export const postRouter = createPublicTRPCRouter({
         patch.categoryId = input.categoryId;
       }
       if (input.coverImageUrl !== undefined) {
+        if (input.coverImageUrl !== current.coverImageUrl) {
+          assertOwnCoverImage(input.coverImageUrl, ctx.session.user.id);
+        }
         patch.coverImageUrl = input.coverImageUrl;
       }
       if (input.canonicalUrl !== undefined) {
