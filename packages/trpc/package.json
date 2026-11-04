@@ -16,7 +16,9 @@
   "scripts": {
     "lint": "biome lint .",
     "check": "biome check .",
-    "type-check": "tsc"
+    "type-check": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "peerDependencies": {
     "react": "^19.2.4",
@@ -39,6 +41,7 @@
     "@types/node": "^22.10.2",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "vitest": "^4.1.12"
   }
 }
