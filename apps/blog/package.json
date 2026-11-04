@@ -21,6 +21,7 @@
   "dependencies": {
     "@hookform/resolvers": "^5.7.1",
     "@repo/auth": "workspace:*",
+    "@repo/auth-ui": "workspace:*",
     "@repo/db": "workspace:*",
     "@repo/trpc": "workspace:^",
     "@repo/ui": "workspace:*",

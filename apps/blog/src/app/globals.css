@@ -3,6 +3,7 @@
 @import "@repo/ui/styles/premium.css";
 @plugin "@tailwindcss/typography";
 @source "../../../../packages/ui/src";
+@source "../../../../packages/auth-ui/src";
 
 :root {
   --background: 250 20% 6%;

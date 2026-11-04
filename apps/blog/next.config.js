@@ -51,7 +51,7 @@ const storageConnectOrigins =
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ["@repo/ui", "@repo/auth", "@repo/trpc"],
+  transpilePackages: ["@repo/ui", "@repo/auth", "@repo/auth-ui", "@repo/trpc"],
   images: {
     remotePatterns: storageRemotePattern ? [storageRemotePattern] : [],
     dangerouslyAllowLocalIP: isDev,

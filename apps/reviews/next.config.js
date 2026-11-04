@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ["@repo/ui", "@repo/auth", "@repo/trpc"],
+  transpilePackages: ["@repo/ui", "@repo/auth", "@repo/auth-ui", "@repo/trpc"],
   async headers() {
     const isDev = process.env.NODE_ENV !== "production";
     // 'unsafe-inline' is required for Next/React's own inline bootstrap/hydration scripts.
