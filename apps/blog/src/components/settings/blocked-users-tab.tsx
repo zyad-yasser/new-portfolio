@@ -11,7 +11,12 @@ import { toast } from "sonner";
 
 export function BlockedUsersTab() {
   const utils = publicApi.useUtils();
-  const { data: blocked, isLoading, error, refetch } = publicApi.block.list.useQuery();
+  const { data, isLoading, error, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    publicApi.block.list.useInfiniteQuery(
+      {},
+      { getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined }
+    );
+  const blocked = data?.pages.flatMap((page) => page.items);
 
   const unblock = publicApi.block.unblock.useMutation({
     onSuccess: () => {
@@ -61,6 +66,17 @@ export function BlockedUsersTab() {
             </Button>
           </Card>
         ))}
+
+        {hasNextPage && (
+          <Button
+            variant="outline"
+            className="self-center"
+            disabled={isFetchingNextPage}
+            onClick={() => fetchNextPage()}
+          >
+            {isFetchingNextPage ? "Loading…" : "Load more"}
+          </Button>
+        )}
       </div>
     </div>
   );

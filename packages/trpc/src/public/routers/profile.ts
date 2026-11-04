@@ -4,6 +4,7 @@ import { TRPCError } from "@trpc/server";
 import { and, count, desc, eq, ne } from "drizzle-orm";
 import { z } from "zod";
 import { authedProcedure, createPublicTRPCRouter, publicProcedure, verifiedProcedure } from "../init";
+import { afterCursor, byOwnCursor, pageInputSchema, toPage } from "../pagination";
 import { formatPost, postWith } from "./post";
 
 function slugifyBase(value: string) {
@@ -98,7 +99,7 @@ export const profileRouter = createPublicTRPCRouter({
     }),
 
   posts: publicProcedure
-    .input(z.object({ username: z.string() }))
+    .input(pageInputSchema(12, 50).extend({ username: z.string() }))
     .query(async ({ input }) => {
       const profile = await db.query.userProfile.findFirst({
         where: eq(userProfile.username, input.username),
@@ -109,12 +110,18 @@ export const profileRouter = createPublicTRPCRouter({
       }
 
       const rows = await db.query.post.findMany({
-        where: and(eq(post.authorId, profile.userId), eq(post.published, true)),
-        orderBy: desc(post.createdAt),
+        where: and(
+          eq(post.authorId, profile.userId),
+          eq(post.published, true),
+          afterCursor(post, input.cursor)
+        ),
+        orderBy: [desc(post.createdAt), desc(post.id)],
+        limit: input.limit + 1,
         with: postWith,
       });
 
-      return rows.map(formatPost);
+      const page = toPage(rows, input.limit, byOwnCursor);
+      return { ...page, items: page.items.map(formatPost) };
     }),
 
   mine: authedProcedure.query(({ ctx }) => ensureUserProfile(ctx.session.user.id)),

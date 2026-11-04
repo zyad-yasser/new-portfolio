@@ -1,9 +1,10 @@
 import { db } from "@repo/db";
 import { post, postTag, tag } from "@repo/db/schema";
 import { TRPCError } from "@trpc/server";
-import { and, asc, desc, eq, ilike, inArray } from "drizzle-orm";
+import { and, asc, count, desc, eq, ilike, inArray } from "drizzle-orm";
 import { z } from "zod";
 import { createPublicTRPCRouter, publicProcedure } from "../init";
+import { afterCursor, byOwnCursor, pageInputSchema, toPage } from "../pagination";
 import { formatPost, postWith } from "./post";
 
 function publishedTagIds() {
@@ -11,6 +12,26 @@ function publishedTagIds() {
     .selectDistinct({ id: postTag.tagId })
     .from(postTag)
     .innerJoin(post, and(eq(post.id, postTag.postId), eq(post.published, true)));
+}
+
+async function findTagBySlug(slug: string) {
+  const found = await db.query.tag.findFirst({ where: eq(tag.slug, slug) });
+
+  if (!found) {
+    throw new TRPCError({ code: "NOT_FOUND" });
+  }
+
+  return found;
+}
+
+function publishedWithTag(tagId: string) {
+  return and(
+    eq(post.published, true),
+    inArray(
+      post.id,
+      db.select({ id: postTag.postId }).from(postTag).where(eq(postTag.tagId, tagId))
+    )
+  );
 }
 
 export const tagRouter = createPublicTRPCRouter({
@@ -37,30 +58,34 @@ export const tagRouter = createPublicTRPCRouter({
   getBySlug: publicProcedure
     .input(z.object({ slug: z.string() }))
     .query(async ({ input }) => {
-      const found = await db.query.tag.findFirst({
-        where: eq(tag.slug, input.slug),
-      });
+      const found = await findTagBySlug(input.slug);
 
-      if (!found) {
+      const [countRow] = await db
+        .select({ value: count() })
+        .from(post)
+        .where(publishedWithTag(found.id));
+      const postCount = countRow?.value ?? 0;
+
+      if (!postCount) {
         throw new TRPCError({ code: "NOT_FOUND" });
       }
 
+      return { ...found, postCount };
+    }),
+
+  posts: publicProcedure
+    .input(pageInputSchema(12, 50).extend({ slug: z.string() }))
+    .query(async ({ input }) => {
+      const found = await findTagBySlug(input.slug);
+
       const rows = await db.query.post.findMany({
-        where: and(
-          eq(post.published, true),
-          inArray(
-            post.id,
-            db.select({ id: postTag.postId }).from(postTag).where(eq(postTag.tagId, found.id))
-          )
-        ),
-        orderBy: desc(post.createdAt),
+        where: and(publishedWithTag(found.id), afterCursor(post, input.cursor)),
+        orderBy: [desc(post.createdAt), desc(post.id)],
+        limit: input.limit + 1,
         with: postWith,
       });
 
-      if (!rows.length) {
-        throw new TRPCError({ code: "NOT_FOUND" });
-      }
-
-      return { ...found, posts: rows.map(formatPost) };
+      const page = toPage(rows, input.limit, byOwnCursor);
+      return { ...page, items: page.items.map(formatPost) };
     }),
 });

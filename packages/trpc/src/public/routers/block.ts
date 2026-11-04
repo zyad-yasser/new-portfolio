@@ -1,9 +1,10 @@
 import { db } from "@repo/db";
 import { userBlock } from "@repo/db/schema";
 import { TRPCError } from "@trpc/server";
-import { and, eq, or } from "drizzle-orm";
+import { and, desc, eq, or } from "drizzle-orm";
 import { z } from "zod";
 import { authedProcedure, createPublicTRPCRouter, strictRateLimit, verifiedProcedure } from "../init";
+import { afterCursor, pageInputSchema, toPage } from "../pagination";
 
 export async function getBlockedUserIds(viewerId: string | null | undefined) {
   if (!viewerId) {
@@ -39,14 +40,23 @@ export async function assertNotBlocked(viewerId: string, targetUserId: string) {
 }
 
 export const blockRouter = createPublicTRPCRouter({
-  list: authedProcedure.query(async ({ ctx }) => {
-    const rows = await db.query.userBlock.findMany({
-      where: eq(userBlock.blockerId, ctx.session.user.id),
-      with: { blocked: { columns: { id: true, name: true, image: true } } },
-    });
+  list: authedProcedure
+    .input(pageInputSchema(20, 50).optional())
+    .query(async ({ ctx, input }) => {
+      const limit = input?.limit ?? 20;
+      const rows = await db.query.userBlock.findMany({
+        where: and(
+          eq(userBlock.blockerId, ctx.session.user.id),
+          afterCursor({ createdAt: userBlock.createdAt, id: userBlock.blockedId }, input?.cursor)
+        ),
+        orderBy: [desc(userBlock.createdAt), desc(userBlock.blockedId)],
+        limit: limit + 1,
+        with: { blocked: { columns: { id: true, name: true, image: true } } },
+      });
 
-    return rows.map((row) => row.blocked);
-  }),
+      const page = toPage(rows, limit, (row) => ({ createdAt: row.createdAt, id: row.blockedId }));
+      return { ...page, items: page.items.map((row) => row.blocked) };
+    }),
 
   block: verifiedProcedure
     .use(strictRateLimit({ path: "block.block", limit: 100, window: "1 h" }))

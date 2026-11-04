@@ -6,21 +6,33 @@ import { z } from "zod";
 import { authedProcedure, createPublicTRPCRouter, strictRateLimit, verifiedProcedure } from "../init";
 import { assertNotBlocked } from "./block";
 import { createNotification } from "./notification";
+import { afterCursor, pageInputSchema, toPage } from "../pagination";
 import { formatPost, postWith } from "./post";
 import { isReadableBy } from "./readable-post";
 
 export const reshareRouter = createPublicTRPCRouter({
-  mine: authedProcedure.query(async ({ ctx }) => {
-    const rows = await db.query.postReshare.findMany({
-      where: eq(postReshare.userId, ctx.session.user.id),
-      orderBy: desc(postReshare.createdAt),
-      with: { post: { with: postWith } },
-    });
+  mine: authedProcedure
+    .input(pageInputSchema(20, 50).optional())
+    .query(async ({ ctx, input }) => {
+      const limit = input?.limit ?? 20;
+      const rows = await db.query.postReshare.findMany({
+        where: and(
+          eq(postReshare.userId, ctx.session.user.id),
+          afterCursor({ createdAt: postReshare.createdAt, id: postReshare.postId }, input?.cursor)
+        ),
+        orderBy: [desc(postReshare.createdAt), desc(postReshare.postId)],
+        limit: limit + 1,
+        with: { post: { with: postWith } },
+      });
 
-    return rows
-      .filter((row) => isReadableBy(row.post, ctx.session.user.id))
-      .map((row) => formatPost(row.post));
-  }),
+      const page = toPage(rows, limit, (row) => ({ createdAt: row.createdAt, id: row.postId }));
+      return {
+        ...page,
+        items: page.items
+          .filter((row) => isReadableBy(row.post, ctx.session.user.id))
+          .map((row) => formatPost(row.post)),
+      };
+    }),
 
   isReshared: authedProcedure
     .input(z.object({ postId: z.string() }))

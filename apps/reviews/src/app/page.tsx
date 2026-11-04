@@ -18,7 +18,12 @@ function initialsOf(name: string) {
 }
 
 export default function ReviewsPage() {
-  const { data: reviews, isLoading } = publicApi.review.list.useQuery();
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    publicApi.review.list.useInfiniteQuery(
+      {},
+      { getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined }
+    );
+  const reviews = data?.pages.flatMap((page) => page.items);
 
   return (
     <main className="mx-auto flex max-w-3xl flex-col gap-8 p-6 py-16">
@@ -76,6 +81,17 @@ export default function ReviewsPage() {
             </CardContent>
           </Card>
         ))}
+
+        {hasNextPage && (
+          <Button
+            variant="outline"
+            className="self-center"
+            disabled={isFetchingNextPage}
+            onClick={() => fetchNextPage()}
+          >
+            {isFetchingNextPage ? "Loading…" : "Load more"}
+          </Button>
+        )}
       </div>
     </main>
   );

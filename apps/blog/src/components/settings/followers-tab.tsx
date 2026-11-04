@@ -13,12 +13,12 @@ export function FollowersTab() {
   const { data: session } = publicAuthClient.useSession();
   const userId = session?.user.id;
 
-  const {
-    data: followers,
-    isLoading,
-    error,
-    refetch,
-  } = publicApi.follow.followers.useQuery({ userId: userId ?? "" }, { enabled: !!userId });
+  const { data, isLoading, error, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    publicApi.follow.followers.useInfiniteQuery(
+      { userId: userId ?? "" },
+      { enabled: !!userId, getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined }
+    );
+  const followers = data?.pages.flatMap((page) => page.items);
 
   return (
     <div className="flex flex-col gap-6">
@@ -52,6 +52,17 @@ export function FollowersTab() {
             </Link>
           </Card>
         ))}
+
+        {hasNextPage && (
+          <Button
+            variant="outline"
+            className="self-center"
+            disabled={isFetchingNextPage}
+            onClick={() => fetchNextPage()}
+          >
+            {isFetchingNextPage ? "Loading…" : "Load more"}
+          </Button>
+        )}
       </div>
     </div>
   );

@@ -16,12 +16,12 @@ export function FollowingTab() {
   const userId = session?.user.id;
   const utils = publicApi.useUtils();
 
-  const {
-    data: following,
-    isLoading,
-    error,
-    refetch,
-  } = publicApi.follow.following.useQuery({ userId: userId ?? "" }, { enabled: !!userId });
+  const { data, isLoading, error, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    publicApi.follow.following.useInfiniteQuery(
+      { userId: userId ?? "" },
+      { enabled: !!userId, getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined }
+    );
+  const following = data?.pages.flatMap((page) => page.items);
 
   const unfollow = publicApi.follow.unfollow.useMutation({
     onSuccess: () => {
@@ -71,6 +71,17 @@ export function FollowingTab() {
             </Button>
           </Card>
         ))}
+
+        {hasNextPage && (
+          <Button
+            variant="outline"
+            className="self-center"
+            disabled={isFetchingNextPage}
+            onClick={() => fetchNextPage()}
+          >
+            {isFetchingNextPage ? "Loading…" : "Load more"}
+          </Button>
+        )}
       </div>
     </div>
   );
