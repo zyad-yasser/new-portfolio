@@ -1,8 +1,9 @@
+import { ADMIN_COOKIE_PREFIX } from "@repo/auth/shared";
 import { getSessionCookie } from "better-auth/cookies";
 import { type NextRequest, NextResponse } from "next/server";
 
 export function proxy(request: NextRequest) {
-  const sessionCookie = getSessionCookie(request);
+  const sessionCookie = getSessionCookie(request, { cookiePrefix: ADMIN_COOKIE_PREFIX });
 
   if (!sessionCookie) {
     return NextResponse.redirect(new URL("/login", request.url));

@@ -3,7 +3,7 @@ import * as schema from "@repo/db/schema";
 import { createSecondaryStorage } from "@repo/utils/secondary-storage";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { roleField } from "./shared";
+import { ADMIN_COOKIE_PREFIX, roleField } from "./shared";
 
 if (!process.env.BETTER_AUTH_SECRET) {
   throw new Error("BETTER_AUTH_SECRET is not set");
@@ -30,6 +30,9 @@ export const auth = betterAuth({
       "/sign-in/email": { window: 60, max: 5 },
       "/request-password-reset": { window: 300, max: 3 },
     },
+  },
+  advanced: {
+    cookiePrefix: ADMIN_COOKIE_PREFIX,
   },
   user: {
     additionalFields: roleField,
