@@ -12,7 +12,8 @@
     "./oauth-error-message": "./src/oauth-error-message.ts",
     "./password-reset-throttle": "./src/password-reset-throttle.ts",
     "./use-password-reset-cooldown": "./src/use-password-reset-cooldown.ts",
-    "./use-resend-verification-email": "./src/use-resend-verification-email.ts"
+    "./use-resend-verification-email": "./src/use-resend-verification-email.ts",
+    "./session-proxy": "./src/session-proxy.ts"
   },
   "scripts": {
     "lint": "biome lint .",
@@ -28,11 +29,13 @@
     "better-auth": "^1.7.17"
   },
   "peerDependencies": {
-    "react": "^19.2.4"
+    "react": "^19.2.4",
+    "next": "^16.4.5"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
     "@types/react": "^19.3.0",
+    "next": "^16.4.5",
     "typescript": "^5.7.2",
     "vitest": "^4.1.12"
   }
