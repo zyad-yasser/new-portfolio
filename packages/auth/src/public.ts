@@ -32,6 +32,7 @@ export const publicAuth = betterAuth({
     enabled: true,
     minPasswordLength: MIN_PASSWORD_LENGTH,
     maxPasswordLength: MAX_PASSWORD_LENGTH,
+    revokeSessionsOnPasswordReset: true,
     sendResetPassword: async ({ user, url, token }) => {
       await replaceIssuedResetToken(user.email, token, publicSecondaryStorage);
       await sendPasswordResetEmail({ appName, to: user.email, name: user.name, url });
