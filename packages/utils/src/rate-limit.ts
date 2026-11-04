@@ -32,10 +32,15 @@ export async function safeLimit(limiter: Ratelimit, key: string) {
 
 const LOCAL_DEV_IP = "127.0.0.1";
 
+function firstAddress(value: string | null) {
+  return value?.split(",")[0]?.trim() || null;
+}
+
 export function getClientIp(headers: Headers) {
-  const forwardedFor = headers.get("x-forwarded-for");
-  if (forwardedFor) {
-    return forwardedFor.split(",")[0]?.trim() || LOCAL_DEV_IP;
-  }
-  return headers.get("x-real-ip") ?? LOCAL_DEV_IP;
+  return (
+    firstAddress(headers.get("x-vercel-forwarded-for")) ??
+    firstAddress(headers.get("x-real-ip")) ??
+    firstAddress(headers.get("x-forwarded-for")) ??
+    LOCAL_DEV_IP
+  );
 }
