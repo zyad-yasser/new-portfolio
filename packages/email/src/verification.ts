@@ -1,4 +1,5 @@
 import { requireEnv } from "@repo/utils";
+import { escapeHtml } from "./escape-html";
 import { getTransporter } from "./transport";
 
 type VerificationEmailInput = {
@@ -18,9 +19,9 @@ export async function sendVerificationEmail({ appName, to, name, url }: Verifica
     subject: `Verify your email for ${appName}`,
     text: `Hi ${name},\n\nVerify your email address to unlock writing on ${appName}:\n${url}\n\nIf you didn't create this account, you can ignore this email.`,
     html: `
-      <p>Hi ${name},</p>
-      <p>Verify your email address to unlock writing on ${appName}:</p>
-      <p><a href="${url}">${url}</a></p>
+      <p>Hi ${escapeHtml(name)},</p>
+      <p>Verify your email address to unlock writing on ${escapeHtml(appName)}:</p>
+      <p><a href="${escapeHtml(url)}">${escapeHtml(url)}</a></p>
       <p>If you didn't create this account, you can ignore this email.</p>
     `,
   });
