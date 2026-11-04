@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { db } from "@repo/db";
-import { comment, post, userBlock } from "@repo/db/schema";
+import { comment, post } from "@repo/db/schema";
 import { TRPCError } from "@trpc/server";
 import { and, asc, eq, gt, isNull, notInArray, or, sql } from "drizzle-orm";
 import { z } from "zod";
@@ -10,7 +10,7 @@ import {
   strictRateLimit,
   verifiedProcedure,
 } from "../init";
-import { assertNotBlocked } from "./block";
+import { assertNotBlocked, getBlockedUserIds } from "./block";
 import { createNotification } from "./notification";
 import { ensureUserProfile } from "./profile";
 import { assertReadablePost } from "./readable-post";
@@ -32,14 +32,7 @@ export const commentRouter = createPublicTRPCRouter({
     .query(async ({ ctx, input }) => {
       await assertReadablePost(input.postId, ctx.session?.user.id, { checkBlock: false });
       const limit = input.limit;
-      const blockedIds = ctx.session
-        ? (
-            await db.query.userBlock.findMany({
-              where: eq(userBlock.blockerId, ctx.session.user.id),
-              columns: { blockedId: true },
-            })
-          ).map((row) => row.blockedId)
-        : [];
+      const blockedIds = await getBlockedUserIds(ctx.session?.user.id);
 
       const baseWhere = [eq(comment.postId, input.postId), isNull(comment.parentCommentId)];
       if (blockedIds.length) {

@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { db } from "@repo/db";
-import { post, postTag, series, tag, userBlock } from "@repo/db/schema";
+import { post, postTag, series, tag } from "@repo/db/schema";
 import type { PostType, TiptapDoc } from "@repo/db/schema";
 import { requireEnv } from "@repo/utils";
 import { createRateLimiter, getClientIp, safeLimit } from "@repo/utils/rate-limit";
@@ -16,7 +16,7 @@ import {
   strictRateLimit,
   verifiedProcedure,
 } from "../init";
-import { assertNotBlocked } from "./block";
+import { assertNotBlocked, getBlockedUserIds } from "./block";
 import { createNotification } from "./notification";
 import { ensureUserProfile } from "./profile";
 import { assertReadablePost } from "./readable-post";
@@ -221,14 +221,7 @@ export const postRouter = createPublicTRPCRouter({
       const cursor = input?.cursor;
       const limit = input?.limit ?? 20;
 
-      const blockedIds = ctx.session
-        ? (
-            await db.query.userBlock.findMany({
-              where: eq(userBlock.blockerId, ctx.session.user.id),
-              columns: { blockedId: true },
-            })
-          ).map((row) => row.blockedId)
-        : [];
+      const blockedIds = await getBlockedUserIds(ctx.session?.user.id);
 
       const conditions = [eq(post.published, true)];
       if (blockedIds.length) {

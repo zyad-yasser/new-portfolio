@@ -5,6 +5,19 @@ import { and, eq, or } from "drizzle-orm";
 import { z } from "zod";
 import { authedProcedure, createPublicTRPCRouter, strictRateLimit, verifiedProcedure } from "../init";
 
+export async function getBlockedUserIds(viewerId: string | null | undefined) {
+  if (!viewerId) {
+    return [];
+  }
+
+  const rows = await db.query.userBlock.findMany({
+    where: eq(userBlock.blockerId, viewerId),
+    columns: { blockedId: true },
+  });
+
+  return rows.map((row) => row.blockedId);
+}
+
 export async function assertNotBlocked(viewerId: string, targetUserId: string) {
   if (viewerId === targetUserId) {
     return;

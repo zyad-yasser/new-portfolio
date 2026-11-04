@@ -1,9 +1,10 @@
 import { db } from "@repo/db";
-import { post, userBlock } from "@repo/db/schema";
+import { post } from "@repo/db/schema";
 import { and, eq, notInArray, sql } from "drizzle-orm";
 import { z } from "zod";
 import { createPublicTRPCRouter, publicProcedure } from "../init";
 import { formatPost, postWith } from "./post";
+import { getBlockedUserIds } from "./block";
 
 const cursorSchema = z.object({ rank: z.number(), id: z.string() });
 
@@ -44,14 +45,7 @@ export const searchRouter = createPublicTRPCRouter({
 
       const rank = sql<number>`ts_rank(${post.searchVector}, ${tsquery})`;
 
-      const blockedIds = ctx.session
-        ? (
-            await db.query.userBlock.findMany({
-              where: eq(userBlock.blockerId, ctx.session.user.id),
-              columns: { blockedId: true },
-            })
-          ).map((row) => row.blockedId)
-        : [];
+      const blockedIds = await getBlockedUserIds(ctx.session?.user.id);
 
       const conditions = [
         eq(post.published, true),
