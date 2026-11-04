@@ -15,13 +15,12 @@
       "**/dist/**",
       "**/drizzle/meta/**",
       "build/**",
-      "**/public/**",
+      "apps/*/public/**",
       "static/**",
       "*.min.js",
       "*.min.css",
       ".agents/**",
-      ".claude/skills/**",
-      "agent/**"
+      ".claude/skills/**"
     ]
   },
   "formatter": {

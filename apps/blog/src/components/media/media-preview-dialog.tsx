@@ -40,6 +40,7 @@ export function MediaPreviewDialog({
           <>
             <div className="relative flex max-h-[55vh] min-h-48 flex-1 items-center justify-center overflow-hidden rounded-lg border border-border/60 bg-muted/30">
               {item.mimeType.startsWith("video/") ? (
+                // biome-ignore lint/a11y/useMediaCaption: user-uploaded media, no caption track available
                 <video src={item.url} controls className="max-h-[55vh] w-full" />
               ) : (
                 <Image

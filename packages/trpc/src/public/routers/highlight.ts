@@ -106,18 +106,16 @@ export const highlightRouter = createPublicTRPCRouter({
       return rows[0];
     }),
 
-  delete: verifiedProcedure
-    .input(z.object({ id: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      const rows = await db
-        .delete(postHighlight)
-        .where(and(eq(postHighlight.id, input.id), eq(postHighlight.userId, ctx.session.user.id)))
-        .returning({ id: postHighlight.id });
+  delete: verifiedProcedure.input(z.object({ id: z.string() })).mutation(async ({ ctx, input }) => {
+    const rows = await db
+      .delete(postHighlight)
+      .where(and(eq(postHighlight.id, input.id), eq(postHighlight.userId, ctx.session.user.id)))
+      .returning({ id: postHighlight.id });
 
-      if (!rows[0]) {
-        throw new TRPCError({ code: "NOT_FOUND" });
-      }
+    if (!rows[0]) {
+      throw new TRPCError({ code: "NOT_FOUND" });
+    }
 
-      return rows[0];
-    }),
+    return rows[0];
+  }),
 });

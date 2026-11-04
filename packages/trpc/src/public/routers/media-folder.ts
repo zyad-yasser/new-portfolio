@@ -44,31 +44,26 @@ export const mediaFolderRouter = createPublicTRPCRouter({
     });
   }),
 
-  path: authedProcedure
-    .input(z.object({ folderId: z.string() }))
-    .query(async ({ ctx, input }) => {
-      const path: { id: string; name: string }[] = [];
-      let currentId: string | null = input.folderId;
+  path: authedProcedure.input(z.object({ folderId: z.string() })).query(async ({ ctx, input }) => {
+    const path: { id: string; name: string }[] = [];
+    let currentId: string | null = input.folderId;
 
-      while (currentId) {
-        const found: { id: string; name: string; parentId: string | null } | undefined =
-          await db.query.mediaFolder.findFirst({
-            where: and(
-              eq(mediaFolder.id, currentId),
-              eq(mediaFolder.ownerId, ctx.session.user.id)
-            ),
-            columns: { id: true, name: true, parentId: true },
-          });
+    while (currentId) {
+      const found: { id: string; name: string; parentId: string | null } | undefined =
+        await db.query.mediaFolder.findFirst({
+          where: and(eq(mediaFolder.id, currentId), eq(mediaFolder.ownerId, ctx.session.user.id)),
+          columns: { id: true, name: true, parentId: true },
+        });
 
-        if (!found) {
-          break;
-        }
-        path.unshift({ id: found.id, name: found.name });
-        currentId = found.parentId;
+      if (!found) {
+        break;
       }
+      path.unshift({ id: found.id, name: found.name });
+      currentId = found.parentId;
+    }
 
-      return path;
-    }),
+    return path;
+  }),
 
   create: verifiedProcedure
     .input(
@@ -171,35 +166,31 @@ export const mediaFolderRouter = createPublicTRPCRouter({
       return rows[0];
     }),
 
-  delete: verifiedProcedure
-    .input(z.object({ id: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      const owned = await db.query.mediaFolder.findFirst({
-        where: and(eq(mediaFolder.id, input.id), eq(mediaFolder.ownerId, ctx.session.user.id)),
-      });
-      if (!owned) {
-        throw new TRPCError({ code: "NOT_FOUND" });
-      }
+  delete: verifiedProcedure.input(z.object({ id: z.string() })).mutation(async ({ ctx, input }) => {
+    const owned = await db.query.mediaFolder.findFirst({
+      where: and(eq(mediaFolder.id, input.id), eq(mediaFolder.ownerId, ctx.session.user.id)),
+    });
+    if (!owned) {
+      throw new TRPCError({ code: "NOT_FOUND" });
+    }
 
-      const descendantIds = await getDescendantFolderIds(input.id);
+    const descendantIds = await getDescendantFolderIds(input.id);
 
-      const containedMedia = await db.transaction(async (tx) => {
-        const rows = await tx
-          .delete(media)
-          .where(
-            and(inArray(media.folderId, descendantIds), eq(media.ownerId, ctx.session.user.id))
-          )
-          .returning({ storageKey: media.storageKey, size: media.size });
+    const containedMedia = await db.transaction(async (tx) => {
+      const rows = await tx
+        .delete(media)
+        .where(and(inArray(media.folderId, descendantIds), eq(media.ownerId, ctx.session.user.id)))
+        .returning({ storageKey: media.storageKey, size: media.size });
 
-        const releasedBytes = rows.reduce((sum, item) => sum + item.size, 0);
-        await releaseQuota(ctx.session.user.id, releasedBytes, tx);
-        await tx.delete(mediaFolder).where(eq(mediaFolder.id, input.id));
+      const releasedBytes = rows.reduce((sum, item) => sum + item.size, 0);
+      await releaseQuota(ctx.session.user.id, releasedBytes, tx);
+      await tx.delete(mediaFolder).where(eq(mediaFolder.id, input.id));
 
-        return rows;
-      });
+      return rows;
+    });
 
-      await Promise.allSettled(containedMedia.map((item) => deleteObject(item.storageKey)));
+    await Promise.allSettled(containedMedia.map((item) => deleteObject(item.storageKey)));
 
-      return { id: input.id, deletedFileCount: containedMedia.length };
-    }),
+    return { id: input.id, deletedFileCount: containedMedia.length };
+  }),
 });

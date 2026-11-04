@@ -24,18 +24,16 @@ function publishedInCategory(categoryId: string) {
 export const categoryRouter = createPublicTRPCRouter({
   list: publicProcedure.query(() => db.query.category.findMany({ orderBy: asc(category.name) })),
 
-  getBySlug: publicProcedure
-    .input(z.object({ slug: z.string() }))
-    .query(async ({ input }) => {
-      const found = await findCategoryBySlug(input.slug);
+  getBySlug: publicProcedure.input(z.object({ slug: z.string() })).query(async ({ input }) => {
+    const found = await findCategoryBySlug(input.slug);
 
-      const [countRow] = await db
-        .select({ value: count() })
-        .from(post)
-        .where(publishedInCategory(found.id));
+    const [countRow] = await db
+      .select({ value: count() })
+      .from(post)
+      .where(publishedInCategory(found.id));
 
-      return { ...found, postCount: countRow?.value ?? 0 };
-    }),
+    return { ...found, postCount: countRow?.value ?? 0 };
+  }),
 
   posts: publicProcedure
     .input(pageInputSchema(12, 50).extend({ slug: z.string() }))

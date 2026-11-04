@@ -127,28 +127,22 @@ export const notificationRouter = createPublicTRPCRouter({
     return count;
   }),
 
-  markRead: authedProcedure
-    .input(z.object({ id: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      await db
-        .update(notification)
-        .set({ readAt: new Date() })
-        .where(
-          and(eq(notification.id, input.id), eq(notification.recipientId, ctx.session.user.id))
-        );
+  markRead: authedProcedure.input(z.object({ id: z.string() })).mutation(async ({ ctx, input }) => {
+    await db
+      .update(notification)
+      .set({ readAt: new Date() })
+      .where(and(eq(notification.id, input.id), eq(notification.recipientId, ctx.session.user.id)));
 
-      await invalidateUnreadCount(ctx.session.user.id);
+    await invalidateUnreadCount(ctx.session.user.id);
 
-      return { id: input.id };
-    }),
+    return { id: input.id };
+  }),
 
   markAllRead: authedProcedure.mutation(async ({ ctx }) => {
     await db
       .update(notification)
       .set({ readAt: new Date() })
-      .where(
-        and(eq(notification.recipientId, ctx.session.user.id), isNull(notification.readAt))
-      );
+      .where(and(eq(notification.recipientId, ctx.session.user.id), isNull(notification.readAt)));
 
     await getRedis()
       .set(unreadCacheKey(ctx.session.user.id), 0, { ex: UNREAD_CACHE_TTL_SECONDS })

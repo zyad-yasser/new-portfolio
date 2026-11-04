@@ -141,23 +141,21 @@ export const imageAnnotationRouter = createPublicTRPCRouter({
       return rows[0];
     }),
 
-  delete: verifiedProcedure
-    .input(z.object({ id: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      const rows = await db
-        .delete(postImageAnnotation)
-        .where(
-          and(
-            eq(postImageAnnotation.id, input.id),
-            eq(postImageAnnotation.userId, ctx.session.user.id)
-          )
+  delete: verifiedProcedure.input(z.object({ id: z.string() })).mutation(async ({ ctx, input }) => {
+    const rows = await db
+      .delete(postImageAnnotation)
+      .where(
+        and(
+          eq(postImageAnnotation.id, input.id),
+          eq(postImageAnnotation.userId, ctx.session.user.id)
         )
-        .returning({ id: postImageAnnotation.id });
+      )
+      .returning({ id: postImageAnnotation.id });
 
-      if (!rows[0]) {
-        throw new TRPCError({ code: "NOT_FOUND" });
-      }
+    if (!rows[0]) {
+      throw new TRPCError({ code: "NOT_FOUND" });
+    }
 
-      return rows[0];
-    }),
+    return rows[0];
+  }),
 });

@@ -16,11 +16,11 @@ import {
   strictRateLimit,
   verifiedProcedure,
 } from "../init";
+import { afterCursor, byOwnCursor, createdAtCursorSchema, toPage } from "../pagination";
 import { assertNotBlocked, getBlockedUserIds } from "./block";
 import { createNotification } from "./notification";
 import { ensureUserProfile } from "./profile";
 import { assertReadablePost } from "./readable-post";
-import { afterCursor, byOwnCursor, createdAtCursorSchema, toPage } from "../pagination";
 
 const appName = requireEnv("APP_NAME");
 const viewRateLimiter = createRateLimiter({
@@ -273,50 +273,48 @@ export const postRouter = createPublicTRPCRouter({
       return { ...page, items: page.items.map(formatPost) };
     }),
 
-  getBySlug: publicProcedure
-    .input(z.object({ slug: z.string() }))
-    .query(async ({ ctx, input }) => {
-      const found = await db.query.post.findFirst({
-        where: eq(post.slug, input.slug),
-        with: postWith,
+  getBySlug: publicProcedure.input(z.object({ slug: z.string() })).query(async ({ ctx, input }) => {
+    const found = await db.query.post.findFirst({
+      where: eq(post.slug, input.slug),
+      with: postWith,
+    });
+
+    const isOwner = !!ctx.session && found?.authorId === ctx.session.user.id;
+
+    if (!found || (!found.published && !isOwner)) {
+      throw new TRPCError({ code: "NOT_FOUND" });
+    }
+
+    let seriesContext: {
+      position: number;
+      total: number;
+      prevSlug: string | null;
+      nextSlug: string | null;
+    } | null = null;
+
+    if (found.seriesId) {
+      const siblings = await db.query.post.findMany({
+        where: and(eq(post.seriesId, found.seriesId), eq(post.published, true)),
+        orderBy: asc(post.seriesOrder),
+        columns: { id: true, slug: true },
       });
-
-      const isOwner = !!ctx.session && found?.authorId === ctx.session.user.id;
-
-      if (!found || (!found.published && !isOwner)) {
-        throw new TRPCError({ code: "NOT_FOUND" });
+      const index = siblings.findIndex((sibling) => sibling.id === found.id);
+      if (index !== -1) {
+        seriesContext = {
+          position: index + 1,
+          total: siblings.length,
+          prevSlug: index > 0 ? (siblings[index - 1]?.slug ?? null) : null,
+          nextSlug: index < siblings.length - 1 ? (siblings[index + 1]?.slug ?? null) : null,
+        };
       }
+    }
 
-      let seriesContext: {
-        position: number;
-        total: number;
-        prevSlug: string | null;
-        nextSlug: string | null;
-      } | null = null;
-
-      if (found.seriesId) {
-        const siblings = await db.query.post.findMany({
-          where: and(eq(post.seriesId, found.seriesId), eq(post.published, true)),
-          orderBy: asc(post.seriesOrder),
-          columns: { id: true, slug: true },
-        });
-        const index = siblings.findIndex((sibling) => sibling.id === found.id);
-        if (index !== -1) {
-          seriesContext = {
-            position: index + 1,
-            total: siblings.length,
-            prevSlug: index > 0 ? (siblings[index - 1]?.slug ?? null) : null,
-            nextSlug: index < siblings.length - 1 ? (siblings[index + 1]?.slug ?? null) : null,
-          };
-        }
-      }
-
-      return {
-        ...formatPost(found),
-        readingMinutes: estimateReadingMinutes(extractPlainText(found.contentJson)),
-        seriesContext,
-      };
-    }),
+    return {
+      ...formatPost(found),
+      readingMinutes: estimateReadingMinutes(extractPlainText(found.contentJson)),
+      seriesContext,
+    };
+  }),
 
   create: verifiedProcedure
     .use(strictRateLimit({ path: "post.create", limit: 50, window: "1 h" }))
@@ -515,20 +513,18 @@ export const postRouter = createPublicTRPCRouter({
       });
     }),
 
-  delete: verifiedProcedure
-    .input(z.object({ id: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      const rows = await db
-        .delete(post)
-        .where(and(eq(post.id, input.id), eq(post.authorId, ctx.session.user.id)))
-        .returning();
+  delete: verifiedProcedure.input(z.object({ id: z.string() })).mutation(async ({ ctx, input }) => {
+    const rows = await db
+      .delete(post)
+      .where(and(eq(post.id, input.id), eq(post.authorId, ctx.session.user.id)))
+      .returning();
 
-      if (!rows[0]) {
-        throw new TRPCError({ code: "NOT_FOUND" });
-      }
+    if (!rows[0]) {
+      throw new TRPCError({ code: "NOT_FOUND" });
+    }
 
-      return { id: rows[0].id };
-    }),
+    return { id: rows[0].id };
+  }),
 
   setPublished: verifiedProcedure
     .input(z.object({ id: z.string(), published: z.boolean() }))

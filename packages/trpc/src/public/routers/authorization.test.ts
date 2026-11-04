@@ -39,9 +39,9 @@ describe.skipIf(!isLocalDatabase())("public router authorization", () => {
     it("rejects delete by a non-owner and allows the owner", async () => {
       const target = await h.insertPost({ authorId: author.id, published: true });
 
-      await expect(
-        h.publicCaller(stranger).post.delete({ id: target.id })
-      ).rejects.toMatchObject({ code: "NOT_FOUND" });
+      await expect(h.publicCaller(stranger).post.delete({ id: target.id })).rejects.toMatchObject({
+        code: "NOT_FOUND",
+      });
 
       await expect(h.publicCaller(author).post.delete({ id: target.id })).resolves.toEqual({
         id: target.id,
@@ -77,9 +77,9 @@ describe.skipIf(!isLocalDatabase())("public router authorization", () => {
       await expect(
         h.publicCaller(stranger).post.getBySlug({ slug: draft.slug })
       ).rejects.toMatchObject({ code: "NOT_FOUND" });
-      await expect(
-        h.publicCaller(null).post.getBySlug({ slug: draft.slug })
-      ).rejects.toMatchObject({ code: "NOT_FOUND" });
+      await expect(h.publicCaller(null).post.getBySlug({ slug: draft.slug })).rejects.toMatchObject(
+        { code: "NOT_FOUND" }
+      );
 
       const own = await h.publicCaller(author).post.getBySlug({ slug: draft.slug });
       expect(own.id).toBe(draft.id);
@@ -94,12 +94,12 @@ describe.skipIf(!isLocalDatabase())("public router authorization", () => {
       await expect(caller.bookmark.toggle({ postId: draft.id })).rejects.toMatchObject({
         code: "NOT_FOUND",
       });
-      await expect(
-        caller.reaction.react({ postId: draft.id, type: "like" })
-      ).rejects.toMatchObject({ code: "NOT_FOUND" });
-      await expect(
-        caller.comment.create({ postId: draft.id, body: "peek" })
-      ).rejects.toMatchObject({ code: "NOT_FOUND" });
+      await expect(caller.reaction.react({ postId: draft.id, type: "like" })).rejects.toMatchObject(
+        { code: "NOT_FOUND" }
+      );
+      await expect(caller.comment.create({ postId: draft.id, body: "peek" })).rejects.toMatchObject(
+        { code: "NOT_FOUND" }
+      );
       await expect(caller.comment.listByPost({ postId: draft.id })).rejects.toMatchObject({
         code: "NOT_FOUND",
       });

@@ -10,9 +10,14 @@ import {
 import { TRPCError } from "@trpc/server";
 import { and, desc, eq, ilike, inArray, isNull } from "drizzle-orm";
 import { z } from "zod";
-import { authedProcedure, createPublicTRPCRouter, strictRateLimit, verifiedProcedure } from "../init";
-import { getQuota, releaseQuota, tryReserveQuota } from "./media-quota";
+import {
+  authedProcedure,
+  createPublicTRPCRouter,
+  strictRateLimit,
+  verifiedProcedure,
+} from "../init";
 import { afterCursor, byOwnCursor, createdAtCursorSchema, toPage } from "../pagination";
+import { getQuota, releaseQuota, tryReserveQuota } from "./media-quota";
 
 const ALLOWED_MEDIA_TYPES: Record<string, string> = {
   "image/png": "png",
@@ -38,7 +43,6 @@ function isOwnMediaKey(key: string, userId: string) {
 function maxBytesFor(contentType: string) {
   return contentType.startsWith("video/") ? MAX_VIDEO_BYTES : MAX_IMAGE_BYTES;
 }
-
 
 export const mediaRouter = createPublicTRPCRouter({
   list: authedProcedure
@@ -88,10 +92,10 @@ export const mediaRouter = createPublicTRPCRouter({
           contentType: z.string(),
           size: z.number().int().positive(),
         })
-        .refine(
-          (input) => input.size <= maxBytesFor(input.contentType),
-          { message: "File is too large", path: ["size"] }
-        )
+        .refine((input) => input.size <= maxBytesFor(input.contentType), {
+          message: "File is too large",
+          path: ["size"],
+        })
     )
     .mutation(async ({ ctx, input }) => {
       const ext = ALLOWED_MEDIA_TYPES[input.contentType];
@@ -234,24 +238,22 @@ export const mediaRouter = createPublicTRPCRouter({
       return updated;
     }),
 
-  delete: verifiedProcedure
-    .input(z.object({ id: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      const rows = await db
-        .delete(media)
-        .where(and(eq(media.id, input.id), eq(media.ownerId, ctx.session.user.id)))
-        .returning();
+  delete: verifiedProcedure.input(z.object({ id: z.string() })).mutation(async ({ ctx, input }) => {
+    const rows = await db
+      .delete(media)
+      .where(and(eq(media.id, input.id), eq(media.ownerId, ctx.session.user.id)))
+      .returning();
 
-      const deleted = rows[0];
-      if (!deleted) {
-        throw new TRPCError({ code: "NOT_FOUND" });
-      }
+    const deleted = rows[0];
+    if (!deleted) {
+      throw new TRPCError({ code: "NOT_FOUND" });
+    }
 
-      await deleteObject(deleted.storageKey);
-      await releaseQuota(ctx.session.user.id, deleted.size);
+    await deleteObject(deleted.storageKey);
+    await releaseQuota(ctx.session.user.id, deleted.size);
 
-      return { id: deleted.id };
-    }),
+    return { id: deleted.id };
+  }),
 
   bulkDelete: verifiedProcedure
     .input(z.object({ ids: z.array(z.string()).min(1).max(200) }))

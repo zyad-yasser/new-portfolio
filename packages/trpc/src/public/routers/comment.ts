@@ -10,11 +10,11 @@ import {
   strictRateLimit,
   verifiedProcedure,
 } from "../init";
+import { afterCursor, byOwnCursor, createdAtCursorSchema, toPage } from "../pagination";
 import { assertNotBlocked, getBlockedUserIds } from "./block";
 import { createNotification } from "./notification";
 import { ensureUserProfile } from "./profile";
 import { assertReadablePost } from "./readable-post";
-import { afterCursor, byOwnCursor, createdAtCursorSchema, toPage } from "../pagination";
 
 const authorColumns = { id: true, name: true, image: true } as const;
 const authorWith = { profile: { columns: { username: true } } } as const;
@@ -146,40 +146,38 @@ export const commentRouter = createPublicTRPCRouter({
       return rows[0];
     }),
 
-  delete: verifiedProcedure
-    .input(z.object({ id: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      const target = await db.query.comment.findFirst({
-        where: eq(comment.id, input.id),
-        with: { post: { columns: { authorId: true } } },
-      });
+  delete: verifiedProcedure.input(z.object({ id: z.string() })).mutation(async ({ ctx, input }) => {
+    const target = await db.query.comment.findFirst({
+      where: eq(comment.id, input.id),
+      with: { post: { columns: { authorId: true } } },
+    });
 
-      if (!target) {
-        throw new TRPCError({ code: "NOT_FOUND" });
+    if (!target) {
+      throw new TRPCError({ code: "NOT_FOUND" });
+    }
+
+    const isOwner = target.authorId === ctx.session.user.id;
+    const isPostAuthor = target.post.authorId === ctx.session.user.id;
+
+    if (!isOwner && !isPostAuthor) {
+      throw new TRPCError({ code: "FORBIDDEN" });
+    }
+
+    await db.transaction(async (tx) => {
+      const deleted = await tx
+        .update(comment)
+        .set({ deletedAt: new Date(), body: "" })
+        .where(and(eq(comment.id, input.id), isNull(comment.deletedAt)))
+        .returning({ id: comment.id });
+
+      if (deleted.length) {
+        await tx
+          .update(post)
+          .set({ commentCount: sql`greatest(${post.commentCount} - 1, 0)` })
+          .where(eq(post.id, target.postId));
       }
+    });
 
-      const isOwner = target.authorId === ctx.session.user.id;
-      const isPostAuthor = target.post.authorId === ctx.session.user.id;
-
-      if (!isOwner && !isPostAuthor) {
-        throw new TRPCError({ code: "FORBIDDEN" });
-      }
-
-      await db.transaction(async (tx) => {
-        const deleted = await tx
-          .update(comment)
-          .set({ deletedAt: new Date(), body: "" })
-          .where(and(eq(comment.id, input.id), isNull(comment.deletedAt)))
-          .returning({ id: comment.id });
-
-        if (deleted.length) {
-          await tx
-            .update(post)
-            .set({ commentCount: sql`greatest(${post.commentCount} - 1, 0)` })
-            .where(eq(post.id, target.postId));
-        }
-      });
-
-      return { id: input.id };
-    }),
+    return { id: input.id };
+  }),
 });

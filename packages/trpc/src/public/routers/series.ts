@@ -121,19 +121,17 @@ export const seriesRouter = createPublicTRPCRouter({
       };
     }),
 
-  getBySlug: publicProcedure
-    .input(z.object({ slug: z.string() }))
-    .query(async ({ ctx, input }) => {
-      const found = await findSeriesBySlug(input.slug);
-      const isOwner = !!ctx.session && found.authorId === ctx.session.user.id;
+  getBySlug: publicProcedure.input(z.object({ slug: z.string() })).query(async ({ ctx, input }) => {
+    const found = await findSeriesBySlug(input.slug);
+    const isOwner = !!ctx.session && found.authorId === ctx.session.user.id;
 
-      const [countRow] = await db
-        .select({ value: count() })
-        .from(post)
-        .where(visibleSeriesPosts(found.id, isOwner));
+    const [countRow] = await db
+      .select({ value: count() })
+      .from(post)
+      .where(visibleSeriesPosts(found.id, isOwner));
 
-      return { ...found, postCount: countRow?.value ?? 0 };
-    }),
+    return { ...found, postCount: countRow?.value ?? 0 };
+  }),
 
   posts: publicProcedure
     .input(
@@ -250,20 +248,18 @@ export const seriesRouter = createPublicTRPCRouter({
       return updated;
     }),
 
-  delete: verifiedProcedure
-    .input(z.object({ id: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      const rows = await db
-        .delete(series)
-        .where(and(eq(series.id, input.id), eq(series.authorId, ctx.session.user.id)))
-        .returning();
+  delete: verifiedProcedure.input(z.object({ id: z.string() })).mutation(async ({ ctx, input }) => {
+    const rows = await db
+      .delete(series)
+      .where(and(eq(series.id, input.id), eq(series.authorId, ctx.session.user.id)))
+      .returning();
 
-      if (!rows[0]) {
-        throw new TRPCError({ code: "NOT_FOUND" });
-      }
+    if (!rows[0]) {
+      throw new TRPCError({ code: "NOT_FOUND" });
+    }
 
-      return { id: rows[0].id };
-    }),
+    return { id: rows[0].id };
+  }),
 
   reorder: verifiedProcedure
     .input(z.object({ seriesId: z.string(), postIds: z.array(z.string()).min(1).max(500) }))

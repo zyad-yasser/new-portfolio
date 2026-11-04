@@ -104,20 +104,18 @@ export const videoCommentRouter = createPublicTRPCRouter({
       return rows[0];
     }),
 
-  delete: verifiedProcedure
-    .input(z.object({ id: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      const rows = await db
-        .delete(postVideoComment)
-        .where(
-          and(eq(postVideoComment.id, input.id), eq(postVideoComment.userId, ctx.session.user.id))
-        )
-        .returning({ id: postVideoComment.id });
+  delete: verifiedProcedure.input(z.object({ id: z.string() })).mutation(async ({ ctx, input }) => {
+    const rows = await db
+      .delete(postVideoComment)
+      .where(
+        and(eq(postVideoComment.id, input.id), eq(postVideoComment.userId, ctx.session.user.id))
+      )
+      .returning({ id: postVideoComment.id });
 
-      if (!rows[0]) {
-        throw new TRPCError({ code: "NOT_FOUND" });
-      }
+    if (!rows[0]) {
+      throw new TRPCError({ code: "NOT_FOUND" });
+    }
 
-      return rows[0];
-    }),
+    return rows[0];
+  }),
 });

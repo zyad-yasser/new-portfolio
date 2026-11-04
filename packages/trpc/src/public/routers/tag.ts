@@ -42,36 +42,32 @@ export const tagRouter = createPublicTRPCRouter({
     })
   ),
 
-  search: publicProcedure
-    .input(z.object({ query: z.string().trim().max(30) }))
-    .query(({ input }) =>
-      db.query.tag.findMany({
-        where: and(
-          inArray(tag.id, publishedTagIds()),
-          input.query ? ilike(tag.name, `%${input.query}%`) : undefined
-        ),
-        orderBy: asc(tag.name),
-        limit: 20,
-      })
-    ),
+  search: publicProcedure.input(z.object({ query: z.string().trim().max(30) })).query(({ input }) =>
+    db.query.tag.findMany({
+      where: and(
+        inArray(tag.id, publishedTagIds()),
+        input.query ? ilike(tag.name, `%${input.query}%`) : undefined
+      ),
+      orderBy: asc(tag.name),
+      limit: 20,
+    })
+  ),
 
-  getBySlug: publicProcedure
-    .input(z.object({ slug: z.string() }))
-    .query(async ({ input }) => {
-      const found = await findTagBySlug(input.slug);
+  getBySlug: publicProcedure.input(z.object({ slug: z.string() })).query(async ({ input }) => {
+    const found = await findTagBySlug(input.slug);
 
-      const [countRow] = await db
-        .select({ value: count() })
-        .from(post)
-        .where(publishedWithTag(found.id));
-      const postCount = countRow?.value ?? 0;
+    const [countRow] = await db
+      .select({ value: count() })
+      .from(post)
+      .where(publishedWithTag(found.id));
+    const postCount = countRow?.value ?? 0;
 
-      if (!postCount) {
-        throw new TRPCError({ code: "NOT_FOUND" });
-      }
+    if (!postCount) {
+      throw new TRPCError({ code: "NOT_FOUND" });
+    }
 
-      return { ...found, postCount };
-    }),
+    return { ...found, postCount };
+  }),
 
   posts: publicProcedure
     .input(pageInputSchema(12, 50).extend({ slug: z.string() }))

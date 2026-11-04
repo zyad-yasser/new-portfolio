@@ -3,8 +3,8 @@ import { post } from "@repo/db/schema";
 import { and, eq, notInArray, sql } from "drizzle-orm";
 import { z } from "zod";
 import { createPublicTRPCRouter, publicProcedure } from "../init";
-import { formatPost, postWith } from "./post";
 import { getBlockedUserIds } from "./block";
+import { formatPost, postWith } from "./post";
 
 const cursorSchema = z.object({ rank: z.number(), id: z.string() });
 
@@ -47,10 +47,7 @@ export const searchRouter = createPublicTRPCRouter({
 
       const blockedIds = await getBlockedUserIds(ctx.session?.user.id);
 
-      const conditions = [
-        eq(post.published, true),
-        sql`${post.searchVector} @@ ${tsquery}`,
-      ];
+      const conditions = [eq(post.published, true), sql`${post.searchVector} @@ ${tsquery}`];
       if (blockedIds.length) {
         conditions.push(notInArray(post.authorId, blockedIds));
       }

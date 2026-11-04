@@ -36,6 +36,7 @@ export function PostStructuredData({
     <Script
       id="post-schema"
       type="application/ld+json"
+      // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD must be inlined; "<" is escaped
       dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replace(/</g, "\\u003c") }}
     />
   );

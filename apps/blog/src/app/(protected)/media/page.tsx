@@ -547,6 +547,8 @@ function MediaLibraryContent() {
                       goToFolder(folder.id);
                     }
                   }}
+                  // biome-ignore lint/a11y/useSemanticElements: draggable tile that can contain a rename input, which a <button> cannot
+
                   role="button"
                   tabIndex={0}
                   onKeyDown={(e: KeyboardEvent<HTMLDivElement>) => {
@@ -645,6 +647,8 @@ function MediaLibraryContent() {
                       setPreviewId(item.id);
                     }
                   }}
+                  // biome-ignore lint/a11y/useSemanticElements: draggable tile that can contain a rename input, which a <button> cannot
+
                   role="button"
                   tabIndex={0}
                   onKeyDown={(e: KeyboardEvent<HTMLDivElement>) => {
