@@ -3,6 +3,7 @@ import * as schema from "@repo/db/schema";
 import { createSecondaryStorage } from "@repo/utils/secondary-storage";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { APIError, createAuthMiddleware } from "better-auth/api";
 import { ADMIN_COOKIE_PREFIX, roleField } from "./shared";
 
 if (!process.env.BETTER_AUTH_SECRET) {
@@ -33,6 +34,24 @@ export const auth = betterAuth({
   },
   advanced: {
     cookiePrefix: ADMIN_COOKIE_PREFIX,
+  },
+  hooks: {
+    before: createAuthMiddleware(async (ctx) => {
+      if (ctx.path !== "/sign-in/email") {
+        return;
+      }
+
+      const email = typeof ctx.body?.email === "string" ? ctx.body.email.trim().toLowerCase() : "";
+      const found = email ? await ctx.context.internalAdapter.findUserByEmail(email) : null;
+      const role = (found?.user as { role?: string } | undefined)?.role;
+
+      if (role !== "admin") {
+        throw new APIError("UNAUTHORIZED", {
+          code: "INVALID_EMAIL_OR_PASSWORD",
+          message: "Invalid email or password",
+        });
+      }
+    }),
   },
   user: {
     additionalFields: roleField,
