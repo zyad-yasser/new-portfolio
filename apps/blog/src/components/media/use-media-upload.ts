@@ -3,6 +3,7 @@
 import { getErrorMessage } from "@repo/trpc/error";
 import { publicApi } from "@repo/trpc/public/react";
 import { useCallback, useState } from "react";
+import { toast } from "sonner";
 
 export type MediaItem = {
   id: string;
@@ -122,6 +123,7 @@ export function useMediaUpload(onUploaded: (item: MediaItem) => void) {
 
       const validationError = validateFile(file);
       if (validationError) {
+        toast.error(`${file.name}: ${validationError}`);
         setItems((prev) =>
           prev.map((item) =>
             item.id === id ? { ...item, status: "error", error: validationError } : item
@@ -158,16 +160,10 @@ export function useMediaUpload(onUploaded: (item: MediaItem) => void) {
           onUploaded(confirmed);
         }
       } catch (error) {
+        const message = getErrorMessage(error, "Upload failed");
+        toast.error(`${file.name}: ${message}`);
         setItems((prev) =>
-          prev.map((item) =>
-            item.id === id
-              ? {
-                  ...item,
-                  status: "error",
-                  error: getErrorMessage(error, "Upload failed"),
-                }
-              : item
-          )
+          prev.map((item) => (item.id === id ? { ...item, status: "error", error: message } : item))
         );
       }
     },
