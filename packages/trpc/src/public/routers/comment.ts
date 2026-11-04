@@ -148,7 +148,13 @@ export const commentRouter = createPublicTRPCRouter({
       const rows = await db
         .update(comment)
         .set({ body: input.body, updatedAt: new Date() })
-        .where(and(eq(comment.id, input.id), eq(comment.authorId, ctx.session.user.id)))
+        .where(
+          and(
+            eq(comment.id, input.id),
+            eq(comment.authorId, ctx.session.user.id),
+            isNull(comment.deletedAt)
+          )
+        )
         .returning();
 
       if (!rows[0]) {
