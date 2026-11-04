@@ -6,7 +6,7 @@ import { requireEnv } from "@repo/utils";
 import { createRateLimiter, getClientIp, safeLimit } from "@repo/utils/rate-limit";
 import { getPublicUrl } from "@repo/utils/storage";
 import { TRPCError } from "@trpc/server";
-import { and, asc, desc, eq, ne, notInArray, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, ne, notInArray, sql } from "drizzle-orm";
 import type { PgUpdateSetSource } from "drizzle-orm/pg-core";
 import { z } from "zod";
 import {
@@ -139,38 +139,39 @@ async function computeAppendOrder(seriesId: string, authorId: string) {
     throw new TRPCError({ code: "FORBIDDEN" });
   }
 
-  const existing = await db.query.post.findMany({
-    where: eq(post.seriesId, seriesId),
-    columns: { id: true },
-  });
-  return existing.length;
+  const [row] = await db
+    .select({ next: sql<number>`coalesce(max(${post.seriesOrder}), -1) + 1` })
+    .from(post)
+    .where(eq(post.seriesId, seriesId));
+  return Number(row?.next ?? 0);
 }
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
 async function syncPostTags(tx: Tx, postId: string, tagNames: string[]) {
-  const tagIds: string[] = [];
-
+  const namesBySlug = new Map<string, string>();
   for (const rawName of tagNames) {
     const name = rawName.trim();
     const slug = slugifyBase(name) || "tag";
-    const existing = await tx.query.tag.findFirst({ where: eq(tag.slug, slug) });
-
-    if (existing) {
-      tagIds.push(existing.id);
-      continue;
+    if (!namesBySlug.has(slug)) {
+      namesBySlug.set(slug, name);
     }
-
-    const id = randomUUID();
-    await tx.insert(tag).values({ id, name, slug });
-    tagIds.push(id);
   }
+  const slugs = [...namesBySlug.keys()];
 
   await tx.delete(postTag).where(eq(postTag.postId, postId));
 
-  if (tagIds.length) {
-    await tx.insert(postTag).values(tagIds.map((tagId) => ({ postId, tagId })));
+  if (!slugs.length) {
+    return;
   }
+
+  await tx
+    .insert(tag)
+    .values(slugs.map((slug) => ({ id: randomUUID(), name: namesBySlug.get(slug) ?? slug, slug })))
+    .onConflictDoNothing({ target: tag.slug });
+
+  const tags = await tx.select({ id: tag.id }).from(tag).where(inArray(tag.slug, slugs));
+  await tx.insert(postTag).values(tags.map((row) => ({ postId, tagId: row.id })));
 }
 
 const authorColumns = { id: true, name: true, image: true } as const;

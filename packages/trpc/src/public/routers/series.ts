@@ -266,7 +266,7 @@ export const seriesRouter = createPublicTRPCRouter({
     }),
 
   reorder: verifiedProcedure
-    .input(z.object({ seriesId: z.string(), postIds: z.array(z.string()).min(1) }))
+    .input(z.object({ seriesId: z.string(), postIds: z.array(z.string()).min(1).max(500) }))
     .mutation(async ({ ctx, input }) => {
       const owned = await db.query.series.findFirst({
         where: and(eq(series.id, input.seriesId), eq(series.authorId, ctx.session.user.id)),
@@ -289,14 +289,15 @@ export const seriesRouter = createPublicTRPCRouter({
         throw new TRPCError({ code: "BAD_REQUEST", message: "postIds must match the series" });
       }
 
-      await db.transaction(async (tx) => {
-        for (const [index, postId] of input.postIds.entries()) {
-          await tx
-            .update(post)
-            .set({ seriesOrder: index })
-            .where(and(eq(post.id, postId), eq(post.seriesId, input.seriesId)));
-        }
-      });
+      const orderCases = sql.join(
+        input.postIds.map((postId, index) => sql`when ${postId} then ${index}::int`),
+        sql` `
+      );
+
+      await db
+        .update(post)
+        .set({ seriesOrder: sql`case ${post.id} ${orderCases} end` })
+        .where(and(inArray(post.id, input.postIds), eq(post.seriesId, input.seriesId)));
 
       return { ok: true };
     }),
