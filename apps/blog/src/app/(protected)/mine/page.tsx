@@ -2,6 +2,7 @@
 
 import { SiteHeader } from "@/components/site-header";
 import { categoryColorClasses } from "@/lib/category-colors";
+import { getErrorMessage } from "@repo/trpc/error";
 import { publicApi } from "@repo/trpc/public/react";
 import {
   AlertDialog,
@@ -20,23 +21,32 @@ import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui/card";
 import { Skeleton } from "@repo/ui/skeleton";
 import { Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
+import { toast } from "sonner";
 
 export default function MinePostsPage() {
   const utils = publicApi.useUtils();
-  const { data: posts, isLoading, error, refetch } = publicApi.post.mine.useQuery();
+  const { data, isLoading, error, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    publicApi.post.mine.useInfiniteQuery(
+      {},
+      { getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined }
+    );
+  const posts = data?.pages.flatMap((page) => page.items);
 
   const setPublished = publicApi.post.setPublished.useMutation({
     onSuccess: async () => {
       await utils.post.mine.invalidate();
       await utils.post.list.invalidate();
     },
+    onError: (error) => toast.error(getErrorMessage(error, "Couldn't update this post.")),
   });
 
   const deletePost = publicApi.post.delete.useMutation({
     onSuccess: async () => {
       await utils.post.mine.invalidate();
       await utils.post.list.invalidate();
+      toast.success("Post deleted.");
     },
+    onError: (error) => toast.error(getErrorMessage(error, "Couldn't delete this post.")),
   });
 
   return (
@@ -48,12 +58,12 @@ export default function MinePostsPage() {
         <div className="flex flex-col gap-4">
           {isLoading &&
             Array.from({ length: 3 }).map((_, i) => (
-              <Skeleton key={i} className="h-24 w-full rounded-lg" />
+              <Skeleton key={i} className="skeleton-shimmer h-24 w-full rounded-lg" />
             ))}
 
           {error && (
             <div className="flex flex-col items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
-              <p>Couldn't load your posts. {error.message}</p>
+              <p>Couldn't load your posts. Please try again.</p>
               <Button variant="outline" size="sm" onClick={() => refetch()}>
                 Try again
               </Button>
@@ -67,13 +77,13 @@ export default function MinePostsPage() {
                 href="/new"
                 className="font-medium text-foreground underline underline-offset-4"
               >
-                Write your first post
+                Write your first article
               </Link>
             </p>
           )}
 
           {posts?.map((post) => (
-            <Card key={post.id}>
+            <Card key={post.id} className="card-hover">
               <CardHeader className="flex flex-row items-center justify-between gap-3">
                 <CardTitle className="text-base">
                   <Link href={`/post/${post.slug}`} className="hover:underline">
@@ -153,6 +163,17 @@ export default function MinePostsPage() {
               </CardContent>
             </Card>
           ))}
+
+          {hasNextPage && (
+            <Button
+              variant="outline"
+              className="self-center"
+              disabled={isFetchingNextPage}
+              onClick={() => fetchNextPage()}
+            >
+              {isFetchingNextPage ? "Loading…" : "Load more"}
+            </Button>
+          )}
         </div>
       </main>
     </>

@@ -1,4 +1,6 @@
+import { EmailVerificationBanner } from "@/components/email-verification-banner";
 import { PublicTRPCReactProvider } from "@repo/trpc/public/react";
+import { Toaster } from "@repo/ui/sonner";
 import { ThemeProvider } from "@repo/ui/theme-provider";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
@@ -24,7 +26,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           enableSystem
           disableTransitionOnChange
         >
-          <PublicTRPCReactProvider>{children}</PublicTRPCReactProvider>
+          <PublicTRPCReactProvider>
+            <EmailVerificationBanner />
+            {children}
+            <Toaster />
+          </PublicTRPCReactProvider>
         </ThemeProvider>
       </body>
     </html>

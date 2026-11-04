@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "@repo/ui/sonner";
 import { ThemeProvider } from "@repo/ui/theme-provider";
 import { StructuredData } from "../components/seo/structured-data";
 import { SiteHeader } from "../components/site-header";
@@ -115,6 +116,7 @@ export default function RootLayout({
         >
           <SiteHeader />
           {children}
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

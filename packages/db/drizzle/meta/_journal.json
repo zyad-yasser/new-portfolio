@@ -50,6 +50,76 @@
       "when": 1785955140695,
       "tag": "0006_blog-username-not-null",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1786028128193,
+      "tag": "0007_shiny_human_torch",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1786108519853,
+      "tag": "0008_strange_korath",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1786112834910,
+      "tag": "0009_fluffy_zarda",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1786130246318,
+      "tag": "0010_naive_whizzer",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1786237638844,
+      "tag": "0011_funny_triathlon",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1786917774674,
+      "tag": "0012_blushing_thor",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1787050831612,
+      "tag": "0013_harsh_post",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1787060057610,
+      "tag": "0014_zippy_wendigo",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1787232200601,
+      "tag": "0015_thin_the_renegades",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1788882167960,
+      "tag": "0016_acoustic_vermin",
+      "breakpoints": true
     }
   ]
 }

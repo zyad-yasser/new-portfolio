@@ -2,17 +2,20 @@
 
 import { PostCard } from "@/components/posts/post-card";
 import { SiteHeader } from "@/components/site-header";
+import { VerifiedGate } from "@/components/verified-gate";
 import { isSafeHttpUrl } from "@/lib/safe-url";
 import { publicAuthClient } from "@repo/auth/public-client";
+import { getErrorMessage } from "@repo/trpc/error";
 import { publicApi } from "@repo/trpc/public/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@repo/ui/avatar";
 import { Button } from "@repo/ui/button";
 import { Skeleton } from "@repo/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui/tabs";
 import { TooltipProvider } from "@repo/ui/tooltip";
-import { Calendar, Globe, Loader2, MapPin } from "lucide-react";
+import { Calendar, FileText, Globe, Loader2, MapPin, User } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { toast } from "sonner";
 
 function initialsFor(name: string) {
   return name
@@ -49,6 +52,8 @@ export default function ProfilePage() {
       }
       utils.profile.getByUsername.invalidate({ username });
     },
+    onError: (mutationError) =>
+      toast.error(getErrorMessage(mutationError, "Couldn't follow this user.")),
   });
   const unfollow = publicApi.follow.unfollow.useMutation({
     onSuccess: () => {
@@ -57,6 +62,8 @@ export default function ProfilePage() {
       }
       utils.profile.getByUsername.invalidate({ username });
     },
+    onError: (mutationError) =>
+      toast.error(getErrorMessage(mutationError, "Couldn't unfollow this user.")),
   });
 
   if (isLoading) {
@@ -64,8 +71,8 @@ export default function ProfilePage() {
       <>
         <SiteHeader />
         <main className="mx-auto flex max-w-3xl flex-col gap-6 px-6 py-16">
-          <Skeleton className="h-24 w-full" />
-          <Skeleton className="h-64 w-full" />
+          <Skeleton className="skeleton-shimmer h-24 w-full" />
+          <Skeleton className="skeleton-shimmer h-64 w-full" />
         </main>
       </>
     );
@@ -102,20 +109,25 @@ export default function ProfilePage() {
           </div>
 
           {!isOwnProfile && session && (
-            <Button
-              variant={isFollowing ? "outline" : "default"}
-              disabled={follow.isPending || unfollow.isPending}
-              onClick={() =>
-                isFollowing
-                  ? unfollow.mutate({ userId: profile.userId })
-                  : follow.mutate({ userId: profile.userId })
-              }
+            <VerifiedGate
+              verified={session.user.emailVerified}
+              message="Verify your email to follow other users"
             >
-              {(follow.isPending || unfollow.isPending) && (
-                <Loader2 className="size-4 animate-spin" />
-              )}
-              {isFollowing ? "Following" : "Follow"}
-            </Button>
+              <Button
+                variant={isFollowing ? "outline" : "default"}
+                disabled={!session.user.emailVerified || follow.isPending || unfollow.isPending}
+                onClick={() =>
+                  isFollowing
+                    ? unfollow.mutate({ userId: profile.userId })
+                    : follow.mutate({ userId: profile.userId })
+                }
+              >
+                {(follow.isPending || unfollow.isPending) && (
+                  <Loader2 className="size-4 animate-spin" />
+                )}
+                {isFollowing ? "Following" : "Follow"}
+              </Button>
+            </VerifiedGate>
           )}
         </div>
 
@@ -134,32 +146,45 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        <Tabs defaultValue="posts">
-          <TabsList>
-            <TabsTrigger value="posts">Posts</TabsTrigger>
-            <TabsTrigger value="about">About</TabsTrigger>
+        <Tabs defaultValue="posts" className="gap-4">
+          <TabsList variant="outline" className="w-full sm:w-fit">
+            <TabsTrigger value="posts" className="gap-1.5">
+              <FileText className="size-3.5" />
+              Posts
+              <span className="text-xs opacity-70">{profile.postCount}</span>
+            </TabsTrigger>
+            <TabsTrigger value="about" className="gap-1.5">
+              <User className="size-3.5" />
+              About
+            </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="posts" className="pt-4">
+          <TabsContent value="posts" className="pt-2">
             <TooltipProvider>
-              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                {postsLoading &&
-                  Array.from({ length: 4 }).map((_, i) => (
-                    <Skeleton key={i} className="h-52 w-full rounded-xl" />
+              {!postsLoading && posts?.length === 0 && (
+                <p className="text-center text-muted-foreground">No published posts yet.</p>
+              )}
+
+              {(postsLoading || (posts && posts.length > 0)) && (
+                <div className="columns-1 gap-5 sm:columns-2">
+                  {postsLoading &&
+                    Array.from({ length: 4 }).map((_, i) => (
+                      <Skeleton
+                        key={i}
+                        className="skeleton-shimmer mb-5 h-52 w-full rounded-xl break-inside-avoid"
+                      />
+                    ))}
+                  {posts?.map((post) => (
+                    <div key={post.id} className="mb-5 break-inside-avoid">
+                      <PostCard post={post} />
+                    </div>
                   ))}
-                {!postsLoading && posts?.length === 0 && (
-                  <p className="col-span-full text-center text-muted-foreground">
-                    No published posts yet.
-                  </p>
-                )}
-                {posts?.map((post) => (
-                  <PostCard key={post.id} post={post} />
-                ))}
-              </div>
+                </div>
+              )}
             </TooltipProvider>
           </TabsContent>
 
-          <TabsContent value="about" className="flex flex-col gap-3 pt-4 text-sm">
+          <TabsContent value="about" className="flex flex-col gap-3 pt-2 text-sm">
             {profile.bio ? (
               <p>{profile.bio}</p>
             ) : (

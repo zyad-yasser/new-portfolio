@@ -2,7 +2,7 @@ import { db } from "@repo/db";
 import { postBookmark } from "@repo/db/schema";
 import { and, desc, eq } from "drizzle-orm";
 import { z } from "zod";
-import { authedProcedure, createPublicTRPCRouter } from "../init";
+import { authedProcedure, createPublicTRPCRouter, verifiedProcedure } from "../init";
 import { formatPost, postWith } from "./post";
 
 export const bookmarkRouter = createPublicTRPCRouter({
@@ -29,7 +29,7 @@ export const bookmarkRouter = createPublicTRPCRouter({
       return !!existing;
     }),
 
-  toggle: authedProcedure
+  toggle: verifiedProcedure
     .input(z.object({ postId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const where = and(

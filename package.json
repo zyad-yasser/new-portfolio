@@ -25,6 +25,7 @@
     "test:e2e": "turbo run test:e2e",
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down",
+    "firebase:emulators": "firebase emulators:start --only storage",
     "db:push": "pnpm --filter @repo/db db:push",
     "db:generate": "pnpm --filter @repo/db db:generate",
     "db:migrate": "pnpm --filter @repo/db db:migrate",
@@ -33,6 +34,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
+    "firebase-tools": "^15.27.0",
     "turbo": "^2.3.3",
     "typescript": "^5.7.2"
   },

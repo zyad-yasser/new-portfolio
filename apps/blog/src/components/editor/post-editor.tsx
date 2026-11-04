@@ -1,7 +1,11 @@
 "use client";
 
+import { CoverImagePicker } from "@/components/media/cover-image-picker";
+import { VerifiedGate } from "@/components/verified-gate";
 import { categoryColorClasses } from "@/lib/category-colors";
+import { publicAuthClient } from "@repo/auth/public-client";
 import type { TiptapDoc } from "@repo/db/schema";
+import { getErrorMessage } from "@repo/trpc/error";
 import { publicApi } from "@repo/trpc/public/react";
 import { Badge } from "@repo/ui/badge";
 import { Button } from "@repo/ui/button";
@@ -14,14 +18,25 @@ import {
   CommandItem,
   CommandList,
 } from "@repo/ui/command";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@repo/ui/dialog";
 import { Input } from "@repo/ui/input";
+import { Label } from "@repo/ui/label";
 import { cn } from "@repo/ui/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@repo/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@repo/ui/select";
+import { Textarea } from "@repo/ui/textarea";
 import { Check, Loader2, Plus, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { TiptapEditor } from "./tiptap-editor";
 import { type AutosaveStatus, useAutosavePost } from "./use-autosave-post";
 
@@ -140,13 +155,74 @@ function TagPicker({
   );
 }
 
+function NewSeriesDialog({ onCreated }: { onCreated: (id: string) => void }) {
+  const utils = publicApi.useUtils();
+  const [open, setOpen] = useState(false);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+
+  const create = publicApi.series.create.useMutation({
+    onSuccess: async (created) => {
+      await utils.series.mine.invalidate();
+      setOpen(false);
+      setTitle("");
+      setDescription("");
+      onCreated(created.id);
+      toast.success("Series created.");
+    },
+    onError: (error) => toast.error(getErrorMessage(error, "Couldn't create this series.")),
+  });
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button type="button" variant="outline" size="sm" className="h-7 gap-1 text-xs">
+          <Plus className="size-3.5" />
+          New series
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>New series</DialogTitle>
+        </DialogHeader>
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="series-title">Title</Label>
+            <Input id="series-title" value={title} onChange={(e) => setTitle(e.target.value)} />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="series-description">Description</Label>
+            <Textarea
+              id="series-description"
+              rows={3}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button
+            disabled={!title.trim() || create.isPending}
+            onClick={() => create.mutate({ title, description: description || null })}
+          >
+            {create.isPending && <Loader2 className="size-4 animate-spin" />}
+            Create
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export function PostEditor({
   mode,
   existingPostId,
   initialTitle,
   initialContentJson,
   initialCategoryId,
+  initialSeriesId,
   initialTagNames,
+  initialCoverImageUrl,
   doneHref,
 }: {
   mode: "create" | "edit";
@@ -154,18 +230,24 @@ export function PostEditor({
   initialTitle?: string;
   initialContentJson?: TiptapDoc;
   initialCategoryId?: string | null;
+  initialSeriesId?: string | null;
   initialTagNames?: string[];
+  initialCoverImageUrl?: string | null;
   doneHref?: string;
 }) {
   const router = useRouter();
+  const { data: session } = publicAuthClient.useSession();
   const [title, setTitle] = useState(initialTitle ?? "");
   const [contentJson, setContentJson] = useState<TiptapDoc>(initialContentJson ?? EMPTY_DOC);
   const [categoryId, setCategoryId] = useState<string | null>(initialCategoryId ?? null);
+  const [seriesId, setSeriesId] = useState<string | null>(initialSeriesId ?? null);
   const [tagNames, setTagNames] = useState<string[]>(initialTagNames ?? []);
+  const [coverImageUrl, setCoverImageUrl] = useState<string | null>(initialCoverImageUrl ?? null);
 
   const { data: categories } = publicApi.category.list.useQuery(undefined, {
     staleTime: 10 * 60 * 1000,
   });
+  const { data: mySeries } = publicApi.series.mine.useQuery();
   const autosave = useAutosavePost(existingPostId);
 
   const skipNextAutosave = useRef(true);
@@ -174,8 +256,8 @@ export function PostEditor({
       skipNextAutosave.current = false;
       return;
     }
-    autosave.schedule({ title, contentJson, categoryId, tagNames });
-  }, [title, contentJson, categoryId, tagNames]);
+    autosave.schedule({ title, contentJson, categoryId, seriesId, tagNames, coverImageUrl });
+  }, [title, contentJson, categoryId, seriesId, tagNames, coverImageUrl]);
 
   function addTag(name: string) {
     const trimmed = name.trim();
@@ -188,9 +270,14 @@ export function PostEditor({
   }
 
   async function handlePublish() {
-    const result = await autosave.publish();
-    if (result) {
-      router.push(`/post/${result.slug}`);
+    try {
+      const result = await autosave.publish();
+      if (result) {
+        toast.success("Post published.");
+        router.push(`/post/${result.slug}`);
+      }
+    } catch (error) {
+      toast.error(getErrorMessage(error, "Couldn't publish this post."));
     }
   }
 
@@ -198,12 +285,14 @@ export function PostEditor({
     <Card>
       <CardHeader className="flex flex-row items-center justify-between gap-3">
         <div>
-          <CardTitle>{mode === "edit" ? "Edit post" : "Write a post"}</CardTitle>
+          <CardTitle>{mode === "edit" ? "Edit article" : "Write an article"}</CardTitle>
           <CardDescription>Changes save automatically as you write.</CardDescription>
         </div>
         <SavingIndicator status={autosave.status} />
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
+        <CoverImagePicker value={coverImageUrl} onChange={setCoverImageUrl} />
+
         <Input
           autoFocus
           placeholder="Post title"
@@ -236,6 +325,24 @@ export function PostEditor({
             </SelectContent>
           </Select>
 
+          <Select
+            value={seriesId ?? "none"}
+            onValueChange={(value) => setSeriesId(value === "none" ? null : value)}
+          >
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Series" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">No series</SelectItem>
+              {mySeries?.map((s) => (
+                <SelectItem key={s.id} value={s.id}>
+                  {s.title}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <NewSeriesDialog onCreated={setSeriesId} />
+
           <TagPicker tagNames={tagNames} onAdd={addTag} onRemove={removeTag} />
         </div>
 
@@ -248,10 +355,19 @@ export function PostEditor({
             </Button>
           )}
           {mode === "create" && (
-            <Button onClick={handlePublish} disabled={!title.trim() || autosave.isPublishing}>
-              {autosave.isPublishing && <Loader2 className="size-4 animate-spin" />}
-              Publish
-            </Button>
+            <VerifiedGate
+              verified={!!session?.user.emailVerified}
+              message="Verify your email to publish an article"
+            >
+              <Button
+                className="btn-glow"
+                onClick={handlePublish}
+                disabled={!session?.user.emailVerified || !title.trim() || autosave.isPublishing}
+              >
+                {autosave.isPublishing && <Loader2 className="size-4 animate-spin" />}
+                Publish
+              </Button>
+            </VerifiedGate>
           )}
         </div>
       </CardContent>

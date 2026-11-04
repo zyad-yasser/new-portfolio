@@ -4,25 +4,36 @@
   "private": true,
   "exports": {
     ".": "./src/index.ts",
+    "./schemas/auth": "./src/schemas/auth.ts",
     "./schemas/contact": "./src/schemas/contact.ts",
+    "./schemas/password": "./src/schemas/password.ts",
     "./redis": "./src/redis.ts",
     "./rate-limit": "./src/rate-limit.ts",
     "./secondary-storage": "./src/secondary-storage.ts",
     "./same-origin": "./src/same-origin.ts",
-    "./turnstile": "./src/turnstile.ts"
+    "./turnstile": "./src/turnstile.ts",
+    "./s3": "./src/s3.ts",
+    "./firebase-storage": "./src/firebase-storage.ts",
+    "./storage": "./src/storage.ts"
   },
   "scripts": {
     "lint": "biome lint .",
     "check": "biome check .",
-    "type-check": "tsc"
+    "type-check": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.691.0",
+    "@aws-sdk/s3-request-presigner": "^3.691.0",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.38.1",
+    "firebase-admin": "^14.2.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "vitest": "^4.1.10"
   }
 }

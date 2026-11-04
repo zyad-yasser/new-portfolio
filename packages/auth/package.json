@@ -6,20 +6,33 @@
     ".": "./src/index.ts",
     "./client": "./src/client.ts",
     "./public": "./src/public.ts",
-    "./public-client": "./src/public-client.ts"
+    "./public-client": "./src/public-client.ts",
+    "./error-message": "./src/error-message.ts",
+    "./oauth-error-message": "./src/oauth-error-message.ts",
+    "./password-reset-throttle": "./src/password-reset-throttle.ts",
+    "./use-password-reset-cooldown": "./src/use-password-reset-cooldown.ts",
+    "./use-resend-verification-email": "./src/use-resend-verification-email.ts"
   },
   "scripts": {
     "lint": "biome lint .",
     "check": "biome check .",
-    "type-check": "tsc"
+    "type-check": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@repo/db": "workspace:*",
+    "@repo/email": "workspace:*",
     "@repo/utils": "workspace:*",
     "better-auth": "^1.6.25"
   },
+  "peerDependencies": {
+    "react": "^19.2.4"
+  },
   "devDependencies": {
     "@types/node": "^22.10.2",
-    "typescript": "^5.7.2"
+    "@types/react": "^19.0.2",
+    "typescript": "^5.7.2",
+    "vitest": "^4.1.10"
   }
 }

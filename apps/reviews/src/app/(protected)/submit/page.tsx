@@ -1,7 +1,9 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { getAuthErrorMessage } from "@repo/auth/error-message";
 import { publicAuthClient } from "@repo/auth/public-client";
+import { getErrorMessage } from "@repo/trpc/error";
 import { publicApi } from "@repo/trpc/public/react";
 import { Button } from "@repo/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui/card";
@@ -13,6 +15,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 const reviewSchema = z.object({
@@ -26,7 +29,6 @@ type ReviewValues = z.infer<typeof reviewSchema>;
 export default function SubmitReviewPage() {
   const router = useRouter();
   const utils = publicApi.useUtils();
-  const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
 
   const form = useForm<ReviewValues>({
@@ -39,16 +41,20 @@ export default function SubmitReviewPage() {
       setSubmitted(true);
       await utils.review.list.invalidate();
     },
-    onError: (mutationError) => setError(mutationError.message),
+    onError: (mutationError) =>
+      toast.error(getErrorMessage(mutationError, "Couldn't submit your review.")),
   });
 
   async function onSubmit(values: ReviewValues) {
-    setError(null);
     createReview.mutate(values);
   }
 
   async function handleSignOut() {
-    await publicAuthClient.signOut();
+    const { error } = await publicAuthClient.signOut();
+    if (error) {
+      toast.error(getAuthErrorMessage(error, "Couldn't sign out."));
+      return;
+    }
     router.push("/login");
     router.refresh();
   }
@@ -139,15 +145,6 @@ export default function SubmitReviewPage() {
                     </FormItem>
                   )}
                 />
-
-                {error && (
-                  <p
-                    role="alert"
-                    className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
-                  >
-                    {error}
-                  </p>
-                )}
 
                 <Button type="submit" className="w-full gap-2" disabled={createReview.isPending}>
                   {createReview.isPending && <Loader2 className="size-4 animate-spin" />}

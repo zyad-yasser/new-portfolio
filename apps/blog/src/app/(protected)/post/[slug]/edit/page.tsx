@@ -10,28 +10,32 @@ import { useParams } from "next/navigation";
 
 export default function EditPostPage() {
   const { slug } = useParams<{ slug: string }>();
-  const { data: posts, isLoading, error, refetch } = publicApi.post.mine.useQuery();
-  const post = posts?.find((p) => p.slug === slug);
+  const {
+    data: post,
+    isLoading,
+    error,
+    refetch,
+  } = publicApi.post.getBySlug.useQuery({ slug }, { retry: false });
 
   if (isLoading) {
     return (
       <>
         <SiteHeader />
         <main className="mx-auto flex max-w-3xl flex-col gap-6 px-6 py-16">
-          <Skeleton className="h-9 w-1/2" />
-          <Skeleton className="h-64 w-full" />
+          <Skeleton className="skeleton-shimmer h-9 w-1/2" />
+          <Skeleton className="skeleton-shimmer h-64 w-full" />
         </main>
       </>
     );
   }
 
-  if (error) {
+  if (error && error.data?.code !== "NOT_FOUND") {
     return (
       <>
         <SiteHeader />
         <main className="mx-auto flex max-w-3xl flex-col items-center gap-4 px-6 py-24 text-center">
           <h1 className="text-2xl font-semibold">Couldn't load this post</h1>
-          <p className="text-muted-foreground">{error.message}</p>
+          <p className="text-muted-foreground">Please try again.</p>
           <Button variant="outline" onClick={() => refetch()}>
             Try again
           </Button>
@@ -54,6 +58,23 @@ export default function EditPostPage() {
     );
   }
 
+  if (post.type !== "article") {
+    return (
+      <>
+        <SiteHeader />
+        <main className="mx-auto flex max-w-3xl flex-col items-center gap-4 px-6 py-24 text-center">
+          <h1 className="text-2xl font-semibold">This post can't be edited</h1>
+          <p className="text-muted-foreground">
+            Posts and reshares don't support editing — delete and re-create instead.
+          </p>
+          <Button asChild variant="outline">
+            <Link href={`/post/${post.slug}`}>View post</Link>
+          </Button>
+        </main>
+      </>
+    );
+  }
+
   return (
     <>
       <SiteHeader />
@@ -62,10 +83,12 @@ export default function EditPostPage() {
           key={post.id}
           mode="edit"
           existingPostId={post.id}
-          initialTitle={post.title}
+          initialTitle={post.title ?? ""}
           initialContentJson={post.contentJson}
           initialCategoryId={post.categoryId}
+          initialSeriesId={post.seriesId}
           initialTagNames={post.tags.map((t) => t.name)}
+          initialCoverImageUrl={post.coverImageUrl}
           doneHref={`/post/${post.slug}`}
         />
       </main>

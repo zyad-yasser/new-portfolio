@@ -3,14 +3,23 @@ import { user } from "./auth";
 import {
   category,
   comment,
+  media,
+  mediaFolder,
+  notification,
   post,
   postBookmark,
+  postHighlight,
+  postImageAnnotation,
   postReaction,
+  postReshare,
   postTag,
+  postVideoComment,
+  series,
   tag,
   userBlock,
   userFollow,
   userProfile,
+  userStorageQuota,
 } from "./blog";
 
 export const postRelations = relations(post, ({ one, many }) => ({
@@ -22,9 +31,22 @@ export const postRelations = relations(post, ({ one, many }) => ({
     fields: [post.categoryId],
     references: [category.id],
   }),
+  series: one(series, {
+    fields: [post.seriesId],
+    references: [series.id],
+  }),
+  quotedPost: one(post, {
+    fields: [post.quotedPostId],
+    references: [post.id],
+    relationName: "quotes",
+  }),
   postTags: many(postTag),
   comments: many(comment),
   reactions: many(postReaction),
+  reshares: many(postReshare),
+  highlights: many(postHighlight),
+  videoComments: many(postVideoComment),
+  imageAnnotations: many(postImageAnnotation),
 }));
 
 export const userRelations = relations(user, ({ many, one }) => ({
@@ -33,6 +55,23 @@ export const userRelations = relations(user, ({ many, one }) => ({
   following: many(userFollow, { relationName: "followingList" }),
   followers: many(userFollow, { relationName: "followerList" }),
   bookmarks: many(postBookmark),
+  reshares: many(postReshare),
+  media: many(media),
+  series: many(series),
+  notificationsReceived: many(notification, { relationName: "notificationsReceived" }),
+  notificationsSent: many(notification, { relationName: "notificationsSent" }),
+  storageQuota: one(userStorageQuota),
+  highlights: many(postHighlight),
+  videoComments: many(postVideoComment),
+  imageAnnotations: many(postImageAnnotation),
+}));
+
+export const seriesRelations = relations(series, ({ one, many }) => ({
+  author: one(user, {
+    fields: [series.authorId],
+    references: [user.id],
+  }),
+  posts: many(post),
 }));
 
 export const categoryRelations = relations(category, ({ many }) => ({
@@ -95,6 +134,39 @@ export const postReactionRelations = relations(postReaction, ({ one }) => ({
   }),
 }));
 
+export const postHighlightRelations = relations(postHighlight, ({ one }) => ({
+  post: one(post, {
+    fields: [postHighlight.postId],
+    references: [post.id],
+  }),
+  user: one(user, {
+    fields: [postHighlight.userId],
+    references: [user.id],
+  }),
+}));
+
+export const postVideoCommentRelations = relations(postVideoComment, ({ one }) => ({
+  post: one(post, {
+    fields: [postVideoComment.postId],
+    references: [post.id],
+  }),
+  user: one(user, {
+    fields: [postVideoComment.userId],
+    references: [user.id],
+  }),
+}));
+
+export const postImageAnnotationRelations = relations(postImageAnnotation, ({ one }) => ({
+  post: one(post, {
+    fields: [postImageAnnotation.postId],
+    references: [post.id],
+  }),
+  user: one(user, {
+    fields: [postImageAnnotation.userId],
+    references: [user.id],
+  }),
+}));
+
 export const userProfileRelations = relations(userProfile, ({ one }) => ({
   user: one(user, {
     fields: [userProfile.userId],
@@ -123,5 +195,69 @@ export const postBookmarkRelations = relations(postBookmark, ({ one }) => ({
   post: one(post, {
     fields: [postBookmark.postId],
     references: [post.id],
+  }),
+}));
+
+export const postReshareRelations = relations(postReshare, ({ one }) => ({
+  user: one(user, {
+    fields: [postReshare.userId],
+    references: [user.id],
+  }),
+  post: one(post, {
+    fields: [postReshare.postId],
+    references: [post.id],
+  }),
+}));
+
+export const mediaRelations = relations(media, ({ one }) => ({
+  owner: one(user, {
+    fields: [media.ownerId],
+    references: [user.id],
+  }),
+  folder: one(mediaFolder, {
+    fields: [media.folderId],
+    references: [mediaFolder.id],
+  }),
+}));
+
+export const mediaFolderRelations = relations(mediaFolder, ({ one, many }) => ({
+  owner: one(user, {
+    fields: [mediaFolder.ownerId],
+    references: [user.id],
+  }),
+  parent: one(mediaFolder, {
+    fields: [mediaFolder.parentId],
+    references: [mediaFolder.id],
+    relationName: "folderTree",
+  }),
+  children: many(mediaFolder, { relationName: "folderTree" }),
+  media: many(media),
+}));
+
+export const userStorageQuotaRelations = relations(userStorageQuota, ({ one }) => ({
+  owner: one(user, {
+    fields: [userStorageQuota.ownerId],
+    references: [user.id],
+  }),
+}));
+
+export const notificationRelations = relations(notification, ({ one }) => ({
+  recipient: one(user, {
+    fields: [notification.recipientId],
+    references: [user.id],
+    relationName: "notificationsReceived",
+  }),
+  actor: one(user, {
+    fields: [notification.actorId],
+    references: [user.id],
+    relationName: "notificationsSent",
+  }),
+  post: one(post, {
+    fields: [notification.postId],
+    references: [post.id],
+  }),
+  comment: one(comment, {
+    fields: [notification.commentId],
+    references: [comment.id],
   }),
 }));

@@ -9,7 +9,9 @@ export function assertSameOrigin(headers: Headers) {
   const host = headers.get("x-forwarded-host") ?? headers.get("host");
 
   if (!origin || !host) {
-    throw new SameOriginError("Missing Origin or Host header");
+    throw new SameOriginError(
+      process.env.NODE_ENV !== "production" ? "Missing Origin or Host header" : undefined
+    );
   }
 
   let originHost: string;

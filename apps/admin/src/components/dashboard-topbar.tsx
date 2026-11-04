@@ -1,6 +1,7 @@
 "use client";
 
 import { authClient } from "@repo/auth/client";
+import { getAuthErrorMessage } from "@repo/auth/error-message";
 import { Avatar, AvatarFallback, AvatarImage } from "@repo/ui/avatar";
 import {
   DropdownMenu,
@@ -15,6 +16,7 @@ import { SidebarTrigger } from "@repo/ui/sidebar";
 import { ThemeToggle } from "@repo/ui/theme-toggle";
 import { LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 interface DashboardTopbarProps {
   user: {
@@ -28,7 +30,11 @@ export function DashboardTopbar({ user }: DashboardTopbarProps) {
   const router = useRouter();
 
   async function handleSignOut() {
-    await authClient.signOut();
+    const { error } = await authClient.signOut();
+    if (error) {
+      toast.error(getAuthErrorMessage(error, "Couldn't sign out."));
+      return;
+    }
     router.push("/login");
     router.refresh();
   }

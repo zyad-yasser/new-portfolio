@@ -14,6 +14,7 @@ import { motion } from "framer-motion";
 import { Loader2, Mail, MapPin, Phone, Send } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { SectionHeader } from "./ui/section-header";
 
 const contactInfo = [
@@ -39,7 +40,6 @@ const contactInfo = [
 
 export function ModernContact() {
   const [status, setStatus] = useState<"idle" | "success">("idle");
-  const [error, setError] = useState<string | null>(null);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [turnstileKey, setTurnstileKey] = useState(0);
 
@@ -49,10 +49,8 @@ export function ModernContact() {
   });
 
   async function onSubmit(values: ContactFormValues) {
-    setError(null);
-
     if (!turnstileToken) {
-      setError("Please complete the verification.");
+      toast.error("Please complete the verification.");
       return;
     }
 
@@ -64,12 +62,12 @@ export function ModernContact() {
       });
       const data: { ok: boolean; error?: string } = await response.json();
       if (!data.ok) {
-        setError(data.error ?? "Something went wrong. Please try again.");
+        toast.error(data.error ?? "Something went wrong. Please try again.");
         return;
       }
       setStatus("success");
     } catch {
-      setError("Something went wrong. Please try again.");
+      toast.error("Something went wrong. Please try again.");
     } finally {
       setTurnstileToken(null);
       setTurnstileKey((key) => key + 1);
@@ -79,7 +77,6 @@ export function ModernContact() {
   function handleSendAnother() {
     form.reset();
     setStatus("idle");
-    setError(null);
   }
 
   return (
@@ -240,14 +237,6 @@ export function ModernContact() {
                           onVerify={setTurnstileToken}
                           onExpire={() => setTurnstileToken(null)}
                         />
-                        {error && (
-                          <p
-                            role="alert"
-                            className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
-                          >
-                            {error}
-                          </p>
-                        )}
                         <Button
                           size="lg"
                           className="w-full text-base sm:text-lg py-5 sm:py-6 btn-glow"

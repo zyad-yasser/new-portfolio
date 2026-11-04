@@ -4,10 +4,14 @@ import { REACTION_EMOJI, REACTION_LABEL } from "@/lib/reactions";
 import { publicAuthClient } from "@repo/auth/public-client";
 import type { ReactionType } from "@repo/db/schema";
 import { REACTION_TYPES } from "@repo/db/schema";
+import { getErrorMessage } from "@repo/trpc/error";
 import { publicApi } from "@repo/trpc/public/react";
 import { Avatar, AvatarFallback, AvatarGroup, AvatarImage } from "@repo/ui/avatar";
+import { FlipNumber } from "@repo/ui/flip-number";
 import { cn } from "@repo/ui/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@repo/ui/popover";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@repo/ui/tooltip";
+import { toast } from "sonner";
 
 type Reactor = { id: string; name: string; image: string | null };
 
@@ -16,6 +20,7 @@ function ReactionButton({
   count,
   active,
   disabled,
+  disabledReason,
   reactors,
   onReact,
 }: {
@@ -23,6 +28,7 @@ function ReactionButton({
   count: number;
   active: boolean;
   disabled: boolean;
+  disabledReason?: string | undefined;
   reactors: Reactor[];
   onReact: () => void;
 }) {
@@ -43,15 +49,11 @@ function ReactionButton({
       )}
     >
       <span>{REACTION_EMOJI[type]}</span>
-      {count > 0 && <span>{count}</span>}
+      {count > 0 && <FlipNumber value={count} label={REACTION_LABEL[type]} />}
     </button>
   );
 
-  if (!reactors.length) {
-    return button;
-  }
-
-  return (
+  const node = reactors.length ? (
     <Popover>
       <PopoverTrigger asChild>{button}</PopoverTrigger>
       <PopoverContent align="start" className="w-auto p-3">
@@ -68,6 +70,24 @@ function ReactionButton({
         </div>
       </PopoverContent>
     </Popover>
+  ) : (
+    button
+  );
+
+  if (!disabledReason) {
+    return node;
+  }
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        {/* biome-ignore lint/a11y/noNoninteractiveTabindex: focusable so keyboard users can reveal why the disabled reaction is disabled */}
+        <span tabIndex={0} className="inline-flex">
+          {node}
+        </span>
+      </TooltipTrigger>
+      <TooltipContent>{disabledReason}</TooltipContent>
+    </Tooltip>
   );
 }
 
@@ -78,7 +98,32 @@ export function ReactionBar({ postId }: { postId: string }) {
   const { data: mine } = publicApi.reaction.mine.useQuery({ postId }, { enabled: !!session });
 
   const react = publicApi.reaction.react.useMutation({
-    onSuccess: () => {
+    onMutate: async ({ type }) => {
+      await Promise.all([
+        utils.reaction.summary.cancel({ postId }),
+        utils.reaction.mine.cancel({ postId }),
+      ]);
+
+      const previousSummary = utils.reaction.summary.getData({ postId });
+      const previousMine = utils.reaction.mine.getData({ postId }) ?? null;
+      const nextMine = previousMine === type ? null : type;
+
+      utils.reaction.mine.setData({ postId }, nextMine);
+      utils.reaction.summary.setData({ postId }, (current) =>
+        current?.map((row) => {
+          const delta = (row.type === nextMine ? 1 : 0) - (row.type === previousMine ? 1 : 0);
+          return delta === 0 ? row : { ...row, count: Math.max(0, row.count + delta) };
+        })
+      );
+
+      return { previousSummary, previousMine };
+    },
+    onError: (error, _variables, context) => {
+      utils.reaction.summary.setData({ postId }, context?.previousSummary);
+      utils.reaction.mine.setData({ postId }, context?.previousMine ?? null);
+      toast.error(getErrorMessage(error, "Couldn't react to this post."));
+    },
+    onSettled: () => {
       utils.reaction.summary.invalidate({ postId });
       utils.reaction.mine.invalidate({ postId });
     },
@@ -95,7 +140,12 @@ export function ReactionBar({ postId }: { postId: string }) {
             type={type}
             count={entry?.count ?? 0}
             active={mine === type}
-            disabled={!session || react.isPending}
+            disabled={!session || !session.user.emailVerified || react.isPending}
+            disabledReason={
+              session && !session.user.emailVerified
+                ? "Verify your email to react to posts"
+                : undefined
+            }
             reactors={entry?.reactors ?? []}
             onReact={() => react.mutate({ postId, type })}
           />

@@ -1,12 +1,15 @@
 "use client";
 
+import { VerifiedGate } from "@/components/verified-gate";
 import { publicAuthClient } from "@repo/auth/public-client";
+import { getErrorMessage } from "@repo/trpc/error";
 import { publicApi } from "@repo/trpc/public/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@repo/ui/avatar";
 import { Button } from "@repo/ui/button";
 import { Card } from "@repo/ui/card";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
+import { toast } from "sonner";
 
 function initialsFor(name: string) {
   return name
@@ -35,6 +38,7 @@ export function AuthorCard({ username }: { username: string }) {
         utils.follow.isFollowing.invalidate({ userId: profile.userId });
       }
     },
+    onError: (error) => toast.error(getErrorMessage(error, "Couldn't follow this user.")),
   });
   const unfollow = publicApi.follow.unfollow.useMutation({
     onSuccess: () => {
@@ -42,6 +46,7 @@ export function AuthorCard({ username }: { username: string }) {
         utils.follow.isFollowing.invalidate({ userId: profile.userId });
       }
     },
+    onError: (error) => toast.error(getErrorMessage(error, "Couldn't unfollow this user.")),
   });
 
   if (!profile) {
@@ -49,7 +54,7 @@ export function AuthorCard({ username }: { username: string }) {
   }
 
   return (
-    <Card className="flex flex-col gap-3 border-border/60 p-4">
+    <Card className="glass flex flex-col gap-3 p-4">
       <div className="flex items-center gap-3">
         <Avatar>
           <AvatarImage src={profile.user.image ?? undefined} alt={profile.user.name} />
@@ -66,21 +71,26 @@ export function AuthorCard({ username }: { username: string }) {
       {profile.bio && <p className="text-sm text-muted-foreground">{profile.bio}</p>}
 
       {!isOwnProfile && session && (
-        <Button
-          size="sm"
-          variant={isFollowing ? "outline" : "default"}
-          disabled={follow.isPending || unfollow.isPending}
-          onClick={() =>
-            isFollowing
-              ? unfollow.mutate({ userId: profile.userId })
-              : follow.mutate({ userId: profile.userId })
-          }
+        <VerifiedGate
+          verified={session.user.emailVerified}
+          message="Verify your email to follow other users"
         >
-          {(follow.isPending || unfollow.isPending) && (
-            <Loader2 className="size-3.5 animate-spin" />
-          )}
-          {isFollowing ? "Following" : "Follow"}
-        </Button>
+          <Button
+            size="sm"
+            variant={isFollowing ? "outline" : "default"}
+            disabled={!session.user.emailVerified || follow.isPending || unfollow.isPending}
+            onClick={() =>
+              isFollowing
+                ? unfollow.mutate({ userId: profile.userId })
+                : follow.mutate({ userId: profile.userId })
+            }
+          >
+            {(follow.isPending || unfollow.isPending) && (
+              <Loader2 className="size-3.5 animate-spin" />
+            )}
+            {isFollowing ? "Following" : "Follow"}
+          </Button>
+        </VerifiedGate>
       )}
     </Card>
   );

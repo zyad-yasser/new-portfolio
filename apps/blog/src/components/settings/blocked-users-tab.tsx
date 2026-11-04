@@ -1,0 +1,67 @@
+"use client";
+
+import { initialsFor } from "@/lib/notifications";
+import { getErrorMessage } from "@repo/trpc/error";
+import { publicApi } from "@repo/trpc/public/react";
+import { Avatar, AvatarFallback, AvatarImage } from "@repo/ui/avatar";
+import { Button } from "@repo/ui/button";
+import { Card } from "@repo/ui/card";
+import { Skeleton } from "@repo/ui/skeleton";
+import { toast } from "sonner";
+
+export function BlockedUsersTab() {
+  const utils = publicApi.useUtils();
+  const { data: blocked, isLoading, error, refetch } = publicApi.block.list.useQuery();
+
+  const unblock = publicApi.block.unblock.useMutation({
+    onSuccess: () => {
+      utils.block.list.invalidate();
+      toast.success("User unblocked.");
+    },
+    onError: (error) => toast.error(getErrorMessage(error, "Couldn't unblock this user.")),
+  });
+
+  return (
+    <div className="flex flex-col gap-6">
+      <h2 className="text-lg font-semibold">Blocked users</h2>
+
+      {isLoading && <Skeleton className="skeleton-shimmer h-24 w-full" />}
+      {error && (
+        <div className="flex flex-col items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
+          <p>Couldn't load blocked users. Please try again.</p>
+          <Button variant="outline" size="sm" onClick={() => refetch()}>
+            Try again
+          </Button>
+        </div>
+      )}
+      {!isLoading && !error && blocked?.length === 0 && (
+        <p className="text-muted-foreground">You haven't blocked anyone.</p>
+      )}
+
+      <div className="flex flex-col gap-3">
+        {blocked?.map((blockedUser) => (
+          <Card
+            key={blockedUser.id}
+            className="flex flex-row items-center justify-between gap-3 p-4"
+          >
+            <div className="flex items-center gap-3">
+              <Avatar size="sm">
+                <AvatarImage src={blockedUser.image ?? undefined} alt={blockedUser.name} />
+                <AvatarFallback>{initialsFor(blockedUser.name)}</AvatarFallback>
+              </Avatar>
+              <span className="text-sm font-medium">{blockedUser.name}</span>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={unblock.isPending}
+              onClick={() => unblock.mutate({ userId: blockedUser.id })}
+            >
+              Unblock
+            </Button>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}

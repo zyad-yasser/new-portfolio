@@ -1,19 +1,43 @@
+import { sql } from "drizzle-orm";
 import {
   type AnyPgColumn,
+  bigint,
   boolean,
+  customType,
   index,
   integer,
   jsonb,
   pgTable,
   primaryKey,
+  real,
   text,
   timestamp,
   unique,
 } from "drizzle-orm/pg-core";
 import { user } from "./auth";
 
+const tsvector = customType<{ data: string }>({
+  dataType() {
+    return "tsvector";
+  },
+});
+
 export const REACTION_TYPES = ["like", "unicorn", "mindblown", "raised_hands", "fire"] as const;
 export type ReactionType = (typeof REACTION_TYPES)[number];
+
+export const NOTIFICATION_TYPES = [
+  "follow",
+  "comment",
+  "reply",
+  "reaction",
+  "mention",
+  "reshare",
+  "quote",
+] as const;
+export type NotificationType = (typeof NOTIFICATION_TYPES)[number];
+
+export const POST_TYPES = ["article", "media", "quote"] as const;
+export type PostType = (typeof POST_TYPES)[number];
 
 export type TiptapDoc = {
   type: string;
@@ -39,21 +63,56 @@ export const tag = pgTable("tag", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
-export const post = pgTable("post", {
+export const series = pgTable("series", {
   id: text("id").primaryKey(),
   authorId: text("author_id")
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
-  categoryId: text("category_id").references(() => category.id, { onDelete: "set null" }),
   title: text("title").notNull(),
   slug: text("slug").notNull().unique(),
-  excerptText: text("excerpt_text").notNull(),
-  contentJson: jsonb("content_json").$type<TiptapDoc>().notNull(),
-  published: boolean("published").notNull().default(false),
-  viewCount: integer("view_count").notNull().default(0),
+  description: text("description"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
+
+export const post = pgTable(
+  "post",
+  {
+    id: text("id").primaryKey(),
+    authorId: text("author_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    categoryId: text("category_id").references(() => category.id, { onDelete: "set null" }),
+    seriesId: text("series_id").references(() => series.id, { onDelete: "set null" }),
+    seriesOrder: integer("series_order"),
+    type: text("type").notNull().default("article").$type<PostType>(),
+    quotedPostId: text("quoted_post_id").references((): AnyPgColumn => post.id, {
+      onDelete: "set null",
+    }),
+    title: text("title"),
+    slug: text("slug").notNull().unique(),
+    excerptText: text("excerpt_text"),
+    contentJson: jsonb("content_json").$type<TiptapDoc>().notNull(),
+    coverImageUrl: text("cover_image_url"),
+    canonicalUrl: text("canonical_url"),
+    searchVector: tsvector("search_vector"),
+    published: boolean("published").notNull().default(false),
+    viewCount: integer("view_count").notNull().default(0),
+    reactionCount: integer("reaction_count").notNull().default(0),
+    commentCount: integer("comment_count").notNull().default(0),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (table) => [
+    index("post_series_id_idx").on(table.seriesId),
+    index("post_search_vector_idx").using("gin", table.searchVector),
+    index("post_author_id_idx").on(table.authorId),
+    index("post_quoted_post_id_idx").on(table.quotedPostId),
+    index("post_published_created_at_idx")
+      .on(table.published, table.createdAt.desc(), table.id.desc())
+      .where(sql`${table.published} = true`),
+  ]
+);
 
 export const postTag = pgTable(
   "post_tag",
@@ -109,6 +168,83 @@ export const comment = pgTable(
   (table) => [
     index("comment_post_id_idx").on(table.postId),
     index("comment_parent_comment_id_idx").on(table.parentCommentId),
+  ]
+);
+
+export const HIGHLIGHT_COLORS = ["yellow", "green", "blue", "pink"] as const;
+export type HighlightColor = (typeof HIGHLIGHT_COLORS)[number];
+
+export const postHighlight = pgTable(
+  "post_highlight",
+  {
+    id: text("id").primaryKey(),
+    postId: text("post_id")
+      .notNull()
+      .references(() => post.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    quoteText: text("quote_text").notNull(),
+    prefixText: text("prefix_text").notNull().default(""),
+    suffixText: text("suffix_text").notNull().default(""),
+    startOffset: integer("start_offset").notNull(),
+    endOffset: integer("end_offset").notNull(),
+    color: text("color").notNull().default("yellow").$type<HighlightColor>(),
+    noteJson: jsonb("note_json").$type<TiptapDoc>(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (table) => [
+    index("post_highlight_post_id_user_id_idx").on(table.postId, table.userId),
+    index("post_highlight_user_id_idx").on(table.userId),
+  ]
+);
+
+export const postVideoComment = pgTable(
+  "post_video_comment",
+  {
+    id: text("id").primaryKey(),
+    postId: text("post_id")
+      .notNull()
+      .references(() => post.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    videoSrc: text("video_src").notNull(),
+    timestampSeconds: real("timestamp_seconds").notNull(),
+    color: text("color").notNull().default("yellow").$type<HighlightColor>(),
+    noteJson: jsonb("note_json").$type<TiptapDoc>(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (table) => [
+    index("post_video_comment_post_id_user_id_idx").on(table.postId, table.userId),
+    index("post_video_comment_user_id_idx").on(table.userId),
+  ]
+);
+
+export const postImageAnnotation = pgTable(
+  "post_image_annotation",
+  {
+    id: text("id").primaryKey(),
+    postId: text("post_id")
+      .notNull()
+      .references(() => post.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    imageSrc: text("image_src").notNull(),
+    xPercent: real("x_percent").notNull(),
+    yPercent: real("y_percent").notNull(),
+    radiusPercent: real("radius_percent").notNull(),
+    color: text("color").notNull().default("yellow").$type<HighlightColor>(),
+    noteJson: jsonb("note_json").$type<TiptapDoc>(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (table) => [
+    index("post_image_annotation_post_id_user_id_idx").on(table.postId, table.userId),
+    index("post_image_annotation_user_id_idx").on(table.userId),
   ]
 );
 
@@ -175,4 +311,91 @@ export const postBookmark = pgTable(
     primaryKey({ columns: [table.userId, table.postId] }),
     index("post_bookmark_post_id_idx").on(table.postId),
   ]
+);
+
+export const postReshare = pgTable(
+  "post_reshare",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    postId: text("post_id")
+      .notNull()
+      .references(() => post.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.userId, table.postId] }),
+    index("post_reshare_post_id_idx").on(table.postId),
+  ]
+);
+
+export const mediaFolder = pgTable(
+  "media_folder",
+  {
+    id: text("id").primaryKey(),
+    ownerId: text("owner_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    parentId: text("parent_id").references((): AnyPgColumn => mediaFolder.id, {
+      onDelete: "cascade",
+    }),
+    name: text("name").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (table) => [index("media_folder_owner_id_parent_id_idx").on(table.ownerId, table.parentId)]
+);
+
+export const media = pgTable(
+  "media",
+  {
+    id: text("id").primaryKey(),
+    ownerId: text("owner_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    folderId: text("folder_id").references(() => mediaFolder.id, { onDelete: "set null" }),
+    storageKey: text("storage_key").notNull().unique(),
+    url: text("url").notNull(),
+    originalName: text("original_name").notNull(),
+    mimeType: text("mime_type").notNull(),
+    size: integer("size").notNull(),
+    width: integer("width"),
+    height: integer("height"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (table) => [
+    index("media_owner_id_idx").on(table.ownerId),
+    index("media_folder_id_idx").on(table.folderId),
+  ]
+);
+
+export const userStorageQuota = pgTable("user_storage_quota", {
+  id: text("id").primaryKey(),
+  ownerId: text("owner_id")
+    .notNull()
+    .unique()
+    .references(() => user.id, { onDelete: "cascade" }),
+  totalBytes: bigint("total_bytes", { mode: "number" })
+    .notNull()
+    .default(5 * 1024 * 1024 * 1024),
+  usedBytes: bigint("used_bytes", { mode: "number" }).notNull().default(0),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const notification = pgTable(
+  "notification",
+  {
+    id: text("id").primaryKey(),
+    recipientId: text("recipient_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    actorId: text("actor_id").references(() => user.id, { onDelete: "cascade" }),
+    type: text("type").notNull().$type<NotificationType>(),
+    postId: text("post_id").references(() => post.id, { onDelete: "cascade" }),
+    commentId: text("comment_id").references(() => comment.id, { onDelete: "cascade" }),
+    readAt: timestamp("read_at"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (table) => [index("notification_recipient_id_read_at_idx").on(table.recipientId, table.readAt)]
 );

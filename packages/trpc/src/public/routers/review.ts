@@ -3,7 +3,7 @@ import { db } from "@repo/db";
 import { review, user } from "@repo/db/schema";
 import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
-import { authedProcedure, createPublicTRPCRouter, publicProcedure, strictRateLimit } from "../init";
+import { createPublicTRPCRouter, publicProcedure, strictRateLimit, verifiedProcedure } from "../init";
 
 export const reviewRouter = createPublicTRPCRouter({
   list: publicProcedure.query(async () => {
@@ -24,8 +24,8 @@ export const reviewRouter = createPublicTRPCRouter({
     return rows;
   }),
 
-  create: authedProcedure
-    .use(strictRateLimit({ path: "review.create", limit: 5, window: "1 h" }))
+  create: verifiedProcedure
+    .use(strictRateLimit({ path: "review.create", limit: 50, window: "1 h" }))
     .input(
       z.object({
         rating: z.number().int().min(1).max(5),

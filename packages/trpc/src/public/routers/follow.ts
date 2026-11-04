@@ -3,8 +3,9 @@ import { userFollow } from "@repo/db/schema";
 import { TRPCError } from "@trpc/server";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
-import { authedProcedure, createPublicTRPCRouter, publicProcedure } from "../init";
+import { authedProcedure, createPublicTRPCRouter, publicProcedure, verifiedProcedure } from "../init";
 import { assertNotBlocked } from "./block";
+import { createNotification } from "./notification";
 
 const followUserColumns = { id: true, name: true, image: true } as const;
 
@@ -44,7 +45,7 @@ export const followRouter = createPublicTRPCRouter({
       return rows.map((row) => row.following);
     }),
 
-  follow: authedProcedure
+  follow: verifiedProcedure
     .input(z.object({ userId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       if (input.userId === ctx.session.user.id) {
@@ -64,12 +65,18 @@ export const followRouter = createPublicTRPCRouter({
         await db
           .insert(userFollow)
           .values({ followerId: ctx.session.user.id, followingId: input.userId });
+
+        await createNotification({
+          recipientId: input.userId,
+          actorId: ctx.session.user.id,
+          type: "follow",
+        });
       }
 
       return { following: true };
     }),
 
-  unfollow: authedProcedure
+  unfollow: verifiedProcedure
     .input(z.object({ userId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       await db
