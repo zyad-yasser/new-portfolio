@@ -1,61 +1,43 @@
-# Zyad Yasser — Portfolio
+# Zyad Yasser — Portfolio Monorepo
 
-Personal portfolio site for Zyad Yasser, built with Next.js. Live at [zyadyasser.net](https://zyadyasser.net).
+Source for [zyadyasser.net](https://zyadyasser.net) and its companion apps, built as a Turborepo + pnpm monorepo.
 
-## Tech Stack
+| App | URL | What it is |
+| --- | --- | --- |
+| `apps/web` | zyadyasser.net | Public portfolio site (plus a contact form API route) |
+| `apps/admin` | admin.zyadyasser.net | Private single-owner admin |
+| `apps/blog` | blog.zyadyasser.net | Public blog with sign-up, media uploads, social features |
+| `apps/reviews` | reviews.zyadyasser.net | Public reviews; shares accounts with the blog |
 
-- [Next.js](https://nextjs.org/) (App Router) + [React](https://react.dev/) + TypeScript
-- [Tailwind CSS](https://tailwindcss.com/) v4 + Sass
-- [Radix UI](https://www.radix-ui.com/) primitives with `class-variance-authority` (shadcn/ui-style components)
-- [Framer Motion](https://www.framer.com/motion/) for animations
-- [Biome](https://biomejs.dev/) for linting and formatting
-- Deployed on [Vercel](https://vercel.com/)
+Shared packages: `@repo/ui` (components + theme), `@repo/auth` / `@repo/auth-ui` (Better Auth instances and auth screens), `@repo/trpc` (API), `@repo/db` (Drizzle + Postgres), `@repo/utils`, `@repo/email`.
 
-## Getting Started
+## Tech stack
 
-Requires Node >=22 and [pnpm](https://pnpm.io/) >=10.8.0.
+Next.js (App Router) · React · TypeScript · Tailwind CSS v4 · Radix/shadcn-style UI · tRPC + React Query · Better Auth · Drizzle + Postgres (Neon in production) · Upstash Redis · Biome · Vitest + Playwright · Vercel.
+
+## Getting started
+
+Requires Node 24 (see `.nvmrc`) and pnpm >= 10.8.
 
 ```bash
 pnpm install
-pnpm dev
+cp .env.example .env            # docker compose settings
+pnpm docker:up                  # Postgres, Redis (+ HTTP proxy), MinIO
+# copy each app's .env.example to .env, then:
+pnpm db:migrate
+pnpm seed
+pnpm dev                        # or dev:web / dev:admin / dev:reviews / dev:blog
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
-
-## Scripts
+## Common scripts
 
 | Command | Description |
 | --- | --- |
-| `pnpm dev` | Start the dev server |
-| `pnpm build` | Production build |
-| `pnpm start` | Run the production build |
-| `pnpm type-check` | Type-check with `tsc` |
-| `pnpm lint` / `pnpm lint:fix` | Lint (check / autofix) |
-| `pnpm format` / `pnpm format:check` | Format (write / check) |
-| `pnpm check` / `pnpm check:fix` | Combined lint + format (check / autofix) |
-| `pnpm clean` | Remove build artifacts and dependency caches |
+| `pnpm dev` | All dev servers (ports 3000–3003) |
+| `pnpm build` | Production build of everything |
+| `pnpm type-check` | `tsc` across the workspace |
+| `pnpm test` | Vitest across the workspace (tRPC integration tests need local Postgres + Redis) |
+| `pnpm test:e2e` | Playwright (web, blog) |
+| `pnpm check` / `pnpm check:fix` | Biome lint + format |
 
-## Project Structure
-
-```
-src/
-  app/          # Routes (App Router): layout, homepage, /projects, sitemap
-  components/   # Page sections (modern-*.tsx) and shared UI primitives (ui/)
-  statics/      # Site content/data (projects, testimonials)
-  models/       # Shared TypeScript interfaces for the static content
-  constants/    # Firebase Storage URL helper
-  lib/          # Tailwind classname helper (cn)
-  typings/      # Ambient type declarations
-```
-
-## Contributing
-
-Run `pnpm check:fix` before committing to lint and format your changes.
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for more information.
-
----
-
-Made with ♥ by Zyad Yasser
+Architecture, conventions and local infra details live in [CLAUDE.md](CLAUDE.md).
