@@ -27,6 +27,13 @@ const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 const MAX_VIDEO_BYTES = 200 * 1024 * 1024;
 const VIDEO_PRESIGN_EXPIRY_SECONDS = 1200;
 
+const MEDIA_KEY_PATTERN =
+  /^media\/[A-Za-z0-9_-]+\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(png|jpg|webp|gif|mp4|webm|mov)$/;
+
+function isOwnMediaKey(key: string, userId: string) {
+  return MEDIA_KEY_PATTERN.test(key) && key.startsWith(`media/${userId}/`);
+}
+
 function maxBytesFor(contentType: string) {
   return contentType.startsWith("video/") ? MAX_VIDEO_BYTES : MAX_IMAGE_BYTES;
 }
@@ -132,7 +139,7 @@ export const mediaRouter = createPublicTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      if (!input.key.startsWith(`media/${ctx.session.user.id}/`)) {
+      if (!isOwnMediaKey(input.key, ctx.session.user.id)) {
         throw new TRPCError({ code: "FORBIDDEN" });
       }
 
