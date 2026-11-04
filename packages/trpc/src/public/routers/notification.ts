@@ -41,6 +41,23 @@ export async function createNotification(input: {
     return;
   }
 
+  if (input.type !== "comment" && input.type !== "reply") {
+    const duplicate = await db.query.notification.findFirst({
+      where: and(
+        eq(notification.recipientId, input.recipientId),
+        eq(notification.actorId, input.actorId),
+        eq(notification.type, input.type),
+        input.postId ? eq(notification.postId, input.postId) : isNull(notification.postId),
+        isNull(notification.readAt)
+      ),
+      columns: { id: true },
+    });
+
+    if (duplicate) {
+      return;
+    }
+  }
+
   await db.insert(notification).values({
     id: randomUUID(),
     recipientId: input.recipientId,
