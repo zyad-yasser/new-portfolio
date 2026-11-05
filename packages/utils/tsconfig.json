@@ -2,8 +2,7 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "module": "esnext",
-    "noEmit": true,
-    "baseUrl": "./src"
+    "noEmit": true
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules"]

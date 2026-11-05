@@ -64,7 +64,7 @@ One caveat baked into the code because of it: the Storage emulator doesn't suppo
 
 ## Architecture
 
-Turborepo (`turbo.json`) + pnpm workspaces (`pnpm-workspace.yaml`: `apps/*`, `packages/*`). Shared strict TypeScript config lives in root `tsconfig.base.json`; each app/package extends it and sets its own `baseUrl`/path aliases.
+Turborepo (`turbo.json`) + pnpm workspaces (`pnpm-workspace.yaml`: `apps/*`, `packages/*`). Shared strict TypeScript config lives in root `tsconfig.base.json` (TypeScript 7, which removed `baseUrl` and no longer auto-includes `@types`, hence `types: ["node"]` in the base); each app/package extends it and declares its own `paths` relative to its tsconfig (e.g. `"@/*": ["./src/*"]`).
 
 ### `apps/web`
 
@@ -147,7 +147,7 @@ Better Auth, built on `@repo/db` and backed by Redis `secondaryStorage` (rate li
 tRPC v11, split into two independent stacks that mirror `packages/auth`'s split — do not let admin and public routers/context cross-import:
 
 - `src/init.ts` / `src/context.ts` / `src/routers/_app.ts` — admin-only. `protectedProcedure` requires both a session _and_ `session.user.role === "admin"`, throwing `UNAUTHORIZED` otherwise. `createTRPCContext()` pulls the session from `@repo/auth`'s admin `auth` instance.
-- `src/provider.tsx` — exports `api` (`createTRPCReact`) and `TRPCReactProvider` for admin's client components, published as `@repo/trpc/react`. Intentionally not named `react.tsx` — with `baseUrl: "./src"` in this package's tsconfig, a file named `react.tsx` would shadow the bare `"react"` import for every file in the package.
+- `src/provider.tsx` — exports `api` (`createTRPCReact`) and `TRPCReactProvider` for admin's client components, published as `@repo/trpc/react`. Intentionally not named `react.tsx`, to avoid any confusion with the bare `"react"` import.
 - `src/public/init.ts` / `src/public/context.ts` / `src/public/routers/_app.ts` — reviews/blog stack, published as `@repo/trpc/public/init`, `/public/context`, `/public/routers/_app`. `authedProcedure` requires a session (no role check); `verifiedProcedure` additionally requires a verified email and gates every write; `strictRateLimit({ path, limit, window })` adds a per-IP and per-user limit to abuse-prone mutations. Both contexts run `assertTRPCSameOrigin` first. `routers/` holds ~21 routers; conventions:
   - Any procedure taking a `postId` must call `assertReadablePost` (`readable-post.ts`: published or owned, plus a block check for writes) — unpublished posts must never leak through side routes.
   - Lists use the cursor helpers in `src/public/pagination.ts` (`afterCursor`, `toPage`, `pageInputSchema`) and return `{ items, nextCursor }`; never return unbounded lists.

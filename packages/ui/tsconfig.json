@@ -4,9 +4,8 @@
     "noEmit": true,
     "module": "esnext",
     "jsx": "react-jsx",
-    "baseUrl": "./src",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./src/*"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "vitest.setup.ts"],
