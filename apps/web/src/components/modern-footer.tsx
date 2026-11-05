@@ -1,17 +1,18 @@
 "use client";
 
 import { Button } from "@repo/ui/button";
+import { GithubIcon, LinkedinIcon } from "@repo/ui/icons";
 import { motion } from "framer-motion";
-import { Github, Heart, Linkedin, Mail } from "lucide-react";
+import { Heart, Mail } from "lucide-react";
 
 const socialLinks = [
   {
-    icon: Github,
+    icon: GithubIcon,
     href: "https://github.com/zyad-yasser",
     label: "GitHub",
   },
   {
-    icon: Linkedin,
+    icon: LinkedinIcon,
     href: "https://www.linkedin.com/in/zyad-yasser-developer/",
     label: "LinkedIn",
   },

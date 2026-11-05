@@ -7,12 +7,12 @@ import { Button } from "@repo/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui/card";
 import { Checkbox } from "@repo/ui/checkbox";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@repo/ui/form";
-import { GoogleIcon } from "@repo/ui/icons";
+import { GithubIcon, GoogleIcon } from "@repo/ui/icons";
 import { Input } from "@repo/ui/input";
 import { cn } from "@repo/ui/lib/utils";
 import { PasswordInput } from "@repo/ui/password-input";
 import { type LoginValues, loginSchema } from "@repo/utils/schemas/auth";
-import { Github, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -212,7 +212,7 @@ export function LoginScreen({
                   {socialProvider === "github" ? (
                     <Loader2 className="size-4 animate-spin" />
                   ) : (
-                    <Github className="size-4" />
+                    <GithubIcon className="size-4" />
                   )}
                   Continue with GitHub
                 </Button>

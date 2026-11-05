@@ -5,9 +5,10 @@ import { otherProjects, productionProjects } from "@/statics";
 import { Badge } from "@repo/ui/badge";
 import { Button } from "@repo/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui/card";
+import { GithubIcon } from "@repo/ui/icons";
 import { containerVariants, itemVariants } from "@repo/ui/lib/motion";
 import { motion } from "framer-motion";
-import { ExternalLink, Github } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -199,7 +200,7 @@ export function ModernProjectsPage() {
                           rel="noopener noreferrer"
                           className="flex items-center justify-center gap-2"
                         >
-                          <Github className="h-4 w-4" />
+                          <GithubIcon className="h-4 w-4" />
                           Code
                         </a>
                       </Button>
