@@ -27,7 +27,7 @@
     "sonner": "^2.0.8"
   },
   "devDependencies": {
-    "@types/node": "^22.10.2",
+    "@types/node": "^24.19.2",
     "@types/react": "^19.3.0",
     "typescript": "^5.7.2"
   }
