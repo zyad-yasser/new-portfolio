@@ -20,7 +20,7 @@
     "favicon": "node scripts/generate-favicon-sharp.mjs"
   },
   "dependencies": {
-    "@hookform/resolvers": "^5.7.1",
+    "@hookform/resolvers": "^7.0.2",
     "@repo/email": "workspace:*",
     "@repo/ui": "workspace:*",
     "@repo/utils": "workspace:*",
