@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { MAX_NAME_LENGTH, loginSchema, signupSchema } from "./auth";
+import { loginSchema, MAX_NAME_LENGTH, signupSchema } from "./auth";
 import { MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH } from "./password";
 
 function messageFor(result: { success: boolean; error?: { issues: { message: string }[] } }) {

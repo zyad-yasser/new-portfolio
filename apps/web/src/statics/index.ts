@@ -450,4 +450,4 @@ const openSourceContributions: OpenSourceContribution[] = [
   },
 ];
 
-export { productionProjects, otherProjects, testimonials, experience, openSourceContributions };
+export { experience, openSourceContributions, otherProjects, productionProjects, testimonials };

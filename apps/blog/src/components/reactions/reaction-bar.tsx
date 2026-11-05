@@ -1,6 +1,5 @@
 "use client";
 
-import { REACTION_EMOJI, REACTION_LABEL } from "@/lib/reactions";
 import { publicAuthClient } from "@repo/auth/public-client";
 import type { ReactionType } from "@repo/db/schema";
 import { REACTION_TYPES } from "@repo/db/schema";
@@ -12,6 +11,7 @@ import { cn } from "@repo/ui/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@repo/ui/popover";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@repo/ui/tooltip";
 import { toast } from "sonner";
+import { REACTION_EMOJI, REACTION_LABEL } from "@/lib/reactions";
 
 type Reactor = { id: string; name: string; image: string | null };
 
@@ -140,7 +140,7 @@ export function ReactionBar({ postId }: { postId: string }) {
             type={type}
             count={entry?.count ?? 0}
             active={mine === type}
-            disabled={!session || !session.user.emailVerified || react.isPending}
+            disabled={!session?.user.emailVerified || react.isPending}
             disabledReason={
               session && !session.user.emailVerified
                 ? "Verify your email to react to posts"

@@ -1,4 +1,3 @@
-import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { db } from "../src";
 import { userProfile } from "../src/schema";

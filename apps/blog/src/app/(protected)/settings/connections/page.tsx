@@ -1,9 +1,9 @@
 "use client";
 
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui/tabs";
 import { BlockedUsersTab } from "@/components/settings/blocked-users-tab";
 import { FollowersTab } from "@/components/settings/followers-tab";
 import { FollowingTab } from "@/components/settings/following-tab";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui/tabs";
 
 export default function ConnectionsPage() {
   return (

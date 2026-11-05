@@ -1,11 +1,11 @@
 "use client";
 
-import { VerifiedGate } from "@/components/verified-gate";
 import type { HighlightColor, TiptapDoc } from "@repo/db/schema";
 import { getErrorMessage } from "@repo/trpc/error";
 import { publicApi } from "@repo/trpc/public/react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { VerifiedGate } from "@/components/verified-gate";
 import { MediaNoteComposer } from "./media-note-composer";
 
 export type CircleAnnotation = {
@@ -396,6 +396,7 @@ export function ArticleCircleOverlay({
             const point = fromPercent(effectiveXPercent, effectiveYPercent);
             const radiusPx = (annotation.radiusPercent / 100) * size.width;
             return (
+              // biome-ignore lint/a11y/useSemanticElements: an SVG <circle> hit target cannot be a <button>
               <circle
                 key={annotation.id}
                 data-annotation-id={annotation.id}

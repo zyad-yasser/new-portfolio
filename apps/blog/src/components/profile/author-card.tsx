@@ -1,6 +1,5 @@
 "use client";
 
-import { VerifiedGate } from "@/components/verified-gate";
 import { publicAuthClient } from "@repo/auth/public-client";
 import { getErrorMessage } from "@repo/trpc/error";
 import { publicApi } from "@repo/trpc/public/react";
@@ -10,6 +9,7 @@ import { Card } from "@repo/ui/card";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { VerifiedGate } from "@/components/verified-gate";
 
 function initialsFor(name: string) {
   return name

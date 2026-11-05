@@ -21,20 +21,26 @@ section[id] {
 }
 
 .card-hover {
-  transition: transform 0.4s var(--ease-premium), box-shadow 0.4s var(--ease-premium), border-color
-    0.4s var(--ease-premium);
+  transition:
+    transform 0.4s var(--ease-premium),
+    box-shadow 0.4s var(--ease-premium),
+    border-color 0.4s var(--ease-premium);
   border: 1px solid hsl(var(--border));
 }
 
 .card-hover:hover {
   border-color: hsl(var(--primary) / 0.35);
-  box-shadow: 0 20px 60px -15px hsl(var(--primary) / 0.15), 0 8px 24px -8px hsl(0 0% 0% / 0.4);
+  box-shadow:
+    0 20px 60px -15px hsl(var(--primary) / 0.15),
+    0 8px 24px -8px hsl(0 0% 0% / 0.4);
   transform: translateY(-4px);
 }
 
 .btn-glow:hover {
-  box-shadow: 0 0 0 1px hsl(var(--primary)), 0 0 30px hsl(var(--primary) / 0.35), 0 8px 20px
-    hsl(var(--primary) / 0.25);
+  box-shadow:
+    0 0 0 1px hsl(var(--primary)),
+    0 0 30px hsl(var(--primary) / 0.35),
+    0 8px 20px hsl(var(--primary) / 0.25);
 }
 
 .glass {
@@ -100,7 +106,9 @@ section[id] {
 
 .focus-visible\:ring-2:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--primary));
+  box-shadow:
+    0 0 0 2px hsl(var(--background)),
+    0 0 0 4px hsl(var(--primary));
 }
 
 .sr-only {

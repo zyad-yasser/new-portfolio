@@ -1,6 +1,5 @@
 "use client";
 
-import { VerifiedGate } from "@/components/verified-gate";
 import type { HighlightColor, TiptapDoc } from "@repo/db/schema";
 import { getErrorMessage } from "@repo/trpc/error";
 import { publicApi } from "@repo/trpc/public/react";
@@ -8,6 +7,7 @@ import { cn } from "@repo/ui/lib/utils";
 import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { VerifiedGate } from "@/components/verified-gate";
 import { colorSwatchClass } from "./color-swatch-picker";
 import { MediaNoteComposer } from "./media-note-composer";
 

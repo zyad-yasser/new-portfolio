@@ -1,12 +1,5 @@
 "use client";
 
-import { SiteHeader } from "@/components/site-header";
-import {
-  NOTIFICATION_TYPE_ICON,
-  initialsFor,
-  notificationHref,
-  notificationText,
-} from "@/lib/notifications";
 import { getErrorMessage } from "@repo/trpc/error";
 import { publicApi } from "@repo/trpc/public/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@repo/ui/avatar";
@@ -17,6 +10,13 @@ import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useMemo } from "react";
 import { toast } from "sonner";
+import { SiteHeader } from "@/components/site-header";
+import {
+  initialsFor,
+  NOTIFICATION_TYPE_ICON,
+  notificationHref,
+  notificationText,
+} from "@/lib/notifications";
 
 export default function NotificationsPage() {
   const utils = publicApi.useUtils();

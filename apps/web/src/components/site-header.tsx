@@ -1,12 +1,12 @@
 "use client";
 
-import { useActiveSection } from "@/lib/use-active-section";
 import { cn } from "@repo/ui/lib/utils";
 import { ThemeToggle } from "@repo/ui/theme-toggle";
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useActiveSection } from "@/lib/use-active-section";
 
 const NAV_ITEMS = [
   { id: "about", label: "About", href: "/#about" },

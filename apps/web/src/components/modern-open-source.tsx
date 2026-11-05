@@ -1,12 +1,12 @@
 "use client";
 
-import { openSourceContributions } from "@/statics";
 import { Badge } from "@repo/ui/badge";
 import { Button } from "@repo/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui/card";
 import { containerVariants, itemVariants } from "@repo/ui/lib/motion";
 import { motion } from "framer-motion";
 import { ExternalLink, Package } from "lucide-react";
+import { openSourceContributions } from "@/statics";
 import { SectionHeader } from "./ui/section-header";
 
 export function ModernOpenSource() {

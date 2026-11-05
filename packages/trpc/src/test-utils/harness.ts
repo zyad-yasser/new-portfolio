@@ -20,7 +20,10 @@ const createdUserIds: string[] = [];
 export async function createTestUser({
   emailVerified = true,
   role = "user",
-}: { emailVerified?: boolean; role?: "admin" | "user" } = {}): Promise<TestUser> {
+}: {
+  emailVerified?: boolean;
+  role?: "admin" | "user";
+} = {}): Promise<TestUser> {
   const id = `test_${randomUUID().replace(/-/g, "")}`;
   const testUser: TestUser = {
     id,

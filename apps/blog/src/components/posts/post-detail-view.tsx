@@ -1,19 +1,5 @@
 "use client";
 
-import { CommentSection } from "@/components/comments/comment-section";
-import { TiptapContent } from "@/components/editor/tiptap-content";
-import { extractHeadings } from "@/components/editor/toc";
-import { AuthorCard } from "@/components/profile/author-card";
-import { ReactionBar } from "@/components/reactions/reaction-bar";
-import { SiteHeader } from "@/components/site-header";
-import type { ResolvedHighlight } from "@/components/study-mode/highlight-extension";
-import { HighlightNoteComposer } from "@/components/study-mode/highlight-note-composer";
-import { HighlightsTimeline } from "@/components/study-mode/highlights-timeline";
-import { ImageAnnotationsList } from "@/components/study-mode/image-annotations-list";
-import { MediaAnnotationsLayer } from "@/components/study-mode/media-annotations-layer";
-import { SelectionToolbar } from "@/components/study-mode/selection-toolbar";
-import { VideoCommentsList } from "@/components/study-mode/video-comments-list";
-import { categoryColorClasses } from "@/lib/category-colors";
 import { publicAuthClient } from "@repo/auth/public-client";
 import { getErrorMessage } from "@repo/trpc/error";
 import { publicApi } from "@repo/trpc/public/react";
@@ -42,6 +28,20 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
+import { CommentSection } from "@/components/comments/comment-section";
+import { TiptapContent } from "@/components/editor/tiptap-content";
+import { extractHeadings } from "@/components/editor/toc";
+import { AuthorCard } from "@/components/profile/author-card";
+import { ReactionBar } from "@/components/reactions/reaction-bar";
+import { SiteHeader } from "@/components/site-header";
+import type { ResolvedHighlight } from "@/components/study-mode/highlight-extension";
+import { HighlightNoteComposer } from "@/components/study-mode/highlight-note-composer";
+import { HighlightsTimeline } from "@/components/study-mode/highlights-timeline";
+import { ImageAnnotationsList } from "@/components/study-mode/image-annotations-list";
+import { MediaAnnotationsLayer } from "@/components/study-mode/media-annotations-layer";
+import { SelectionToolbar } from "@/components/study-mode/selection-toolbar";
+import { VideoCommentsList } from "@/components/study-mode/video-comments-list";
+import { categoryColorClasses } from "@/lib/category-colors";
 
 export function PostDetailView({ slug }: { slug: string }) {
   const { data: session } = publicAuthClient.useSession();

@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { db } from "@repo/db";
-import { post, postTag, series, tag } from "@repo/db/schema";
 import type { PostType, TiptapDoc } from "@repo/db/schema";
+import { post, postTag, series, tag } from "@repo/db/schema";
 import { requireEnv } from "@repo/utils";
 import { createRateLimiter, getClientIp, safeLimit } from "@repo/utils/rate-limit";
 import { getPublicUrl } from "@repo/utils/storage";
@@ -392,7 +392,7 @@ export const postRouter = createPublicTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const quoted = await db.query.post.findFirst({ where: eq(post.id, input.quotedPostId) });
 
-      if (!quoted || !quoted.published) {
+      if (!quoted?.published) {
         throw new TRPCError({ code: "NOT_FOUND" });
       }
 

@@ -1,6 +1,5 @@
 "use client";
 
-import { initialsFor } from "@/lib/notifications";
 import { publicAuthClient } from "@repo/auth/public-client";
 import { publicApi } from "@repo/trpc/public/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@repo/ui/avatar";
@@ -8,6 +7,7 @@ import { Button } from "@repo/ui/button";
 import { Card } from "@repo/ui/card";
 import { Skeleton } from "@repo/ui/skeleton";
 import Link from "next/link";
+import { initialsFor } from "@/lib/notifications";
 
 export function FollowersTab() {
   const { data: session } = publicAuthClient.useSession();

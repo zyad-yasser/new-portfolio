@@ -1,6 +1,5 @@
 "use client";
 
-import { VerifiedGate } from "@/components/verified-gate";
 import { publicAuthClient } from "@repo/auth/public-client";
 import { getErrorMessage } from "@repo/trpc/error";
 import { publicApi } from "@repo/trpc/public/react";
@@ -28,6 +27,7 @@ import { Loader2, MoreHorizontal, UserX } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
+import { VerifiedGate } from "@/components/verified-gate";
 
 type CommentAuthor = {
   id: string;
@@ -326,13 +326,7 @@ function ReplyForm({
   );
 }
 
-export function CommentSection({
-  postId,
-  postAuthorId,
-}: {
-  postId: string;
-  postAuthorId: string;
-}) {
+export function CommentSection({ postId, postAuthorId }: { postId: string; postAuthorId: string }) {
   const { data: session } = publicAuthClient.useSession();
   const utils = publicApi.useUtils();
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =

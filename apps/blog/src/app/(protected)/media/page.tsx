@@ -1,8 +1,5 @@
 "use client";
 
-import { MediaPreviewDialog } from "@/components/media/media-preview-dialog";
-import { useMediaUpload } from "@/components/media/use-media-upload";
-import { SiteHeader } from "@/components/site-header";
 import { getErrorMessage } from "@repo/trpc/error";
 import { publicApi } from "@repo/trpc/public/react";
 import {
@@ -45,6 +42,9 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { type KeyboardEvent, Suspense, useMemo, useState } from "react";
 import { toast } from "sonner";
+import { MediaPreviewDialog } from "@/components/media/media-preview-dialog";
+import { useMediaUpload } from "@/components/media/use-media-upload";
+import { SiteHeader } from "@/components/site-header";
 
 const ACCEPT = "image/png,image/jpeg,image/webp,image/gif,video/mp4,video/webm,video/quicktime";
 const MAX_SIZE_BYTES = 200 * 1024 * 1024;
@@ -525,6 +525,7 @@ function MediaLibraryContent() {
           {subfolders?.map((folder) => (
             <ContextMenu key={folder.id}>
               <ContextMenuTrigger>
+                {/* biome-ignore lint/a11y/useSemanticElements: draggable tile that can contain a rename input, which a <button> cannot */}
                 <div
                   draggable={!selectMode}
                   onDragStart={(e) => {
@@ -547,8 +548,6 @@ function MediaLibraryContent() {
                       goToFolder(folder.id);
                     }
                   }}
-                  // biome-ignore lint/a11y/useSemanticElements: draggable tile that can contain a rename input, which a <button> cannot
-
                   role="button"
                   tabIndex={0}
                   onKeyDown={(e: KeyboardEvent<HTMLDivElement>) => {
@@ -631,6 +630,7 @@ function MediaLibraryContent() {
           {files.map((item) => (
             <ContextMenu key={item.id}>
               <ContextMenuTrigger>
+                {/* biome-ignore lint/a11y/useSemanticElements: draggable tile that can contain a rename input, which a <button> cannot */}
                 <div
                   draggable={!selectMode}
                   onDragStart={(e) => {
@@ -647,8 +647,6 @@ function MediaLibraryContent() {
                       setPreviewId(item.id);
                     }
                   }}
-                  // biome-ignore lint/a11y/useSemanticElements: draggable tile that can contain a rename input, which a <button> cannot
-
                   role="button"
                   tabIndex={0}
                   onKeyDown={(e: KeyboardEvent<HTMLDivElement>) => {

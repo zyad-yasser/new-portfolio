@@ -1,7 +1,5 @@
 "use client";
 
-import { AvatarUpload } from "@/components/settings/avatar-upload";
-import { initialsFor } from "@/lib/notifications";
 import { getAuthErrorMessage } from "@repo/auth/error-message";
 import { publicAuthClient } from "@repo/auth/public-client";
 import { getErrorMessage } from "@repo/trpc/error";
@@ -27,6 +25,8 @@ import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { AvatarUpload } from "@/components/settings/avatar-upload";
+import { initialsFor } from "@/lib/notifications";
 
 export default function ProfileSettingsPage() {
   const router = useRouter();

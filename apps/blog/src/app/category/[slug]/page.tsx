@@ -1,8 +1,5 @@
 "use client";
 
-import { PostCard } from "@/components/posts/post-card";
-import { SiteHeader } from "@/components/site-header";
-import { categoryColorClasses } from "@/lib/category-colors";
 import { publicApi } from "@repo/trpc/public/react";
 import { Button } from "@repo/ui/button";
 import { cn } from "@repo/ui/lib/utils";
@@ -10,6 +7,9 @@ import { Skeleton } from "@repo/ui/skeleton";
 import { TooltipProvider } from "@repo/ui/tooltip";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { PostCard } from "@/components/posts/post-card";
+import { SiteHeader } from "@/components/site-header";
+import { categoryColorClasses } from "@/lib/category-colors";
 
 export default function CategoryDetailPage() {
   const { slug } = useParams<{ slug: string }>();

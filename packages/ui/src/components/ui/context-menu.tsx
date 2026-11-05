@@ -88,9 +88,9 @@ function ContextMenuLabel({
 
 export {
   ContextMenu,
-  ContextMenuTrigger,
   ContextMenuContent,
   ContextMenuItem,
-  ContextMenuSeparator,
   ContextMenuLabel,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
 };

@@ -1,11 +1,5 @@
 "use client";
 
-import { PostCard } from "@/components/posts/post-card";
-import { PullToRefresh } from "@/components/pull-to-refresh";
-import { SiteHeader } from "@/components/site-header";
-import { VerifiedGate } from "@/components/verified-gate";
-import { useScrollRestoration } from "@/hooks/use-scroll-restoration";
-import { categoryColorClasses } from "@/lib/category-colors";
 import { publicAuthClient } from "@repo/auth/public-client";
 import { publicApi } from "@repo/trpc/public/react";
 import { AmbientGradient } from "@repo/ui/ambient-gradient";
@@ -21,6 +15,12 @@ import { motion } from "framer-motion";
 import { ArrowUp, Loader2, PenLine } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useRef } from "react";
+import { PostCard } from "@/components/posts/post-card";
+import { PullToRefresh } from "@/components/pull-to-refresh";
+import { SiteHeader } from "@/components/site-header";
+import { VerifiedGate } from "@/components/verified-gate";
+import { useScrollRestoration } from "@/hooks/use-scroll-restoration";
+import { categoryColorClasses } from "@/lib/category-colors";
 
 const HOME_SCROLL_KEY = "blog-home-scroll";
 

@@ -56,7 +56,7 @@ export const reshareRouter = createPublicTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const target = await db.query.post.findFirst({ where: eq(post.id, input.postId) });
 
-      if (!target || !target.published) {
+      if (!target?.published) {
         throw new TRPCError({ code: "NOT_FOUND" });
       }
 

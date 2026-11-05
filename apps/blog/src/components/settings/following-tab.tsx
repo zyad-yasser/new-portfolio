@@ -1,6 +1,5 @@
 "use client";
 
-import { initialsFor } from "@/lib/notifications";
 import { publicAuthClient } from "@repo/auth/public-client";
 import { getErrorMessage } from "@repo/trpc/error";
 import { publicApi } from "@repo/trpc/public/react";
@@ -10,6 +9,7 @@ import { Card } from "@repo/ui/card";
 import { Skeleton } from "@repo/ui/skeleton";
 import Link from "next/link";
 import { toast } from "sonner";
+import { initialsFor } from "@/lib/notifications";
 
 export function FollowingTab() {
   const { data: session } = publicAuthClient.useSession();

@@ -1,9 +1,5 @@
 "use client";
 
-import { PostCard } from "@/components/posts/post-card";
-import { SiteHeader } from "@/components/site-header";
-import { VerifiedGate } from "@/components/verified-gate";
-import { isSafeHttpUrl } from "@/lib/safe-url";
 import { publicAuthClient } from "@repo/auth/public-client";
 import { getErrorMessage } from "@repo/trpc/error";
 import { publicApi } from "@repo/trpc/public/react";
@@ -16,6 +12,10 @@ import { Calendar, FileText, Globe, Loader2, MapPin, User } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
+import { PostCard } from "@/components/posts/post-card";
+import { SiteHeader } from "@/components/site-header";
+import { VerifiedGate } from "@/components/verified-gate";
+import { isSafeHttpUrl } from "@/lib/safe-url";
 
 function initialsFor(name: string) {
   return name

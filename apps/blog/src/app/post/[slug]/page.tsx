@@ -1,10 +1,10 @@
-import { PostDetailView } from "@/components/posts/post-detail-view";
-import { PostStructuredData } from "@/components/seo/post-structured-data";
 import { db } from "@repo/db";
 import { post } from "@repo/db/schema";
 import { and, eq } from "drizzle-orm";
 import type { Metadata } from "next";
 import { cache } from "react";
+import { PostDetailView } from "@/components/posts/post-detail-view";
+import { PostStructuredData } from "@/components/seo/post-structured-data";
 
 const getPost = cache(async (slug: string) => {
   return db.query.post.findFirst({
@@ -60,11 +60,7 @@ export async function generateMetadata({
   };
 }
 
-export default async function PostDetailPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export default async function PostDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const found = await getPost(slug);
 

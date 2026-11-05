@@ -27,13 +27,13 @@ Single zod schema, shared between client and server via `@repo/utils` (`packages
 published as `@repo/utils/schemas/contact`) — both the client component and the API route import the same
 schema so validation never drifts between them:
 
-| Field   | Type   | Rules                                              |
-|---------|--------|-----------------------------------------------------|
-| name    | string | trim, 1–100 chars, required                         |
-| email   | string | trim, valid email format, required                  |
-| subject | string | trim, 1–150 chars, required                         |
-| message | string | trim, 10–2000 chars, required                       |
-| company | string | optional honeypot — must arrive empty (see §6)      |
+| Field   | Type   | Rules                                          |
+| ------- | ------ | ---------------------------------------------- |
+| name    | string | trim, 1–100 chars, required                    |
+| email   | string | trim, valid email format, required             |
+| subject | string | trim, 1–150 chars, required                    |
+| message | string | trim, 10–2000 chars, required                  |
+| company | string | optional honeypot — must arrive empty (see §6) |
 
 ```ts
 const contactFormSchema = z.object({
@@ -91,6 +91,7 @@ Content-Type: application/json
 ```
 
 Server logic:
+
 1. Parse `request.json()`, run through `contactFormSchema.safeParse` (imported from `@repo/utils/schemas/contact`).
    Reject with 400 on failure (field errors are not itemized in the response — client-side validation
    already prevents this in the normal path, so a 400 here is either a spoofed request or a honeypot trip).
@@ -138,11 +139,11 @@ tying it to the contact form specifically:
 
 New, documented in `apps/web/.env.example` (created by this feature — didn't exist before):
 
-| Var                   | Required | Description                                          |
-|------------------------|----------|-------------------------------------------------------|
-| `GMAIL_USER`           | yes      | Gmail address used to authenticate + send from        |
-| `GMAIL_APP_PASSWORD`   | yes      | 16-char Google App Password for that account          |
-| `CONTACT_TO_EMAIL`     | no       | Recipient; defaults to `zyadyasser6@gmail.com`        |
+| Var                  | Required | Description                                    |
+| -------------------- | -------- | ---------------------------------------------- |
+| `GMAIL_USER`         | yes      | Gmail address used to authenticate + send from |
+| `GMAIL_APP_PASSWORD` | yes      | 16-char Google App Password for that account   |
+| `CONTACT_TO_EMAIL`   | no       | Recipient; defaults to `zyadyasser6@gmail.com` |
 
 These are server-only (read in the route handler, never prefixed `NEXT_PUBLIC_`) and must be set in the
 `apps/web` Vercel project's environment variables for production, and in `apps/web/.env` locally.

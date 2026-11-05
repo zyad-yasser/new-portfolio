@@ -1,8 +1,5 @@
 "use client";
 
-import { PostCard } from "@/components/posts/post-card";
-import { SiteHeader } from "@/components/site-header";
-import { useScrollRestoration } from "@/hooks/use-scroll-restoration";
 import { publicApi } from "@repo/trpc/public/react";
 import { Button } from "@repo/ui/button";
 import { Skeleton } from "@repo/ui/skeleton";
@@ -12,6 +9,9 @@ import { useIsRestoring } from "@tanstack/react-query";
 import { Loader2, Repeat2 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useRef } from "react";
+import { PostCard } from "@/components/posts/post-card";
+import { SiteHeader } from "@/components/site-header";
+import { useScrollRestoration } from "@/hooks/use-scroll-restoration";
 
 const FEED_TABS = ["following", "all"] as const;
 type FeedTab = (typeof FEED_TABS)[number];

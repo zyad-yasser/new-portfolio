@@ -1,7 +1,5 @@
 "use client";
 
-import { SiteHeader } from "@/components/site-header";
-import { categoryColorClasses } from "@/lib/category-colors";
 import { getErrorMessage } from "@repo/trpc/error";
 import { publicApi } from "@repo/trpc/public/react";
 import {
@@ -22,6 +20,8 @@ import { Skeleton } from "@repo/ui/skeleton";
 import { Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { SiteHeader } from "@/components/site-header";
+import { categoryColorClasses } from "@/lib/category-colors";
 
 export default function MinePostsPage() {
   const utils = publicApi.useUtils();

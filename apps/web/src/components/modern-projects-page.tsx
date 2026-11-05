@@ -1,7 +1,5 @@
 "use client";
 
-import { getFirebaseStorageUrl } from "@/constants";
-import { otherProjects, productionProjects } from "@/statics";
 import { Badge } from "@repo/ui/badge";
 import { Button } from "@repo/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui/card";
@@ -12,6 +10,8 @@ import { ExternalLink } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { getFirebaseStorageUrl } from "@/constants";
+import { otherProjects, productionProjects } from "@/statics";
 
 type Tab = "production" | "other";
 

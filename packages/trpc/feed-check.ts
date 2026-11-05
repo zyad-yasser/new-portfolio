@@ -2,6 +2,7 @@ import { db } from "@repo/db";
 import { user } from "@repo/db/schema";
 import { eq } from "drizzle-orm";
 import { publicAppRouter } from "./src/public/routers/_app";
+
 async function main() {
   const u = await db.query.user.findFirst({ where: eq(user.email, "seed.writer@example.com") });
   const caller: any = publicAppRouter.createCaller({

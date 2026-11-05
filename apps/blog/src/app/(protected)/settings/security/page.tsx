@@ -1,9 +1,9 @@
 "use client";
 
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui/tabs";
 import { LinkedAccountsTab } from "@/components/settings/linked-accounts-tab";
 import { SessionsTab } from "@/components/settings/sessions-tab";
 import { TwoFactorTab } from "@/components/settings/two-factor-tab";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui/tabs";
 
 export default function PrivacySecurityPage() {
   return (

@@ -1,10 +1,10 @@
 "use client";
 
-import { getFirebaseStorageUrl } from "@/constants";
 import { Badge } from "@repo/ui/badge";
 import { Card, CardContent } from "@repo/ui/card";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { getFirebaseStorageUrl } from "@/constants";
 import { SectionHeader } from "./ui/section-header";
 
 const skills = [

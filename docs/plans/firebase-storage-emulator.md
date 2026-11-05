@@ -5,7 +5,7 @@
 `apps/blog`'s local `.env` has `STORAGE_PROVIDER=firebase` with an empty `FIREBASE_SERVICE_ACCOUNT`,
 while all 3 existing media rows in the local DB were uploaded back when the app used the S3/MinIO
 provider (`localhost:9010`). Result: old images 404 in `next/image` (host not in
-`next.config.js`'s `remotePatterns`), and any *new* upload throws immediately (`requireEnv`
+`next.config.js`'s `remotePatterns`), and any _new_ upload throws immediately (`requireEnv`
 crashes on the blank `FIREBASE_SERVICE_ACCOUNT`).
 
 MinIO (already running via `docker-compose.yml`) is the zero-effort fix, but the user wants to
@@ -51,9 +51,8 @@ all in this mode. Only signing (`getSignedUrl`) truly can't be emulated; everyth
   `` `http://${process.env.FIREBASE_STORAGE_EMULATOR_HOST}/v0/b/${encodeURIComponent(bucket)}/o/${encodeURIComponent(key)}?alt=media` ``
   — instead of the real `storage.googleapis.com` URL.
 - `createPresignedUploadUrl(...)`: when `isEmulator()`, skip `getSignedUrl` entirely (known
-  unsupported) and return `{ uploadUrl: \`/api/media-upload?key=${encodeURIComponent(key)}\`, publicUrl: getPublicUrl(key) }`
-  — a same-origin relative path. `use-media-upload.ts`'s `uploadWithProgress` already does a plain
-  `xhr.open("PUT", uploadUrl)`, which resolves relative URLs against the current page with zero
+  unsupported) and return `{ uploadUrl: \`/api/media-upload?key=${encodeURIComponent(key)}\`, publicUrl: getPublicUrl(key) }`  — a same-origin relative path.`use-media-upload.ts`'s `uploadWithProgress`already does a plain
+ `xhr.open("PUT", uploadUrl)`, which resolves relative URLs against the current page with zero
   client-side changes needed.
 - New export `uploadObjectDirect(key, body: Buffer, contentType: string)` →
   `getBucket().file(key).save(body, { contentType, resumable: false })` — used only by the new
@@ -93,6 +92,7 @@ the upload PUT is same-origin now, already covered by `connect-src 'self'`.)
 
 `apps/blog/.env.example` (and the user's own `apps/blog/.env`): add, right after
 `FIREBASE_STORAGE_BUCKET`:
+
 ```
 FIREBASE_STORAGE_EMULATOR_HOST=
 FIREBASE_PROJECT_ID=demo-portfolio

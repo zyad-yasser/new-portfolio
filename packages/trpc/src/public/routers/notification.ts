@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { db } from "@repo/db";
-import { notification, userBlock } from "@repo/db/schema";
 import type { NotificationType } from "@repo/db/schema";
+import { notification, userBlock } from "@repo/db/schema";
 import { getRedis } from "@repo/utils/redis";
 import { and, desc, eq, isNull, or, sql } from "drizzle-orm";
 import { z } from "zod";

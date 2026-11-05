@@ -1,11 +1,11 @@
 "use client";
 
-import { experience } from "@/statics";
 import { Badge } from "@repo/ui/badge";
 import { Card, CardContent } from "@repo/ui/card";
 import { containerVariantsSlow, itemVariantsX } from "@repo/ui/lib/motion";
 import { motion } from "framer-motion";
 import { MapPin } from "lucide-react";
+import { experience } from "@/statics";
 import { SectionHeader } from "./ui/section-header";
 
 export function ModernExperience() {

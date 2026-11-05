@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { db } from "@repo/db";
-import { HIGHLIGHT_COLORS, postImageAnnotation } from "@repo/db/schema";
 import type { TiptapDoc } from "@repo/db/schema";
+import { HIGHLIGHT_COLORS, postImageAnnotation } from "@repo/db/schema";
 import { TRPCError } from "@trpc/server";
 import { and, asc, eq } from "drizzle-orm";
 import { z } from "zod";

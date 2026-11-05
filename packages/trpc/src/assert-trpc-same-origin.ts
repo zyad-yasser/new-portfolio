@@ -1,4 +1,4 @@
-import { SameOriginError, assertSameOrigin } from "@repo/utils/same-origin";
+import { assertSameOrigin, SameOriginError } from "@repo/utils/same-origin";
 import { TRPCError } from "@trpc/server";
 
 export function assertTRPCSameOrigin(headers: Headers) {

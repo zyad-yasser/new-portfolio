@@ -177,6 +177,7 @@ export function TwoFactorTab() {
         {enroll?.stage === "verify" && (
           <form onSubmit={handleVerify} className="flex flex-col gap-4">
             <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+              {/* biome-ignore lint/performance/noImgElement: local data: URL QR code, nothing for next/image to optimize */}
               <img
                 src={enroll.qrDataUrl}
                 alt="Scan this QR code with your authenticator app"

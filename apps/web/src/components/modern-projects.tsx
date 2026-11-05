@@ -1,7 +1,5 @@
 "use client";
 
-import { getFirebaseStorageUrl } from "@/constants";
-import { productionProjects } from "@/statics";
 import { Badge } from "@repo/ui/badge";
 import { Button } from "@repo/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui/card";
@@ -10,6 +8,8 @@ import { motion } from "framer-motion";
 import { ExternalLink, ImageOff } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { getFirebaseStorageUrl } from "@/constants";
+import { productionProjects } from "@/statics";
 import { SectionHeader } from "./ui/section-header";
 
 const featuredProjects = productionProjects.slice(0, 4);

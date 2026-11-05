@@ -1,8 +1,5 @@
 "use client";
 
-import { CoverImagePicker } from "@/components/media/cover-image-picker";
-import { VerifiedGate } from "@/components/verified-gate";
-import { categoryColorClasses } from "@/lib/category-colors";
 import { publicAuthClient } from "@repo/auth/public-client";
 import type { TiptapDoc } from "@repo/db/schema";
 import { getErrorMessage } from "@repo/trpc/error";
@@ -37,6 +34,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { CoverImagePicker } from "@/components/media/cover-image-picker";
+import { VerifiedGate } from "@/components/verified-gate";
+import { categoryColorClasses } from "@/lib/category-colors";
 import { TiptapEditor } from "./tiptap-editor";
 import { type AutosaveStatus, useAutosavePost } from "./use-autosave-post";
 

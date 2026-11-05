@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.6.5/schema.json",
   "vcs": {
     "enabled": true,
     "clientKind": "git",
@@ -7,20 +7,21 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "ignore": [
-      "node_modules/**",
-      "**/.next/**",
-      "**/.turbo/**",
-      "out/**",
-      "**/dist/**",
-      "**/drizzle/meta/**",
-      "build/**",
-      "apps/*/public/**",
-      "static/**",
-      "*.min.js",
-      "*.min.css",
-      ".agents/**",
-      ".claude/skills/**"
+    "includes": [
+      "**",
+      "!**/node_modules",
+      "!**/.next",
+      "!**/.turbo",
+      "!**/out",
+      "!**/dist",
+      "!**/drizzle/meta",
+      "!**/build",
+      "!apps/*/public",
+      "!**/static",
+      "!**/*.min.js",
+      "!**/*.min.css",
+      "!**/.agents",
+      "!**/.claude/skills"
     ]
   },
   "formatter": {
@@ -30,13 +31,17 @@
     "lineWidth": 100,
     "lineEnding": "lf"
   },
-  "organizeImports": {
-    "enabled": true
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
   },
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
       "style": {
         "noNonNullAssertion": "off",
         "useImportType": "off"
@@ -48,7 +53,8 @@
       "correctness": {
         "useExhaustiveDependencies": "off"
       },
-      "a11y": {
+      "a11y": {},
+      "security": {
         "noBlankTarget": "off"
       }
     }
@@ -71,5 +77,22 @@
     "linter": {
       "enabled": true
     }
-  }
+  },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["apps/web/src/app/globals.css"],
+      "linter": {
+        "rules": {
+          "complexity": {
+            "noImportantStyles": "off"
+          }
+        }
+      }
+    }
+  ]
 }

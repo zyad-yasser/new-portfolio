@@ -1,10 +1,10 @@
 "use client";
 
-import { MediaPickerDialog } from "@/components/media/media-picker-dialog";
 import { Button } from "@repo/ui/button";
 import { ImageIcon, X } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
+import { MediaPickerDialog } from "@/components/media/media-picker-dialog";
 
 export function CoverImagePicker({
   value,

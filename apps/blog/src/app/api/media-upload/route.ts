@@ -26,7 +26,7 @@ export async function PUT(request: Request) {
   }
 
   const key = new URL(request.url).searchParams.get("key");
-  if (!key || !key.startsWith(`media/${session.user.id}/`)) {
+  if (!key?.startsWith(`media/${session.user.id}/`)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
