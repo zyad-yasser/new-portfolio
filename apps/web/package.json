@@ -24,7 +24,7 @@
     "@repo/email": "workspace:*",
     "@repo/ui": "workspace:*",
     "@repo/utils": "workspace:*",
-    "framer-motion": "^11.12.0",
+    "framer-motion": "^14.9.1",
     "lucide-react": "^1.68.0",
     "next": "^16.4.5",
     "react": "^19.3.1",

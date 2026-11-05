@@ -39,7 +39,7 @@
     "better-auth": "^1.7.17",
     "drizzle-orm": "^0.45.4",
     "feed": "^6.0.0",
-    "framer-motion": "^11.12.0",
+    "framer-motion": "^14.9.1",
     "idb-keyval": "^6.2.2",
     "lucide-react": "^1.68.0",
     "next": "^16.4.5",
