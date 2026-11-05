@@ -62,6 +62,7 @@ export default function ReviewsPage() {
               </div>
               <div
                 className="flex shrink-0 items-center gap-0.5"
+                role="img"
                 aria-label={`${review.rating} out of 5 stars`}
               >
                 {Array.from({ length: 5 }).map((_, i) => (

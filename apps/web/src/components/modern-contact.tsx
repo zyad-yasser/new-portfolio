@@ -145,9 +145,10 @@ export function ModernContact() {
                               <FormItem>
                                 <FormLabel>
                                   Name{" "}
-                                  <span className="text-destructive" aria-label="required">
+                                  <span className="text-destructive" aria-hidden="true">
                                     *
                                   </span>
+                                  <span className="sr-only">(required)</span>
                                 </FormLabel>
                                 <FormControl>
                                   <Input
@@ -168,9 +169,10 @@ export function ModernContact() {
                               <FormItem>
                                 <FormLabel>
                                   Subject{" "}
-                                  <span className="text-destructive" aria-label="required">
+                                  <span className="text-destructive" aria-hidden="true">
                                     *
                                   </span>
+                                  <span className="sr-only">(required)</span>
                                 </FormLabel>
                                 <FormControl>
                                   <Input
@@ -192,9 +194,10 @@ export function ModernContact() {
                             <FormItem>
                               <FormLabel>
                                 Email{" "}
-                                <span className="text-destructive" aria-label="required">
+                                <span className="text-destructive" aria-hidden="true">
                                   *
                                 </span>
+                                <span className="sr-only">(required)</span>
                               </FormLabel>
                               <FormControl>
                                 <Input
@@ -215,9 +218,10 @@ export function ModernContact() {
                             <FormItem>
                               <FormLabel>
                                 Message{" "}
-                                <span className="text-destructive" aria-label="required">
+                                <span className="text-destructive" aria-hidden="true">
                                   *
                                 </span>
+                                <span className="sr-only">(required)</span>
                               </FormLabel>
                               <FormControl>
                                 <Textarea
