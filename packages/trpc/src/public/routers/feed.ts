@@ -56,7 +56,7 @@ export const feedRouter = createPublicTRPCRouter({
       }
       if (cursor) {
         branchAConditions.push(
-          sql`(${post.createdAt}, ${post.id}) < (${cursor.activityAt}, ${cursor.sortKey})`
+          sql`(${post.createdAt}, ${post.id}) < (${cursor.activityAt.toISOString()}::timestamp, ${cursor.sortKey})`
         );
       }
 
@@ -80,7 +80,7 @@ export const feedRouter = createPublicTRPCRouter({
       }
       if (cursor) {
         branchBConditions.push(
-          sql`(${postReshare.createdAt}, ${postReshare.userId} || ':' || ${postReshare.postId}) < (${cursor.activityAt}, ${cursor.sortKey})`
+          sql`(${postReshare.createdAt}, ${postReshare.userId} || ':' || ${postReshare.postId}) < (${cursor.activityAt.toISOString()}::timestamp, ${cursor.sortKey})`
         );
       }
 
