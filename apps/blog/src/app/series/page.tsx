@@ -1,15 +1,20 @@
 "use client";
 
-import { SiteHeader } from "@/components/site-header";
 import { publicApi } from "@repo/trpc/public/react";
 import { Button } from "@repo/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui/card";
 import { Skeleton } from "@repo/ui/skeleton";
 import { Library } from "lucide-react";
 import Link from "next/link";
+import { SiteHeader } from "@/components/site-header";
 
 export default function SeriesIndexPage() {
-  const { data: seriesList, isLoading, error, refetch } = publicApi.series.list.useQuery();
+  const { data, isLoading, error, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    publicApi.series.list.useInfiniteQuery(
+      {},
+      { getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined }
+    );
+  const seriesList = data?.pages.flatMap((page) => page.items);
 
   return (
     <>
@@ -58,6 +63,17 @@ export default function SeriesIndexPage() {
             </Link>
           ))}
         </div>
+
+        {hasNextPage && (
+          <Button
+            variant="outline"
+            className="self-center"
+            disabled={isFetchingNextPage}
+            onClick={() => fetchNextPage()}
+          >
+            {isFetchingNextPage ? "Loading…" : "Load more"}
+          </Button>
+        )}
       </main>
     </>
   );

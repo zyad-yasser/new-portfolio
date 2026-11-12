@@ -1,11 +1,22 @@
 import { randomUUID } from "node:crypto";
 import { db } from "@repo/db";
 import { media, mediaFolder } from "@repo/db/schema";
-import { createPresignedUploadUrl, deleteObject } from "@repo/utils/storage";
+import {
+  createPresignedUploadUrl,
+  deleteObject,
+  getObjectInfo,
+  getPublicUrl,
+} from "@repo/utils/storage";
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq, ilike, isNull, lt, or } from "drizzle-orm";
+import { and, desc, eq, ilike, inArray, isNull } from "drizzle-orm";
 import { z } from "zod";
-import { authedProcedure, createPublicTRPCRouter, strictRateLimit, verifiedProcedure } from "../init";
+import {
+  authedProcedure,
+  createPublicTRPCRouter,
+  strictRateLimit,
+  verifiedProcedure,
+} from "../init";
+import { afterCursor, byOwnCursor, createdAtCursorSchema, toPage } from "../pagination";
 import { getQuota, releaseQuota, tryReserveQuota } from "./media-quota";
 
 const ALLOWED_MEDIA_TYPES: Record<string, string> = {
@@ -22,7 +33,16 @@ const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 const MAX_VIDEO_BYTES = 200 * 1024 * 1024;
 const VIDEO_PRESIGN_EXPIRY_SECONDS = 1200;
 
-const cursorSchema = z.object({ createdAt: z.coerce.date(), id: z.string() });
+const MEDIA_KEY_PATTERN =
+  /^media\/[A-Za-z0-9_-]+\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(png|jpg|webp|gif|mp4|webm|mov)$/;
+
+function isOwnMediaKey(key: string, userId: string) {
+  return MEDIA_KEY_PATTERN.test(key) && key.startsWith(`media/${userId}/`);
+}
+
+function maxBytesFor(contentType: string) {
+  return contentType.startsWith("video/") ? MAX_VIDEO_BYTES : MAX_IMAGE_BYTES;
+}
 
 export const mediaRouter = createPublicTRPCRouter({
   list: authedProcedure
@@ -31,7 +51,7 @@ export const mediaRouter = createPublicTRPCRouter({
         .object({
           folderId: z.string().nullable().optional(),
           search: z.string().trim().max(100).optional(),
-          cursor: cursorSchema.optional(),
+          cursor: createdAtCursorSchema.optional(),
           limit: z.number().int().min(1).max(100).default(60),
         })
         .optional()
@@ -50,14 +70,9 @@ export const mediaRouter = createPublicTRPCRouter({
         conditions.push(folderId ? eq(media.folderId, folderId) : isNull(media.folderId));
       }
 
-      if (cursor) {
-        const cursorCondition = or(
-          lt(media.createdAt, cursor.createdAt),
-          and(eq(media.createdAt, cursor.createdAt), lt(media.id, cursor.id))
-        );
-        if (cursorCondition) {
-          conditions.push(cursorCondition);
-        }
+      const cursorCondition = afterCursor(media, cursor);
+      if (cursorCondition) {
+        conditions.push(cursorCondition);
       }
 
       const rows = await db.query.media.findMany({
@@ -66,14 +81,7 @@ export const mediaRouter = createPublicTRPCRouter({
         limit: limit + 1,
       });
 
-      const hasMore = rows.length > limit;
-      const items = hasMore ? rows.slice(0, limit) : rows;
-      const last = items.at(-1);
-
-      return {
-        items,
-        nextCursor: hasMore && last ? { createdAt: last.createdAt, id: last.id } : null,
-      };
+      return toPage(rows, limit, byOwnCursor);
     }),
 
   createPresignedUrl: verifiedProcedure
@@ -84,15 +92,10 @@ export const mediaRouter = createPublicTRPCRouter({
           contentType: z.string(),
           size: z.number().int().positive(),
         })
-        .refine(
-          (input) => {
-            const maxBytes = input.contentType.startsWith("video/")
-              ? MAX_VIDEO_BYTES
-              : MAX_IMAGE_BYTES;
-            return input.size <= maxBytes;
-          },
-          { message: "File is too large", path: ["size"] }
-        )
+        .refine((input) => input.size <= maxBytesFor(input.contentType), {
+          message: "File is too large",
+          path: ["size"],
+        })
     )
     .mutation(async ({ ctx, input }) => {
       const ext = ALLOWED_MEDIA_TYPES[input.contentType];
@@ -107,30 +110,28 @@ export const mediaRouter = createPublicTRPCRouter({
 
       const isVideo = input.contentType.startsWith("video/");
       const key = `media/${ctx.session.user.id}/${randomUUID()}.${ext}`;
-      const { uploadUrl, publicUrl } = await createPresignedUploadUrl({
+      const { uploadUrl, publicUrl, uploadHeaders } = await createPresignedUploadUrl({
         key,
         contentType: input.contentType,
+        contentLength: input.size,
         ...(isVideo ? { expiresInSeconds: VIDEO_PRESIGN_EXPIRY_SECONDS } : {}),
       });
 
-      return { uploadUrl, publicUrl, key };
+      return { uploadUrl, publicUrl, uploadHeaders, key };
     }),
 
   confirm: verifiedProcedure
     .input(
       z.object({
         key: z.string(),
-        url: z.string().url(),
         originalName: z.string().trim().min(1).max(255),
-        mimeType: z.string(),
-        size: z.number().int().positive(),
         width: z.number().int().positive().optional(),
         height: z.number().int().positive().optional(),
         folderId: z.string().nullable().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      if (!input.key.startsWith(`media/${ctx.session.user.id}/`)) {
+      if (!isOwnMediaKey(input.key, ctx.session.user.id)) {
         throw new TRPCError({ code: "FORBIDDEN" });
       }
 
@@ -146,8 +147,20 @@ export const mediaRouter = createPublicTRPCRouter({
         }
       }
 
+      const object = await getObjectInfo(input.key);
+      if (!object) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Upload not found" });
+      }
+
+      const expectedExt = input.key.split(".").pop();
+      const typeMatchesKey = ALLOWED_MEDIA_TYPES[object.contentType] === expectedExt;
+      if (!typeMatchesKey || object.size <= 0 || object.size > maxBytesFor(object.contentType)) {
+        await deleteObject(input.key);
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Uploaded file was rejected" });
+      }
+
       const inserted = await db.transaction(async (tx) => {
-        const reserved = await tryReserveQuota(ctx.session.user.id, input.size, tx);
+        const reserved = await tryReserveQuota(ctx.session.user.id, object.size, tx);
         if (!reserved) {
           return null;
         }
@@ -159,10 +172,10 @@ export const mediaRouter = createPublicTRPCRouter({
             ownerId: ctx.session.user.id,
             folderId: input.folderId ?? null,
             storageKey: input.key,
-            url: input.url,
+            url: getPublicUrl(input.key),
             originalName: input.originalName,
-            mimeType: input.mimeType,
-            size: input.size,
+            mimeType: object.contentType,
+            size: object.size,
             width: input.width ?? null,
             height: input.height ?? null,
           })
@@ -225,48 +238,41 @@ export const mediaRouter = createPublicTRPCRouter({
       return updated;
     }),
 
-  delete: verifiedProcedure
-    .input(z.object({ id: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      const rows = await db
-        .delete(media)
-        .where(and(eq(media.id, input.id), eq(media.ownerId, ctx.session.user.id)))
-        .returning();
+  delete: verifiedProcedure.input(z.object({ id: z.string() })).mutation(async ({ ctx, input }) => {
+    const rows = await db
+      .delete(media)
+      .where(and(eq(media.id, input.id), eq(media.ownerId, ctx.session.user.id)))
+      .returning();
 
-      const deleted = rows[0];
-      if (!deleted) {
-        throw new TRPCError({ code: "NOT_FOUND" });
-      }
+    const deleted = rows[0];
+    if (!deleted) {
+      throw new TRPCError({ code: "NOT_FOUND" });
+    }
 
-      await deleteObject(deleted.storageKey);
-      await releaseQuota(ctx.session.user.id, deleted.size);
+    await deleteObject(deleted.storageKey);
+    await releaseQuota(ctx.session.user.id, deleted.size);
 
-      return { id: deleted.id };
-    }),
+    return { id: deleted.id };
+  }),
 
   bulkDelete: verifiedProcedure
     .input(z.object({ ids: z.array(z.string()).min(1).max(200) }))
     .mutation(async ({ ctx, input }) => {
-      const deletedIds: string[] = [];
-      let releasedBytes = 0;
-
-      for (const id of input.ids) {
-        const rows = await db
+      const deleted = await db.transaction(async (tx) => {
+        const rows = await tx
           .delete(media)
-          .where(and(eq(media.id, id), eq(media.ownerId, ctx.session.user.id)))
-          .returning();
+          .where(and(inArray(media.id, input.ids), eq(media.ownerId, ctx.session.user.id)))
+          .returning({ id: media.id, storageKey: media.storageKey, size: media.size });
 
-        const deleted = rows[0];
-        if (deleted) {
-          await deleteObject(deleted.storageKey);
-          deletedIds.push(deleted.id);
-          releasedBytes += deleted.size;
-        }
-      }
+        const releasedBytes = rows.reduce((total, row) => total + row.size, 0);
+        await releaseQuota(ctx.session.user.id, releasedBytes, tx);
 
-      if (releasedBytes > 0) {
-        await releaseQuota(ctx.session.user.id, releasedBytes);
-      }
+        return rows;
+      });
+
+      await Promise.allSettled(deleted.map((row) => deleteObject(row.storageKey)));
+
+      const deletedIds = deleted.map((row) => row.id);
 
       return { ids: deletedIds };
     }),

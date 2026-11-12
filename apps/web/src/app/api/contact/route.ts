@@ -1,6 +1,6 @@
 import { sendContactEmail } from "@repo/email";
-import { createRateLimiter, getClientIp } from "@repo/utils/rate-limit";
-import { SameOriginError, assertSameOrigin } from "@repo/utils/same-origin";
+import { createRateLimiter, getClientIp, safeLimit } from "@repo/utils/rate-limit";
+import { assertSameOrigin, SameOriginError } from "@repo/utils/same-origin";
 import { contactRequestSchema } from "@repo/utils/schemas/contact";
 import { verifyTurnstileToken } from "@repo/utils/turnstile";
 import { NextResponse } from "next/server";
@@ -18,11 +18,12 @@ export async function POST(request: Request) {
   }
 
   const ip = getClientIp(request.headers);
-  const { success, reset } = await rateLimiter.limit(ip);
-  if (!success) {
+  const limit = await safeLimit(rateLimiter, ip);
+  if (!limit.success) {
+    const retryAfterSeconds = "reset" in limit ? Math.ceil((limit.reset - Date.now()) / 1000) : 60;
     return NextResponse.json(
       { ok: false, error: "Too many requests. Please try again later." },
-      { status: 429, headers: { "Retry-After": Math.ceil((reset - Date.now()) / 1000).toString() } }
+      { status: 429, headers: { "Retry-After": retryAfterSeconds.toString() } }
     );
   }
 

@@ -1,10 +1,10 @@
 "use client";
 
-import { SiteHeader } from "@/components/site-header";
 import { cn } from "@repo/ui/lib/utils";
 import { ShieldCheck, User, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { SiteHeader } from "@/components/site-header";
 
 const NAV_ITEMS = [
   { href: "/settings/profile", label: "Profile", icon: User },

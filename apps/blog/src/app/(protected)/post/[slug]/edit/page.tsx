@@ -1,12 +1,12 @@
 "use client";
 
-import { PostEditor } from "@/components/editor/post-editor";
-import { SiteHeader } from "@/components/site-header";
 import { publicApi } from "@repo/trpc/public/react";
 import { Button } from "@repo/ui/button";
 import { Skeleton } from "@repo/ui/skeleton";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { PostEditor } from "@/components/editor/post-editor";
+import { SiteHeader } from "@/components/site-header";
 
 export default function EditPostPage() {
   const { slug } = useParams<{ slug: string }>();

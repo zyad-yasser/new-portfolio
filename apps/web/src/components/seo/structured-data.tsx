@@ -129,22 +129,30 @@ export function StructuredData() {
       <Script
         id="person-schema"
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }}
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD must be inlined; "<" is escaped
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema).replace(/</g, "\\u003c") }}
       />
       <Script
         id="website-schema"
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD must be inlined; "<" is escaped
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema).replace(/</g, "\\u003c") }}
       />
       <Script
         id="professional-service-schema"
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(professionalServiceSchema) }}
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD must be inlined; "<" is escaped
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(professionalServiceSchema).replace(/</g, "\\u003c"),
+        }}
       />
       <Script
         id="breadcrumb-schema"
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD must be inlined; "<" is escaped
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbSchema).replace(/</g, "\\u003c"),
+        }}
       />
     </>
   );

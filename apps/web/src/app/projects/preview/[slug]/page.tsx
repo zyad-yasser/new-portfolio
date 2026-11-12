@@ -1,11 +1,11 @@
-import { getFirebaseStorageUrl } from "@/constants";
-import { otherProjects, productionProjects } from "@/statics";
 import { Badge } from "@repo/ui/badge";
 import { Button } from "@repo/ui/button";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getFirebaseStorageUrl } from "@/constants";
+import { otherProjects, productionProjects } from "@/statics";
 
 const PREVIEW_PREFIX = "/projects/preview/";
 

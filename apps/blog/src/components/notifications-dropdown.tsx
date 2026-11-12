@@ -1,11 +1,5 @@
 "use client";
 
-import {
-  NOTIFICATION_TYPE_ICON,
-  initialsFor,
-  notificationHref,
-  notificationText,
-} from "@/lib/notifications";
 import { getErrorMessage } from "@repo/trpc/error";
 import { publicApi } from "@repo/trpc/public/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@repo/ui/avatar";
@@ -17,6 +11,12 @@ import { Bell, BellOff, CheckCheck } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
+import {
+  initialsFor,
+  NOTIFICATION_TYPE_ICON,
+  notificationHref,
+  notificationText,
+} from "@/lib/notifications";
 
 export function NotificationsDropdown({ unreadCount }: { unreadCount: number | undefined }) {
   const [open, setOpen] = useState(false);

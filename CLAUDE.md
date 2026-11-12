@@ -6,18 +6,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Turborepo/pnpm monorepo for Zyad Yasser's portfolio (zyadyasser.net):
 
-- `apps/web` — the public portfolio site. Static/marketing-style Next.js App Router site of landing sections plus a `/projects` page. No backend of its own.
+- `apps/web` — the public portfolio site. Static/marketing-style Next.js App Router site of landing sections plus `/projects` and `/projects/preview/[slug]`. Its only backend is `src/app/api/contact/route.ts` (contact form → email via `@repo/email`, guarded by Turnstile, a rate limit, a honeypot and a same-origin check) — a deliberate exception to the tRPC-only rule, since web has no tRPC stack.
 - `apps/admin` — a private, authenticated admin app (deploys separately to `admin.zyadyasser.net`). Single-owner: sign-up is disabled at the auth-instance level (`emailAndPassword.disableSignUp`) and every protected route additionally requires `session.user.role === "admin"` — two independent layers, since `apps/reviews`/`apps/blog` write to the same `user` table via a separate public auth instance. Currently auth scaffolding only (login + a protected dashboard shell) — no content-management features yet.
-- `apps/reviews` — public reviews app (`reviews.zyadyasser.net`). Public sign-up, any signed-in user can leave a review; reviews are publicly listable without an account.
-- `apps/blog` — public blog app (`blog.zyadyasser.net`). Public sign-up, any signed-in user can write/publish posts; published posts are publicly listable without an account. Shares one account system with `apps/reviews` via cross-subdomain cookies — signing up on either app logs you into both.
+- `apps/reviews` — public reviews app (`reviews.zyadyasser.net`). Public sign-up, any signed-in user can leave a review; reviews are publicly listable (paginated) without an account.
+- `apps/blog` — public blog app (`blog.zyadyasser.net`). Public sign-up; verified users can write/publish posts and media posts, comment, react, bookmark, reshare, quote, follow/block users, organize series, highlight/annotate, and manage a media library with a storage quota. Published posts are publicly listable without an account. Shares one account system with `apps/reviews` via cross-subdomain cookies — signing up on either app logs you into both.
 - `packages/ui` — shared shadcn/ui-style component primitives, `cn()`, theme provider/toggle, and the shared Tailwind v4 theme tokens (`@repo/ui`). All four apps depend on this rather than keeping their own copies.
 - `packages/db` — the Drizzle/Postgres (Neon) layer (`@repo/db`): db client + schema, meant to be consumed by any package/app that needs direct DB access, not just auth. The `user` table (and its `role` column) is shared by every app's auth instance.
 - `packages/auth` — shared Better Auth setup (`@repo/auth`), built on `@repo/db`, exporting two independent instances: the admin `auth`/`authClient` (sign-up disabled, used only by `apps/admin`) and the public `publicAuth`/`publicAuthClient` (sign-up enabled, used only by `apps/reviews` and `apps/blog`). Different secrets, different Better Auth instances — a session cookie minted by one is never valid against the other, even though both read/write the same Postgres tables.
+- `packages/auth-ui` — shared auth screens for reviews/blog (`@repo/auth-ui`): login (incl. the 2FA step), signup, forgot/reset password, auth-error and the email-verification banner, each taking the app's title/copy/styling as props. Kept separate from `@repo/ui` so the UI primitives package never depends on `@repo/auth`/`@repo/db`.
+- `packages/utils` — `@repo/utils`: env helpers, Upstash Redis client, rate limiting (`createRateLimiter`, fail-open `safeLimit`, `getClientIp`), Better Auth secondary storage, same-origin (CSRF) check, Turnstile verification, the storage abstraction (`storage.ts` switching between `s3.ts` and `firebase-storage.ts` on `STORAGE_PROVIDER`), shared zod schemas, and `security-headers.cjs` (`buildSecurityHeaders`, used by every app's `next.config.js`).
+- `packages/email` — `@repo/email`: nodemailer (Gmail) transport plus contact, verification and password-reset templates. Every interpolated user value goes through `escapeHtml`.
 - `packages/trpc` — the API layer (`@repo/trpc`). All backend APIs go through tRPC procedures here, not ad-hoc Next.js route handlers — an app only needs a thin `fetchRequestHandler` route file to mount it. Mirrors the two-auth-instance split: the root `init.ts`/`context.ts`/`routers/_app.ts` are admin-only (role-gated `protectedProcedure`), and `public/init.ts`/`public/context.ts`/`public/routers/_app.ts` are the reviews/blog stack (`authedProcedure`, no role restriction).
 
 ## Commands
 
-Package manager is **pnpm** (v10.8.0+, Node >=22) with Turborepo. Do not use npm/yarn.
+Package manager is **pnpm** (v10.8.0+) with Turborepo. Node is pinned to 24.x (`engines` + `.nvmrc`); set the same in each Vercel project. Do not use npm/yarn.
 
 Run from the repo root unless noted:
 
@@ -30,12 +33,12 @@ Run from the repo root unless noted:
 
 Or scope to one workspace: `pnpm --filter web <script>`, `pnpm --filter admin <script>`, `pnpm --filter @repo/auth <script>`.
 
-- `pnpm test` — Vitest (`vitest run`) across every package/app that has it (`apps/web`, `apps/admin`, `apps/reviews`, `apps/blog`); `pnpm --filter <app> test:watch` for watch mode
-- `pnpm test:e2e` — Playwright, `apps/web` only (`pnpm --filter web test:e2e:ui` for the UI runner). Starts `pnpm dev` automatically via `webServer` in `playwright.config.ts` (reuses an already-running dev server) — CI should build first and point `webServer.command` at `pnpm start` instead for a prod-accurate run.
+- `pnpm test` — Vitest (`vitest run`) across every package/app that has it (all four apps plus `packages/auth`, `packages/ui`, `packages/utils`, `packages/trpc`); `pnpm --filter <app> test:watch` for watch mode. `packages/trpc` holds authorization integration tests that talk to local Postgres and the local Redis HTTP proxy (`http://localhost:8089`, token `local_dev_token`, overridable via `TEST_UPSTASH_REDIS_REST_URL/_TOKEN`); they skip entirely unless `DATABASE_URL` points at localhost.
+- `pnpm test:e2e` — Playwright, `apps/web` and `apps/blog` (`pnpm --filter web test:e2e:ui` for the UI runner). Starts `pnpm dev` automatically via `webServer` in `playwright.config.ts` (reuses an already-running dev server) — CI should build first and point `webServer.command` at `pnpm start` instead for a prod-accurate run.
 
 Vitest config per app is `vitest.config.mts` (jsdom environment, `@testing-library/react` + `@testing-library/jest-dom/vitest` wired via `vitest.setup.ts`, native `resolve.tsconfigPaths` for the `@/*` alias). Test files are colocated next to source as `*.test.ts(x)`; Playwright specs live in `apps/web/e2e/*.spec.ts` and are explicitly excluded from Vitest's discovery.
 
-Linting/formatting is via **Biome**, not ESLint/Prettier — a single root `biome.json` covers the whole workspace. Notable relaxed rules: `noExplicitAny`, `noArrayIndexKey`, `useExhaustiveDependencies`, and `noNonNullAssertion` are all off. Formatter uses double quotes, semicolons, 100-char line width.
+Linting/formatting is via **Biome**, not ESLint/Prettier — a single root `biome.json` covers the whole workspace (only `apps/*/public/**` static assets are ignored — don't widen that to `**/public/**`, which would silently skip `packages/trpc/src/public`). Notable relaxed rules: `noExplicitAny`, `noArrayIndexKey`, `useExhaustiveDependencies`, and `noNonNullAssertion` are all off. Formatter uses double quotes, semicolons, 100-char line width.
 
 There are no commit hooks — run `pnpm check:fix` manually before committing.
 
@@ -61,7 +64,7 @@ One caveat baked into the code because of it: the Storage emulator doesn't suppo
 
 ## Architecture
 
-Turborepo (`turbo.json`) + pnpm workspaces (`pnpm-workspace.yaml`: `apps/*`, `packages/*`). Shared strict TypeScript config lives in root `tsconfig.base.json`; each app/package extends it and sets its own `baseUrl`/path aliases.
+Turborepo (`turbo.json`) + pnpm workspaces (`pnpm-workspace.yaml`: `apps/*`, `packages/*`). Shared strict TypeScript config lives in root `tsconfig.base.json` (TypeScript 7, which removed `baseUrl` and no longer auto-includes `@types`, hence `types: ["node"]` in the base); each app/package extends it and declares its own `paths` relative to its tsconfig (e.g. `"@/*": ["./src/*"]`).
 
 ### `apps/web`
 
@@ -96,12 +99,12 @@ Testing: Vitest (`vitest.config.mts`) for unit/component tests. No Playwright he
 
 ### `apps/reviews` and `apps/blog`
 
-Structurally identical to each other, both public-signup Next.js App Router apps built on `@repo/auth/public` and `@repo/trpc/public/*` rather than admin's stack:
+Both are public-signup Next.js App Router apps built on `@repo/auth/public`, `@repo/auth-ui` and `@repo/trpc/public/*` rather than admin's stack. Reviews is small; the blog is the bulk of the product (feed, media library, notifications, saved, series, settings incl. 2FA/sessions/linked accounts, category/tag/profile pages, `feed.xml`, `sitemap.ts`, a React Query persister for feeds). Shared pieces:
 
 - `src/app/api/auth/[...all]/route.ts` — mounts `publicAuth` from `@repo/auth/public`.
 - `src/app/api/trpc/[trpc]/route.ts` — mounts `publicAppRouter` from `@repo/trpc/public/routers/_app` with `createPublicTRPCContext`.
-- `src/app/login/page.tsx` / `src/app/signup/page.tsx` — `publicAuthClient.signIn.email()` / `.signUp.email()`.
-- `src/proxy.ts` — public by default, unlike admin. `apps/reviews`' matcher only protects `/submit`; `apps/blog`'s only protects `/new` and `/mine`. Everything else (the list pages) is reachable without a session.
+- `src/app/login|signup|forgot-password|reset-password|auth-error/page.tsx` — thin wrappers rendering the matching `@repo/auth-ui` screen with app-specific props; don't fork these back into the apps.
+- `src/proxy.ts` — public by default, unlike admin; calls `requireSessionCookie` from `@repo/auth/session-proxy` and only declares its own matcher (must stay a static literal). `apps/reviews` protects `/submit`; `apps/blog` protects `/new`, `/mine`, `/post/:slug/edit`, `/settings/*`, `/saved`, `/series/mine`, `/notifications`, `/media`, `/feed`.
 - `src/app/page.tsx` — public list page (`review.list` / `post.list` tRPC queries), no auth required.
 - `apps/reviews/src/app/(protected)/submit/page.tsx` — leave a review (`review.create`).
 - `apps/blog/src/app/(protected)/new/page.tsx` and `.../mine/page.tsx` — write a post (`post.create`) and manage/toggle-publish your own posts (`post.mine`, `post.setPublished`, ownership-checked server-side via `authorId`).
@@ -116,22 +119,25 @@ shadcn/ui-style primitives built on Radix + `class-variance-authority` (`cva`) +
 ### `packages/db` (`@repo/db`)
 
 Postgres (local Docker or Neon in production) + Drizzle, meant to be shared by anything that needs the DB — not owned by auth:
+
 - `src/schema/auth.ts` — Better Auth's required tables (`user`, `session`, `account`, `verification`). `user.role` (`"admin" | "user"`, DB default `"user"`) is the hard boundary between admin's trust domain and reviews/blog's — see `packages/auth`. `src/schema/index.ts` re-exports every schema file as the barrel — add new domain tables as sibling files here.
 - `src/schema/reviews.ts` — `review` table (`userId` FK, `rating`, `title`, `body`).
-- `src/schema/blog.ts` — `post` table (`authorId` FK, `title`, unique `slug`, `content`, `published`).
+- `src/schema/blog.ts` — the blog domain: `post` (`contentJson` Tiptap doc, `excerptText`, `searchVector`, `type`, `quotedPostId`, series/category links, counters), `post_tag`/`tag`, `category`, `series`, `comment` (soft-delete via `deletedAt`), reactions, bookmarks, reshares, follows, blocks, highlights/image annotations/video comments, `media`/`media_folder`/`user_storage_quota`, `notification`, `user_profile`. `relations.ts` holds the Drizzle relations. `src/schema/auth.ts` also has Better Auth's `two_factor` table.
 - `src/index.ts` — the Drizzle client (`drizzle-orm/postgres-js`), reads `DATABASE_URL`
 - `drizzle.config.ts` — points `schema` at `src/schema/index.ts` and `out` at `drizzle/` (the migrations folder). All commands below load `apps/admin/.env` via `dotenv-cli`, same as the seed script.
-- Migration workflow (versioned, the default going forward): edit `src/schema/*.ts` → `pnpm --filter @repo/db db:generate` (writes a new numbered `.sql` file + snapshot into `drizzle/` — review the SQL before committing) → `pnpm --filter @repo/db db:migrate` (applies any not-yet-applied migrations, tracked in the DB's own `drizzle.__drizzle_migrations` table). New columns with a DB default backfill *all* existing rows with that default, including rows created outside a migration (e.g. the seed script) — check whether any existing row needs a manual `UPDATE` after adding one (see the `role` column note under "Local infra").
+- Migration workflow (versioned, the default going forward): edit `src/schema/*.ts` → `pnpm --filter @repo/db db:generate` (writes a new numbered `.sql` file + snapshot into `drizzle/` — review the SQL before committing) → `pnpm --filter @repo/db db:migrate` (applies any not-yet-applied migrations, tracked in the DB's own `drizzle.__drizzle_migrations` table). New columns with a DB default backfill _all_ existing rows with that default, including rows created outside a migration (e.g. the seed script) — check whether any existing row needs a manual `UPDATE` after adding one (see the `role` column note under "Local infra").
 - `pnpm --filter @repo/db db:push` still exists for throwaway local experimentation (diffs schema straight against the DB, no migration file) but should not be used against a database with real data — it has no history and no rollback. Once you're happy with a change made via `push`, still run `db:generate` afterward so it's captured as a migration (drizzle-kit will produce an empty diff if the DB already matches, so `push` and `generate` don't fight each other).
+- `scripts/seed-posts.ts` seeds sample blog content and `scripts/backfill-usernames.ts` backfills `user_profile.username`; like the seed users, `seed-posts` refuses to run against a non-local `DATABASE_URL`.
 - `scripts/baseline-migrations.ts` (`pnpm --filter @repo/db db:baseline`) — one-time-per-database tool for adopting migrations on a database whose schema already exists (created via `push`, before migrations were introduced here). Marks the latest migration in `drizzle/` as already applied (inserts one row into `drizzle.__drizzle_migrations` with that migration's content hash) without running its SQL, so `db:migrate` doesn't try to re-create tables that are already there. Already run once against local Docker Postgres; production Neon needs the same treatment before its first real `db:migrate` (point `DATABASE_URL` at Neon when running it, e.g. `DATABASE_URL=<neon-url> pnpm --filter @repo/db exec tsx scripts/baseline-migrations.ts`, since the `db:baseline` script itself is wired to always load `apps/admin/.env`'s local `DATABASE_URL`).
 - `scripts/seed.ts` (`pnpm --filter @repo/db seed`) — creates the single admin account (`role: "admin"`, explicitly overriding the column default) from `ADMIN_NAME`/`ADMIN_EMAIL`/`ADMIN_PASSWORD` in `apps/admin/.env`; this is the only way an admin account gets created — the admin `auth` instance has sign-up disabled entirely. Inserts the `user`/`account` rows directly (hashing the password with `hashPassword` from `better-auth/crypto`) instead of calling `@repo/auth`'s `auth.api.signUpEmail` — `@repo/db` intentionally does not depend on `@repo/auth`, since `@repo/auth` already depends on `@repo/db` and a package.json cycle between them would make Turborepo reject the whole workspace graph. The inserted shape (`providerId: "credential"`, `accountId` set to the user's own `id`) mirrors better-auth's internal `sign-up` route exactly — verified by actually logging in against a seeded account. Reviews/blog accounts are created through the normal public sign-up flow instead (`publicAuth`), not this script.
 
 ### `packages/auth` (`@repo/auth`)
 
-Better Auth (email+password only, no social providers), built on `@repo/db`, exporting two fully independent instances that both read/write the same `user`/`session`/`account` tables but never trust each other's sessions:
-- `src/index.ts` — the admin `auth` instance (`BETTER_AUTH_SECRET`, `emailAndPassword.disableSignUp: true`). Used only by `apps/admin`.
+Better Auth, built on `@repo/db` and backed by Redis `secondaryStorage` (rate limits, sessions), exporting two fully independent instances that both read/write the same `user`/`session`/`account` tables but never trust each other's sessions:
+
+- `src/index.ts` — the admin `auth` instance (`BETTER_AUTH_SECRET`, `emailAndPassword.disableSignUp: true`, cookie prefix `zy-admin` from `shared.ts` so it never collides with the parent-domain public cookie). A `before` hook rejects `/sign-in/email` for any user whose `role` isn't `admin`, with the same error as a wrong password. Used only by `apps/admin`.
 - `src/client.ts` — `authClient` for admin's client components.
-- `src/public.ts` — the `publicAuth` instance (`PUBLIC_BETTER_AUTH_SECRET`, sign-up enabled, `advanced.crossSubDomainCookies` so the session cookie is valid on both `apps/reviews` and `apps/blog`). Used only by those two apps — never import this from `apps/admin`.
+- `src/public.ts` — the `publicAuth` instance (`PUBLIC_BETTER_AUTH_SECRET`, email+password plus optional Google/GitHub, email verification, `twoFactor` and Turnstile `captcha` on sign-up, `advanced.crossSubDomainCookies` so the session cookie is valid on both `apps/reviews` and `apps/blog`, `revokeSessionsOnPasswordReset`, a per-email password-reset cooldown, and a `before` hook validating `name` with `nameSchema` on sign-up/update-user). Used only by those two apps — never import this from `apps/admin`.
 - `src/public-client.ts` — `publicAuthClient` for reviews/blog client components.
 - `src/shared.ts` — `roleField`, the `additionalFields.role` config (`input: false`) both instances pass to `user:`, so `role` is readable on `session.user` from either instance but can never be set via a sign-up/update-user request body regardless of which instance receives it.
 - Why two instances instead of one shared one: Better Auth signs the session cookie with the instance's own secret, so even if a `publicAuth` session row and an `auth` session row sat in the exact same DB table, a cookie minted by one is never accepted by the other. `role` is the second, independent layer on top of that (see `packages/db`'s `auth.ts` schema note) — enforced in `apps/admin`'s layout and in `packages/trpc`'s admin `protectedProcedure`.
@@ -139,17 +145,32 @@ Better Auth (email+password only, no social providers), built on `@repo/db`, exp
 ### `packages/trpc` (`@repo/trpc`)
 
 tRPC v11, split into two independent stacks that mirror `packages/auth`'s split — do not let admin and public routers/context cross-import:
-- `src/init.ts` / `src/context.ts` / `src/routers/_app.ts` — admin-only. `protectedProcedure` requires both a session *and* `session.user.role === "admin"`, throwing `UNAUTHORIZED` otherwise. `createTRPCContext()` pulls the session from `@repo/auth`'s admin `auth` instance.
-- `src/provider.tsx` — exports `api` (`createTRPCReact`) and `TRPCReactProvider` for admin's client components, published as `@repo/trpc/react`. Intentionally not named `react.tsx` — with `baseUrl: "./src"` in this package's tsconfig, a file named `react.tsx` would shadow the bare `"react"` import for every file in the package.
-- `src/public/init.ts` / `src/public/context.ts` / `src/public/routers/_app.ts` — reviews/blog stack, published as `@repo/trpc/public/init`, `/public/context`, `/public/routers/_app`. `authedProcedure` requires only a session (any signed-up user, no role check) via `@repo/auth`'s `publicAuth`. `routers/review.ts` and `routers/post.ts` hold the actual procedures — `post.setPublished` checks `authorId` ownership server-side before allowing an update.
+
+- `src/init.ts` / `src/context.ts` / `src/routers/_app.ts` — admin-only. `protectedProcedure` requires both a session _and_ `session.user.role === "admin"`, throwing `UNAUTHORIZED` otherwise. `createTRPCContext()` pulls the session from `@repo/auth`'s admin `auth` instance.
+- `src/provider.tsx` — exports `api` (`createTRPCReact`) and `TRPCReactProvider` for admin's client components, published as `@repo/trpc/react`. Intentionally not named `react.tsx`, to avoid any confusion with the bare `"react"` import.
+- `src/public/init.ts` / `src/public/context.ts` / `src/public/routers/_app.ts` — reviews/blog stack, published as `@repo/trpc/public/init`, `/public/context`, `/public/routers/_app`. `authedProcedure` requires a session (no role check); `verifiedProcedure` additionally requires a verified email and gates every write; `strictRateLimit({ path, limit, window })` adds a per-IP and per-user limit to abuse-prone mutations. Both contexts run `assertTRPCSameOrigin` first. `routers/` holds ~21 routers; conventions:
+  - Any procedure taking a `postId` must call `assertReadablePost` (`readable-post.ts`: published or owned, plus a block check for writes) — unpublished posts must never leak through side routes.
+  - Lists use the cursor helpers in `src/public/pagination.ts` (`afterCursor`, `toPage`, `pageInputSchema`) and return `{ items, nextCursor }`; never return unbounded lists.
+  - Ownership is enforced in the `WHERE` clause (`authorId`/`ownerId`), not after the fact.
+  - Media uploads: `media.createPresignedUrl` signs the declared size into the URL (S3 `ContentLength`; GCS `x-goog-content-length-range`, returned as `uploadHeaders` the client must send — the GCS bucket's CORS config must allow that header), and `media.confirm` HEADs the stored object and trusts only its real size/type, validating the key against the issued format.
 - `src/public/provider.tsx` — `publicApi` / `PublicTRPCReactProvider`, published as `@repo/trpc/public/react`.
-- Consuming app just needs a thin route handler using `fetchRequestHandler` (see `apps/admin/src/app/api/trpc/[trpc]/route.ts` or `apps/reviews`'s equivalent) plus `@repo/trpc` as a dependency; `@trpc/server` must also be a *direct* dependency of that app since the route file itself imports it (per-file node_modules resolution in this workspace).
+- Consuming app just needs a thin route handler using `fetchRequestHandler` (see `apps/admin/src/app/api/trpc/[trpc]/route.ts` or `apps/reviews`'s equivalent) plus `@repo/trpc` as a dependency; `@trpc/server` must also be a _direct_ dependency of that app since the route file itself imports it (per-file node_modules resolution in this workspace).
 
 ## Code style rules for Claude Code
 
 - Do not write comments in code (this includes `.ts`/`.tsx`/`.js`/`.css` and config files). Code should be self-explanatory through naming and structure; if it needs a comment to be understood, restructure it instead.
 - All client-side feedback from an API call (a tRPC mutation/query result or a Better Auth client call) must be shown via toast, not an inline `<p role="alert">` block, a button label swap (e.g. `"Saved"`/`"Sent"`), or a silently-swallowed error. Use `toast.success(...)` / `toast.error(...)` from `"sonner"` directly in the component — no wrapper hook needed. Each app's `<Toaster />` (from `@repo/ui/sonner`) is mounted once in its root layout; don't add another one per page/component.
 - Never show a user a raw/unhandled error string — a transport failure (e.g. a non-JSON HTML error page breaking `JSON.parse`, producing something like `Unexpected token '<'`), an uncaught server exception's message, or any other value not explicitly authored for end users. tRPC errors: use `getErrorMessage(error, fallback)` from `@repo/trpc/error` — it only returns `error.message` when the server threw a `TRPCError` with one of a known-safe set of codes (`BAD_REQUEST`, `FORBIDDEN`, `CONFLICT`, `TOO_MANY_REQUESTS`, `UNPROCESSABLE_CONTENT`, `PAYLOAD_TOO_LARGE`) and a non-default message; anything else (transport failures, `INTERNAL_SERVER_ERROR`, `NOT_FOUND`, `UNAUTHORIZED`) falls back. Better Auth client errors: use `getAuthErrorMessage(error, fallback)` from `@repo/auth/error-message` — it only returns `error.message` for a 4xx `error.status`. Never write `error.message ?? "fallback"` or `error instanceof Error ? error.message : "fallback"` directly against a tRPC/auth error — always go through these helpers. This applies everywhere an error reaches the UI, including the persistent query-load-error retry boxes (`{error && <div>...<Button onClick={refetch}>Try again</Button></div>}`) — those must show a fixed/sanitized message too, never interpolate `{error.message}` raw.
+
+## Non-obvious decisions (moved out of code comments)
+
+- CSP `script-src` keeps `'unsafe-inline'` because Next/React inject inline bootstrap/hydration scripts (streaming data); `'unsafe-eval'` is dev-only for Turbopack HMR. Removing them freezes the page at its server-rendered state.
+- `safeLimit` fails open: if Redis/Upstash is unreachable every request still proceeds (the outage is logged), since a limiter outage is an infra problem, not the caller's.
+- The public tRPC base limiter (600/min per IP) is a backstop against runaway automation, not a throttle; auth-specific limits live in `@repo/auth`'s `rateLimit` config, and abuse-prone mutations add `strictRateLimit` (keyed per IP and per user).
+- Public auth overrides the twoFactor plugin's default limit (3 req/10s) with 10/min because the default trips on a single mistyped TOTP; `accountLockout` still guards brute force. `/change-password` and `/change-email` are relaxed from Better Auth's 3/10s default for the same reason.
+- `apps/admin/src/proxy.ts` excludes `/api/*`: Better Auth and tRPC enforce auth themselves and must return 401, not an HTML redirect.
+- Blog feed query caches persist across a hard refresh but are cleared on in-app navigation (`feed-cache-invalidator.tsx`, seeded from the first render so the restored cache isn't wiped on mount). `use-scroll-restoration` waits for the persisted cache to rehydrate and scrolls with `behavior: "instant"` to override the global smooth-scroll rule.
+- The blog disables the browser's native pull-to-refresh (`overscroll-behavior`) because `PullToRefresh` implements its own.
 
 ## Git rules for Claude Code
 

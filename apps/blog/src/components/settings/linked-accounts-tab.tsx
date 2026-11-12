@@ -5,9 +5,9 @@ import { publicAuthClient } from "@repo/auth/public-client";
 import { Badge } from "@repo/ui/badge";
 import { Button } from "@repo/ui/button";
 import { Card } from "@repo/ui/card";
-import { GoogleIcon } from "@repo/ui/icons";
+import { GithubIcon, GoogleIcon } from "@repo/ui/icons";
 import { Skeleton } from "@repo/ui/skeleton";
-import { Github, Loader2, Mail } from "lucide-react";
+import { Loader2, Mail } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -16,7 +16,7 @@ const AUTH_ERROR_PATH = "/auth-error";
 
 const SOCIAL_PROVIDERS = [
   { id: "google", label: "Google", Icon: GoogleIcon },
-  { id: "github", label: "GitHub", Icon: Github },
+  { id: "github", label: "GitHub", Icon: GithubIcon },
 ] as const;
 
 type SocialProviderId = (typeof SOCIAL_PROVIDERS)[number]["id"];
@@ -69,7 +69,6 @@ export function LinkedAccountsTab() {
     setPendingProvider(account.providerId);
 
     const { error } = await publicAuthClient.unlinkAccount({
-      providerId: account.providerId,
       accountId: account.accountId,
     });
 

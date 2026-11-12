@@ -1,17 +1,28 @@
 "use client";
 
-import { PostCard } from "@/components/posts/post-card";
-import { SiteHeader } from "@/components/site-header";
 import { publicApi } from "@repo/trpc/public/react";
 import { Button } from "@repo/ui/button";
 import { Skeleton } from "@repo/ui/skeleton";
 import { TooltipProvider } from "@repo/ui/tooltip";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { PostCard } from "@/components/posts/post-card";
+import { SiteHeader } from "@/components/site-header";
 
 export default function TagDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const { data: tag, isLoading, error } = publicApi.tag.getBySlug.useQuery({ slug });
+  const {
+    data: postPages,
+    isLoading: postsLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = publicApi.tag.posts.useInfiniteQuery(
+    { slug },
+    { enabled: !!tag, getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined }
+  );
+  const posts = postPages?.pages.flatMap((page) => page.items) ?? [];
 
   if (isLoading) {
     return (
@@ -46,22 +57,42 @@ export default function TagDetailPage() {
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-semibold">#{tag.name}</h1>
           <span className="text-sm text-muted-foreground">
-            {tag.posts.length} {tag.posts.length === 1 ? "post" : "posts"}
+            {tag.postCount} {tag.postCount === 1 ? "post" : "posts"}
           </span>
         </div>
 
-        {tag.posts.length === 0 ? (
+        {postsLoading ? (
+          <div className="columns-1 gap-5 sm:columns-2">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton
+                key={i}
+                className="skeleton-shimmer mb-5 h-52 w-full rounded-xl break-inside-avoid"
+              />
+            ))}
+          </div>
+        ) : posts.length === 0 ? (
           <p className="text-muted-foreground">No published posts with this tag yet.</p>
         ) : (
           <TooltipProvider>
             <div className="columns-1 gap-5 sm:columns-2">
-              {tag.posts.map((post) => (
+              {posts.map((post) => (
                 <div key={post.id} className="mb-5 break-inside-avoid">
                   <PostCard post={post} />
                 </div>
               ))}
             </div>
           </TooltipProvider>
+        )}
+
+        {hasNextPage && (
+          <Button
+            variant="outline"
+            className="self-center"
+            disabled={isFetchingNextPage}
+            onClick={() => fetchNextPage()}
+          >
+            {isFetchingNextPage ? "Loading…" : "Load more"}
+          </Button>
         )}
       </main>
     </>

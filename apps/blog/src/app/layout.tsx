@@ -1,12 +1,12 @@
-import { EmailVerificationBanner } from "@/components/email-verification-banner";
-import { FeedCacheInvalidator } from "@/components/feed-cache-invalidator";
-import { PersistedTRPCProvider } from "@/components/persisted-trpc-provider";
+import { EmailVerificationBanner } from "@repo/auth-ui/email-verification-banner";
 import { Toaster } from "@repo/ui/sonner";
 import { ThemeProvider } from "@repo/ui/theme-provider";
 import { TooltipProvider } from "@repo/ui/tooltip";
 import { MotionConfig } from "framer-motion";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { FeedCacheInvalidator } from "@/components/feed-cache-invalidator";
+import { PersistedTRPCProvider } from "@/components/persisted-trpc-provider";
 import "./globals.css";
 
 const inter = Inter({
@@ -44,7 +44,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <PersistedTRPCProvider>
               <TooltipProvider>
                 <FeedCacheInvalidator />
-                <EmailVerificationBanner />
+                <EmailVerificationBanner message="Verify your email to write posts, comment, and react." />
                 {children}
                 <Toaster />
               </TooltipProvider>

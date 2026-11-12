@@ -1,14 +1,19 @@
 "use client";
 
-import { PostCard } from "@/components/posts/post-card";
-import { SiteHeader } from "@/components/site-header";
 import { publicApi } from "@repo/trpc/public/react";
 import { Button } from "@repo/ui/button";
 import { Skeleton } from "@repo/ui/skeleton";
 import { TooltipProvider } from "@repo/ui/tooltip";
+import { PostCard } from "@/components/posts/post-card";
+import { SiteHeader } from "@/components/site-header";
 
 export default function SavedPostsPage() {
-  const { data: posts, isLoading, error, refetch } = publicApi.bookmark.mine.useQuery();
+  const { data, isLoading, error, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    publicApi.bookmark.mine.useInfiniteQuery(
+      {},
+      { getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined }
+    );
+  const posts = data?.pages.flatMap((page) => page.items);
 
   return (
     <>
@@ -26,7 +31,7 @@ export default function SavedPostsPage() {
             </div>
           )}
 
-          {!isLoading && !error && posts?.length === 0 && (
+          {!isLoading && !error && posts?.length === 0 && !hasNextPage && (
             <p className="text-center text-muted-foreground">No saved posts yet.</p>
           )}
 
@@ -45,6 +50,17 @@ export default function SavedPostsPage() {
                 </div>
               ))}
             </div>
+          )}
+
+          {hasNextPage && (
+            <Button
+              variant="outline"
+              className="self-center"
+              disabled={isFetchingNextPage}
+              onClick={() => fetchNextPage()}
+            >
+              {isFetchingNextPage ? "Loading…" : "Load more"}
+            </Button>
           )}
         </TooltipProvider>
       </main>

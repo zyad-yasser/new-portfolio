@@ -27,9 +27,6 @@ export function PullToRefresh({
     onRefreshRef.current = onRefresh;
   }, [onRefresh]);
 
-  // Native listeners, not JSX onTouch*/onMouse* props: React attaches touch handlers as
-  // passive by default, so preventDefault() inside onTouchMove would silently no-op and the
-  // page would rubber-band/scroll natively underneath our own pull indicator.
   useEffect(() => {
     const node = containerRef.current;
     if (!node) return;

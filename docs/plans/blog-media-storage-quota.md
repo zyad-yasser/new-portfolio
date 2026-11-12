@@ -35,7 +35,7 @@ Registered as `mediaQuota: mediaQuotaRouter` in `packages/trpc/src/public/router
 ## Frontend
 
 - **`apps/blog/src/app/(protected)/media/page.tsx`**: a `StorageUsageBar` component rendered right after the title/breadcrumb/toolbar row and before the folder/file grid. Uses `publicApi.mediaQuota.get.useQuery()` and the existing `@repo/ui/progress` `Progress` component, showing "X.X GB of 5 GB used" with the indicator color shifting to amber at 80%+ and destructive at 100% via an arbitrary Tailwind selector on `[data-slot=progress-indicator]`. No purchase button/CTA — explicitly out of scope.
-- No new client-side blocking — cumulative quota stays server-enforced; an over-quota upload surfaces through the *existing* per-item upload-error UI in `useMediaUpload`'s `catch` block, which already turns any thrown tRPC error into that item's `error` message.
+- No new client-side blocking — cumulative quota stays server-enforced; an over-quota upload surfaces through the _existing_ per-item upload-error UI in `useMediaUpload`'s `catch` block, which already turns any thrown tRPC error into that item's `error` message.
 
 ## Migration
 
@@ -44,6 +44,7 @@ Registered as `mediaQuota: mediaQuotaRouter` in `packages/trpc/src/public/router
 ## Verification (completed)
 
 Full flow tested end-to-end against local Postgres + MinIO with a throwaway signed-in account:
+
 - First `mediaQuota.get` call lazily creates the row (`{usedBytes: 0, totalBytes: 5368709120}`).
 - Upload → confirm increases `usedBytes` by exactly the file size.
 - `media.delete` and `mediaFolder.delete` (multi-file folder) release the correct amount, folder-delete release matching the summed size of all contained files.

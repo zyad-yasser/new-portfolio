@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "@repo/ui/styles/theme.css";
 @source "../../../../packages/ui/src";
+@source "../../../../packages/auth-ui/src";
 
 :root {
   --background: 200 20% 5%;

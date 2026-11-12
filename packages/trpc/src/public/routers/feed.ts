@@ -1,9 +1,10 @@
 import { db } from "@repo/db";
-import { post, postReshare, user, userBlock, userFollow } from "@repo/db/schema";
+import { post, postReshare, user, userFollow } from "@repo/db/schema";
 import { and, desc, eq, inArray, notInArray, sql } from "drizzle-orm";
 import { unionAll } from "drizzle-orm/pg-core";
 import { z } from "zod";
 import { authedProcedure, createPublicTRPCRouter } from "../init";
+import { getBlockedUserIds } from "./block";
 import { formatPost, postRouter, postWith } from "./post";
 
 const cursorSchema = z.object({ activityAt: z.coerce.date(), sortKey: z.string() });
@@ -47,12 +48,7 @@ export const feedRouter = createPublicTRPCRouter({
         return { items: [], nextCursor: null };
       }
 
-      const blockedIds = (
-        await db.query.userBlock.findMany({
-          where: eq(userBlock.blockerId, viewerId),
-          columns: { blockedId: true },
-        })
-      ).map((row) => row.blockedId);
+      const blockedIds = await getBlockedUserIds(viewerId);
 
       const branchAConditions = [inArray(post.authorId, followingIds), eq(post.published, true)];
       if (blockedIds.length) {
@@ -60,7 +56,7 @@ export const feedRouter = createPublicTRPCRouter({
       }
       if (cursor) {
         branchAConditions.push(
-          sql`(${post.createdAt}, ${post.id}) < (${cursor.activityAt}, ${cursor.sortKey})`
+          sql`(${post.createdAt}, ${post.id}) < (${cursor.activityAt.toISOString()}::timestamp, ${cursor.sortKey})`
         );
       }
 
@@ -84,7 +80,7 @@ export const feedRouter = createPublicTRPCRouter({
       }
       if (cursor) {
         branchBConditions.push(
-          sql`(${postReshare.createdAt}, ${postReshare.userId} || ':' || ${postReshare.postId}) < (${cursor.activityAt}, ${cursor.sortKey})`
+          sql`(${postReshare.createdAt}, ${postReshare.userId} || ':' || ${postReshare.postId}) < (${cursor.activityAt.toISOString()}::timestamp, ${cursor.sortKey})`
         );
       }
 

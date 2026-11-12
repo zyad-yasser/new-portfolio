@@ -1,28 +1,13 @@
-/* Shared brand theme tokens for @repo/ui consumers (apps/web, apps/admin).
-   Two-tier token pattern: bare `--x` vars hold raw "H S% L%" triples (so they can be
-   alpha-blended by hand elsewhere via `hsl(var(--x) / 0.5)`); `--color-x` in @theme wraps
-   them in hsl() so Tailwind's auto-generated utilities (bg-primary, bg-primary/10, ...) get
-   a complete, valid CSS color instead of a bare triple (which `background-color: var(...)`
-   can't render — this is the standard shadcn/Tailwind-v4 HSL convention).
-
-   Note this project inverts the usual shadcn convention: `:root` (no class) IS the dark
-   theme, `.light` is the override — next-themes (attribute="class") sets the <html> class
-   to the literal resolved theme name ("light" or "dark"), so :root styles apply whenever
-   that class is "dark" (or absent), same as before. `dark:` utilities key off an actual
-   ".dark" class rather than the OS media query, matching how next-themes actually toggles. */
-
 @custom-variant dark (&:is(.dark *));
 :root {
-  /* Neutral near-black canvas (Resend/Linear-style restraint) — the warm gradient
-     identity lives in the accent tokens and ambient glow below, not the surface. */
   --background: 240 6% 4%;
   --foreground: 30 15% 96%;
   --card: 240 6% 7%;
   --card-foreground: 30 10% 94%;
   --popover: 240 6% 6%;
   --popover-foreground: 30 10% 94%;
-  --primary: 8 88% 58%; /* vivid coral — brand anchor */
-  --primary-foreground: 0 0% 4%; /* dark text on primary: ~5.9:1, white text on primary fails at ~3.5:1 */
+  --primary: 8 88% 58%;
+  --primary-foreground: 0 0% 4%;
   --secondary: 240 6% 11%;
   --secondary-foreground: 30 8% 92%;
   --muted: 240 6% 9%;
@@ -33,17 +18,13 @@
   --destructive-foreground: 0 0% 100%;
   --border: 240 6% 14%;
   --input: 240 6% 11%;
-  --ring: 8 88% 58%; /* = primary */
-
+  --ring: 8 88% 58%;
   --success: 152 60% 32%;
   --success-foreground: 0 0% 100%;
-  --warning: 38 95% 58%; /* gradient's amber waypoint — also used standalone via to-warning */
+  --warning: 38 95% 58%;
   --warning-foreground: 0 0% 6%;
-  --magenta: 322 78% 56%; /* gradient waypoint */
-  --violet: 262 72% 58%; /* gradient waypoint */
-
-  /* Single source of truth for the warm gradient identity — referenced by
-     .bg-gradient-brand/.text-gradient-brand and AmbientGradient, never hardcoded elsewhere. */
+  --magenta: 322 78% 56%;
+  --violet: 262 72% 58%;
   --gradient-brand: linear-gradient(
     135deg,
     hsl(var(--warning)) 0%,
@@ -61,7 +42,7 @@
   );
   --ambient-glow-opacity: 0.12;
   --ambient-glow-blend: screen;
-  --hero-shadow-opacity: 0.5; /* black watermark barely lifts off the near-black canvas */
+  --hero-shadow-opacity: 0.5;
 }
 
 .light {
@@ -80,7 +61,7 @@
   --accent: 30 25% 92%;
   --accent-foreground: 256 20% 15%;
 
-  --primary: 8 80% 42%; /* darker/richer than dark mode so it holds contrast on a light canvas */
+  --primary: 8 80% 42%;
   --primary-foreground: 0 0% 100%;
   --ring: 8 80% 42%;
 
@@ -91,10 +72,9 @@
   --magenta: 320 65% 40%;
   --violet: 262 55% 44%;
 
-  /* screen-blend disappears on white; switch blend mode and cut opacity further, not just reuse dark's value */
   --ambient-glow-opacity: 0.08;
   --ambient-glow-blend: normal;
-  --hero-shadow-opacity: 0.06; /* same black watermark reads much stronger against a light canvas */
+  --hero-shadow-opacity: 0.06;
 }
 
 @theme {
@@ -127,9 +107,6 @@
   --color-magenta: hsl(var(--magenta));
   --color-violet: hsl(var(--violet));
 
-  /* Sidebar (admin shell) aliases existing semantic tokens rather than defining its own
-     palette, so it inherits the dark/light swap for free instead of needing its own
-     :root/.light overrides. */
   --color-sidebar: hsl(var(--card));
   --color-sidebar-foreground: hsl(var(--card-foreground));
   --color-sidebar-primary: hsl(var(--primary));

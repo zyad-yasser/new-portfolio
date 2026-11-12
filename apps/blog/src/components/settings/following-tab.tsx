@@ -1,6 +1,5 @@
 "use client";
 
-import { initialsFor } from "@/lib/notifications";
 import { publicAuthClient } from "@repo/auth/public-client";
 import { getErrorMessage } from "@repo/trpc/error";
 import { publicApi } from "@repo/trpc/public/react";
@@ -10,18 +9,19 @@ import { Card } from "@repo/ui/card";
 import { Skeleton } from "@repo/ui/skeleton";
 import Link from "next/link";
 import { toast } from "sonner";
+import { initialsFor } from "@/lib/notifications";
 
 export function FollowingTab() {
   const { data: session } = publicAuthClient.useSession();
   const userId = session?.user.id;
   const utils = publicApi.useUtils();
 
-  const {
-    data: following,
-    isLoading,
-    error,
-    refetch,
-  } = publicApi.follow.following.useQuery({ userId: userId ?? "" }, { enabled: !!userId });
+  const { data, isLoading, error, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    publicApi.follow.following.useInfiniteQuery(
+      { userId: userId ?? "" },
+      { enabled: !!userId, getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined }
+    );
+  const following = data?.pages.flatMap((page) => page.items);
 
   const unfollow = publicApi.follow.unfollow.useMutation({
     onSuccess: () => {
@@ -71,6 +71,17 @@ export function FollowingTab() {
             </Button>
           </Card>
         ))}
+
+        {hasNextPage && (
+          <Button
+            variant="outline"
+            className="self-center"
+            disabled={isFetchingNextPage}
+            onClick={() => fetchNextPage()}
+          >
+            {isFetchingNextPage ? "Loading…" : "Load more"}
+          </Button>
+        )}
       </div>
     </div>
   );

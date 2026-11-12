@@ -14,7 +14,8 @@
     "./turnstile": "./src/turnstile.ts",
     "./s3": "./src/s3.ts",
     "./firebase-storage": "./src/firebase-storage.ts",
-    "./storage": "./src/storage.ts"
+    "./storage": "./src/storage.ts",
+    "./security-headers": "./security-headers.cjs"
   },
   "scripts": {
     "lint": "biome lint .",
@@ -24,16 +25,16 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.691.0",
-    "@aws-sdk/s3-request-presigner": "^3.691.0",
+    "@aws-sdk/client-s3": "^3.1162.0",
+    "@aws-sdk/s3-request-presigner": "^3.1162.0",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.38.1",
-    "firebase-admin": "^14.2.0",
-    "zod": "^4.4.3"
+    "firebase-admin": "^14.5.0",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@types/node": "^22.10.2",
-    "typescript": "^5.7.2",
-    "vitest": "^4.1.10"
+    "@types/node": "^24.19.2",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.0"
   }
 }

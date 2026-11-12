@@ -1,8 +1,5 @@
 "use client";
 
-import { PostCard } from "@/components/posts/post-card";
-import { SiteHeader } from "@/components/site-header";
-import { categoryColorClasses } from "@/lib/category-colors";
 import { publicApi } from "@repo/trpc/public/react";
 import { Button } from "@repo/ui/button";
 import { cn } from "@repo/ui/lib/utils";
@@ -10,10 +7,24 @@ import { Skeleton } from "@repo/ui/skeleton";
 import { TooltipProvider } from "@repo/ui/tooltip";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { PostCard } from "@/components/posts/post-card";
+import { SiteHeader } from "@/components/site-header";
+import { categoryColorClasses } from "@/lib/category-colors";
 
 export default function CategoryDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const { data: category, isLoading, error } = publicApi.category.getBySlug.useQuery({ slug });
+  const {
+    data: postPages,
+    isLoading: postsLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = publicApi.category.posts.useInfiniteQuery(
+    { slug },
+    { enabled: !!category, getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined }
+  );
+  const posts = postPages?.pages.flatMap((page) => page.items) ?? [];
 
   if (isLoading) {
     return (
@@ -56,22 +67,42 @@ export default function CategoryDetailPage() {
             <p className="max-w-2xl text-muted-foreground">{category.description}</p>
           )}
           <span className="text-sm text-muted-foreground">
-            {category.posts.length} {category.posts.length === 1 ? "post" : "posts"}
+            {category.postCount} {category.postCount === 1 ? "post" : "posts"}
           </span>
         </div>
 
-        {category.posts.length === 0 ? (
+        {postsLoading ? (
+          <div className="columns-1 gap-5 sm:columns-2">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton
+                key={i}
+                className="skeleton-shimmer mb-5 h-52 w-full rounded-xl break-inside-avoid"
+              />
+            ))}
+          </div>
+        ) : posts.length === 0 ? (
           <p className="text-muted-foreground">No published posts in this category yet.</p>
         ) : (
           <TooltipProvider>
             <div className="columns-1 gap-5 sm:columns-2">
-              {category.posts.map((post) => (
+              {posts.map((post) => (
                 <div key={post.id} className="mb-5 break-inside-avoid">
                   <PostCard post={post} />
                 </div>
               ))}
             </div>
           </TooltipProvider>
+        )}
+
+        {hasNextPage && (
+          <Button
+            variant="outline"
+            className="self-center"
+            disabled={isFetchingNextPage}
+            onClick={() => fetchNextPage()}
+          >
+            {isFetchingNextPage ? "Loading…" : "Load more"}
+          </Button>
         )}
       </main>
     </>

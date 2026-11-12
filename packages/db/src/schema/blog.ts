@@ -63,17 +63,21 @@ export const tag = pgTable("tag", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
-export const series = pgTable("series", {
-  id: text("id").primaryKey(),
-  authorId: text("author_id")
-    .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
-  title: text("title").notNull(),
-  slug: text("slug").notNull().unique(),
-  description: text("description"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
+export const series = pgTable(
+  "series",
+  {
+    id: text("id").primaryKey(),
+    authorId: text("author_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    slug: text("slug").notNull().unique(),
+    description: text("description"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (table) => [index("series_author_id_idx").on(table.authorId)]
+);
 
 export const post = pgTable(
   "post",
@@ -108,6 +112,7 @@ export const post = pgTable(
     index("post_search_vector_idx").using("gin", table.searchVector),
     index("post_author_id_idx").on(table.authorId),
     index("post_quoted_post_id_idx").on(table.quotedPostId),
+    index("post_category_id_idx").on(table.categoryId),
     index("post_published_created_at_idx")
       .on(table.published, table.createdAt.desc(), table.id.desc())
       .where(sql`${table.published} = true`),
@@ -166,8 +171,13 @@ export const comment = pgTable(
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
   },
   (table) => [
-    index("comment_post_id_idx").on(table.postId),
+    index("comment_post_id_parent_created_at_idx").on(
+      table.postId,
+      table.parentCommentId,
+      table.createdAt
+    ),
     index("comment_parent_comment_id_idx").on(table.parentCommentId),
+    index("comment_author_id_idx").on(table.authorId),
   ]
 );
 
@@ -344,7 +354,10 @@ export const mediaFolder = pgTable(
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
   },
-  (table) => [index("media_folder_owner_id_parent_id_idx").on(table.ownerId, table.parentId)]
+  (table) => [
+    index("media_folder_owner_id_parent_id_idx").on(table.ownerId, table.parentId),
+    index("media_folder_parent_id_idx").on(table.parentId),
+  ]
 );
 
 export const media = pgTable(
@@ -397,5 +410,11 @@ export const notification = pgTable(
     readAt: timestamp("read_at"),
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },
-  (table) => [index("notification_recipient_id_read_at_idx").on(table.recipientId, table.readAt)]
+  (table) => [
+    index("notification_recipient_id_read_at_idx").on(table.recipientId, table.readAt),
+    index("notification_recipient_id_created_at_idx").on(table.recipientId, table.createdAt),
+    index("notification_actor_id_idx").on(table.actorId),
+    index("notification_post_id_idx").on(table.postId),
+    index("notification_comment_id_idx").on(table.commentId),
+  ]
 );

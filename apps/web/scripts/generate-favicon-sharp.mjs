@@ -1,6 +1,6 @@
-import { readFileSync, writeFileSync } from "fs";
-import { dirname, join } from "path";
-import { fileURLToPath } from "url";
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -26,13 +26,12 @@ async function generateFavicons() {
     console.log(`✓ Generated ${name}`);
   }
 
-  // Generate ICO (using 32x32)
   await sharp(svgBuffer)
     .resize(32, 32)
     .toFormat("png")
     .toFile(join(__dirname, "../public/favicon.ico"));
 
-  console.log(`✓ Generated favicon.ico`);
+  console.log("✓ Generated favicon.ico");
   console.log("\n✅ All favicon formats generated successfully!");
 }
 

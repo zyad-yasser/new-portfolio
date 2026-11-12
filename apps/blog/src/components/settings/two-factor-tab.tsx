@@ -55,7 +55,7 @@ export function TwoFactorTab() {
     const { data, error } = await publicAuthClient.twoFactor.enable({ password: enroll.password });
     setEnrolling(false);
 
-    if (error || !data) {
+    if (error || !data || data.method !== "totp") {
       toast.error(getAuthErrorMessage(error, "Couldn't start two-factor setup."));
       return;
     }
@@ -177,6 +177,7 @@ export function TwoFactorTab() {
         {enroll?.stage === "verify" && (
           <form onSubmit={handleVerify} className="flex flex-col gap-4">
             <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+              {/* biome-ignore lint/performance/noImgElement: local data: URL QR code, nothing for next/image to optimize */}
               <img
                 src={enroll.qrDataUrl}
                 alt="Scan this QR code with your authenticator app"

@@ -3,10 +3,17 @@ import { db } from "@repo/db";
 import { review, user } from "@repo/db/schema";
 import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
-import { createPublicTRPCRouter, publicProcedure, strictRateLimit, verifiedProcedure } from "../init";
+import {
+  createPublicTRPCRouter,
+  publicProcedure,
+  strictRateLimit,
+  verifiedProcedure,
+} from "../init";
+import { afterCursor, byOwnCursor, pageInputSchema, toPage } from "../pagination";
 
 export const reviewRouter = createPublicTRPCRouter({
-  list: publicProcedure.query(async () => {
+  list: publicProcedure.input(pageInputSchema(20, 50).optional()).query(async ({ input }) => {
+    const limit = input?.limit ?? 20;
     const rows = await db
       .select({
         id: review.id,
@@ -19,9 +26,11 @@ export const reviewRouter = createPublicTRPCRouter({
       })
       .from(review)
       .innerJoin(user, eq(review.userId, user.id))
-      .orderBy(desc(review.createdAt));
+      .where(afterCursor(review, input?.cursor))
+      .orderBy(desc(review.createdAt), desc(review.id))
+      .limit(limit + 1);
 
-    return rows;
+    return toPage(rows, limit, byOwnCursor);
   }),
 
   create: verifiedProcedure

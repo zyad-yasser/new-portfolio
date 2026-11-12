@@ -43,7 +43,7 @@ export function useAutosavePost(initialPostId?: string) {
     }
 
     const pending = pendingRef.current;
-    if (!pending || !pending.title.trim()) {
+    if (!pending?.title.trim()) {
       return postIdRef.current;
     }
 

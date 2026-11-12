@@ -1,8 +1,5 @@
 "use client";
 
-import { PostCard } from "@/components/posts/post-card";
-import { SiteHeader } from "@/components/site-header";
-import { useScrollRestoration } from "@/hooks/use-scroll-restoration";
 import { publicApi } from "@repo/trpc/public/react";
 import { Button } from "@repo/ui/button";
 import { Skeleton } from "@repo/ui/skeleton";
@@ -12,6 +9,9 @@ import { useIsRestoring } from "@tanstack/react-query";
 import { Loader2, Repeat2 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useRef } from "react";
+import { PostCard } from "@/components/posts/post-card";
+import { SiteHeader } from "@/components/site-header";
+import { useScrollRestoration } from "@/hooks/use-scroll-restoration";
 
 const FEED_TABS = ["following", "all"] as const;
 type FeedTab = (typeof FEED_TABS)[number];
@@ -88,9 +88,6 @@ function FollowingFeed() {
       {},
       {
         getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
-        // Mirrors the homepage feed: the persisted cache should just sit there after a
-        // refresh, not get silently re-fetched and reshuffled underneath the restored scroll
-        // position.
         refetchOnMount: false,
         refetchOnWindowFocus: false,
         refetchOnReconnect: false,
@@ -98,10 +95,6 @@ function FollowingFeed() {
     );
   const items = useMemo(() => data?.pages.flatMap((page) => page.items), [data]);
   const hasItems = !!items && items.length > 0;
-  // isRestoring must count as "still loading" here too: while the persisted cache is being
-  // read, isLoading is false (the query is paused, not fetching) even though there's no data
-  // yet. Checking isLoading alone would show neither the skeleton nor real content during
-  // that window — a blank flash — since SSR has no persister and is never in this state.
   const showSkeleton = (isLoading || isRestoring) && !hasItems;
   const loadMoreRef = useInfiniteScrollSentinel(hasNextPage, fetchNextPage);
   useScrollRestoration(feedScrollKey("following"), !isRestoring && !isLoading);

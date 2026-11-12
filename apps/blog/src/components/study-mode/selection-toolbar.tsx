@@ -1,6 +1,5 @@
 "use client";
 
-import { VerifiedGate } from "@/components/verified-gate";
 import type { HighlightColor } from "@repo/db/schema";
 import { getErrorMessage } from "@repo/trpc/error";
 import { publicApi } from "@repo/trpc/public/react";
@@ -8,6 +7,7 @@ import { Popover, PopoverAnchor, PopoverContent } from "@repo/ui/popover";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { VerifiedGate } from "@/components/verified-gate";
 import { ColorSwatchPicker } from "./color-swatch-picker";
 import { extractQuote, rangeToTextOffsets } from "./highlight-anchor";
 

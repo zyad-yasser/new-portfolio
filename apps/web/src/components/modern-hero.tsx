@@ -1,9 +1,10 @@
 "use client";
 
+import { AmbientGradient } from "@repo/ui/ambient-gradient";
 import { Button } from "@repo/ui/button";
+import { GithubIcon, LinkedinIcon } from "@repo/ui/icons";
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowDown, Github, Linkedin, Mail } from "lucide-react";
-import { AmbientGradient } from "./ambient-gradient";
+import { ArrowDown, Mail } from "lucide-react";
 
 export function ModernHero() {
   const shouldReduceMotion = useReducedMotion();
@@ -132,7 +133,7 @@ export function ModernHero() {
                   rel="noopener noreferrer"
                   aria-label="Visit my GitHub profile"
                 >
-                  <Github className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
+                  <GithubIcon className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
                 </a>
               </Button>
             </li>
@@ -144,7 +145,7 @@ export function ModernHero() {
                   rel="noopener noreferrer"
                   aria-label="Visit my LinkedIn profile"
                 >
-                  <Linkedin className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
+                  <LinkedinIcon className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
                 </a>
               </Button>
             </li>

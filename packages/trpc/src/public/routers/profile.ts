@@ -3,7 +3,13 @@ import { post, user, userFollow, userProfile } from "@repo/db/schema";
 import { TRPCError } from "@trpc/server";
 import { and, count, desc, eq, ne } from "drizzle-orm";
 import { z } from "zod";
-import { authedProcedure, createPublicTRPCRouter, publicProcedure, verifiedProcedure } from "../init";
+import {
+  authedProcedure,
+  createPublicTRPCRouter,
+  publicProcedure,
+  verifiedProcedure,
+} from "../init";
+import { afterCursor, byOwnCursor, pageInputSchema, toPage } from "../pagination";
 import { formatPost, postWith } from "./post";
 
 function slugifyBase(value: string) {
@@ -81,12 +87,14 @@ export const profileRouter = createPublicTRPCRouter({
           .select({ value: count() })
           .from(post)
           .where(and(eq(post.authorId, profile.userId), eq(post.published, true))),
-        db.select({ value: count() }).from(userFollow).where(
-          eq(userFollow.followingId, profile.userId)
-        ),
-        db.select({ value: count() }).from(userFollow).where(
-          eq(userFollow.followerId, profile.userId)
-        ),
+        db
+          .select({ value: count() })
+          .from(userFollow)
+          .where(eq(userFollow.followingId, profile.userId)),
+        db
+          .select({ value: count() })
+          .from(userFollow)
+          .where(eq(userFollow.followerId, profile.userId)),
       ]);
 
       return {
@@ -98,7 +106,7 @@ export const profileRouter = createPublicTRPCRouter({
     }),
 
   posts: publicProcedure
-    .input(z.object({ username: z.string() }))
+    .input(pageInputSchema(12, 50).extend({ username: z.string() }))
     .query(async ({ input }) => {
       const profile = await db.query.userProfile.findFirst({
         where: eq(userProfile.username, input.username),
@@ -109,12 +117,18 @@ export const profileRouter = createPublicTRPCRouter({
       }
 
       const rows = await db.query.post.findMany({
-        where: and(eq(post.authorId, profile.userId), eq(post.published, true)),
-        orderBy: desc(post.createdAt),
+        where: and(
+          eq(post.authorId, profile.userId),
+          eq(post.published, true),
+          afterCursor(post, input.cursor)
+        ),
+        orderBy: [desc(post.createdAt), desc(post.id)],
+        limit: input.limit + 1,
         with: postWith,
       });
 
-      return rows.map(formatPost);
+      const page = toPage(rows, input.limit, byOwnCursor);
+      return { ...page, items: page.items.map(formatPost) };
     }),
 
   mine: authedProcedure.query(({ ctx }) => ensureUserProfile(ctx.session.user.id)),
@@ -131,7 +145,14 @@ export const profileRouter = createPublicTRPCRouter({
           .optional(),
         bio: z.string().trim().max(280).optional(),
         websiteUrl: z
-          .union([z.string().trim().max(200).url({ protocol: /^https?$/ }), z.literal("")])
+          .union([
+            z
+              .string()
+              .trim()
+              .max(200)
+              .url({ protocol: /^https?$/ }),
+            z.literal(""),
+          ])
           .optional(),
         location: z.string().trim().max(100).optional(),
       })

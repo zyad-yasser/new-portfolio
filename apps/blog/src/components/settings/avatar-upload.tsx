@@ -1,9 +1,9 @@
 "use client";
 
-import { useMediaUpload } from "@/components/media/use-media-upload";
 import { Avatar, AvatarFallback, AvatarImage } from "@repo/ui/avatar";
 import { Loader2, Pencil } from "lucide-react";
 import { useRef } from "react";
+import { useMediaUpload } from "@/components/media/use-media-upload";
 
 export function AvatarUpload({
   imageUrl,

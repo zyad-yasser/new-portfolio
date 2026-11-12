@@ -120,6 +120,13 @@
       "when": 1788882167960,
       "tag": "0016_acoustic_vermin",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1793836305139,
+      "tag": "0017_handy_boomerang",
+      "breakpoints": true
     }
   ]
 }

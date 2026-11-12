@@ -1,7 +1,7 @@
 "use client";
 
-import { containerVariants, itemVariants } from "@/lib/motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui/card";
+import { containerVariants, itemVariants } from "@repo/ui/lib/motion";
 import { motion } from "framer-motion";
 import { Boxes, Brain, Cloud, Gauge, Search, Smartphone } from "lucide-react";
 import { SectionHeader } from "./ui/section-header";

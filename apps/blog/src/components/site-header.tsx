@@ -1,8 +1,5 @@
 "use client";
 
-import { MediaPostDialog } from "@/components/composer/media-post-dialog";
-import { NotificationsDropdown } from "@/components/notifications-dropdown";
-import { VerifiedGate } from "@/components/verified-gate";
 import { getAuthErrorMessage } from "@repo/auth/error-message";
 import { publicAuthClient } from "@repo/auth/public-client";
 import { publicApi } from "@repo/trpc/public/react";
@@ -39,6 +36,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { MediaPostDialog } from "@/components/composer/media-post-dialog";
+import { NotificationsDropdown } from "@/components/notifications-dropdown";
+import { VerifiedGate } from "@/components/verified-gate";
 
 const SEARCH_DEBOUNCE_MS = 250;
 const UNREAD_POLL_INTERVAL_MS = 30_000;

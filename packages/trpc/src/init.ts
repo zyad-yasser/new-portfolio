@@ -1,6 +1,6 @@
 import { requireEnv } from "@repo/utils";
 import { createRateLimiter, getClientIp, safeLimit } from "@repo/utils/rate-limit";
-import { TRPCError, initTRPC } from "@trpc/server";
+import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import type { TRPCContext } from "./context";
 
@@ -27,7 +27,7 @@ export const createCallerFactory = t.createCallerFactory;
 export const publicProcedure = t.procedure.use(rateLimited);
 
 export const protectedProcedure = publicProcedure.use(({ ctx, next }) => {
-  if (!ctx.session || ctx.session.user.role !== "admin") {
+  if (ctx.session?.user.role !== "admin") {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
 

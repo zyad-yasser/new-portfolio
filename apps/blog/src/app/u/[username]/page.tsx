@@ -1,9 +1,5 @@
 "use client";
 
-import { PostCard } from "@/components/posts/post-card";
-import { SiteHeader } from "@/components/site-header";
-import { VerifiedGate } from "@/components/verified-gate";
-import { isSafeHttpUrl } from "@/lib/safe-url";
 import { publicAuthClient } from "@repo/auth/public-client";
 import { getErrorMessage } from "@repo/trpc/error";
 import { publicApi } from "@repo/trpc/public/react";
@@ -16,6 +12,10 @@ import { Calendar, FileText, Globe, Loader2, MapPin, User } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
+import { PostCard } from "@/components/posts/post-card";
+import { SiteHeader } from "@/components/site-header";
+import { VerifiedGate } from "@/components/verified-gate";
+import { isSafeHttpUrl } from "@/lib/safe-url";
 
 function initialsFor(name: string) {
   return name
@@ -36,7 +36,17 @@ export default function ProfilePage() {
     isLoading,
     error,
   } = publicApi.profile.getByUsername.useQuery({ username });
-  const { data: posts, isLoading: postsLoading } = publicApi.profile.posts.useQuery({ username });
+  const {
+    data: postPages,
+    isLoading: postsLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = publicApi.profile.posts.useInfiniteQuery(
+    { username },
+    { getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined }
+  );
+  const posts = postPages?.pages.flatMap((page) => page.items);
 
   const isOwnProfile = !!session && session.user.id === profile?.userId;
 
@@ -179,6 +189,18 @@ export default function ProfilePage() {
                       <PostCard post={post} />
                     </div>
                   ))}
+                </div>
+              )}
+
+              {hasNextPage && (
+                <div className="flex justify-center">
+                  <Button
+                    variant="outline"
+                    disabled={isFetchingNextPage}
+                    onClick={() => fetchNextPage()}
+                  >
+                    {isFetchingNextPage ? "Loading…" : "Load more"}
+                  </Button>
                 </div>
               )}
             </TooltipProvider>

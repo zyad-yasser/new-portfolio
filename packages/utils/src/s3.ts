@@ -1,4 +1,10 @@
-import { DeleteObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import {
+  DeleteObjectCommand,
+  HeadObjectCommand,
+  NotFound,
+  PutObjectCommand,
+  S3Client,
+} from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { requireEnv } from "./env";
 
@@ -28,22 +34,40 @@ export function getPublicUrl(key: string) {
 export async function createPresignedUploadUrl({
   key,
   contentType,
+  contentLength,
   expiresInSeconds = PRESIGN_EXPIRY_SECONDS,
 }: {
   key: string;
   contentType: string;
+  contentLength: number;
   expiresInSeconds?: number;
 }) {
   const command = new PutObjectCommand({
     Bucket: requireEnv("S3_BUCKET"),
     Key: key,
     ContentType: contentType,
+    ContentLength: contentLength,
   });
   const uploadUrl = await getSignedUrl(getS3Client(), command, {
     expiresIn: expiresInSeconds,
+    signableHeaders: new Set(["content-type", "content-length"]),
   });
 
-  return { uploadUrl, publicUrl: getPublicUrl(key) };
+  return { uploadUrl, publicUrl: getPublicUrl(key), uploadHeaders: {} as Record<string, string> };
+}
+
+export async function getObjectInfo(key: string) {
+  try {
+    const head = await getS3Client().send(
+      new HeadObjectCommand({ Bucket: requireEnv("S3_BUCKET"), Key: key })
+    );
+    return { size: head.ContentLength ?? 0, contentType: head.ContentType ?? "" };
+  } catch (error) {
+    if (error instanceof NotFound || (error as { name?: string }).name === "NotFound") {
+      return null;
+    }
+    throw error;
+  }
 }
 
 export async function deleteObject(key: string) {

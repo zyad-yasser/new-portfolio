@@ -1,11 +1,12 @@
 import { randomUUID } from "node:crypto";
 import { db } from "@repo/db";
-import { notification, userBlock } from "@repo/db/schema";
 import type { NotificationType } from "@repo/db/schema";
+import { notification, userBlock } from "@repo/db/schema";
 import { getRedis } from "@repo/utils/redis";
-import { and, desc, eq, isNull, lt, or, sql } from "drizzle-orm";
+import { and, desc, eq, isNull, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import { authedProcedure, createPublicTRPCRouter } from "../init";
+import { afterCursor, byOwnCursor, createdAtCursorSchema, toPage } from "../pagination";
 
 const UNREAD_CACHE_TTL_SECONDS = 24 * 60 * 60;
 
@@ -41,6 +42,23 @@ export async function createNotification(input: {
     return;
   }
 
+  if (input.type !== "comment" && input.type !== "reply") {
+    const duplicate = await db.query.notification.findFirst({
+      where: and(
+        eq(notification.recipientId, input.recipientId),
+        eq(notification.actorId, input.actorId),
+        eq(notification.type, input.type),
+        input.postId ? eq(notification.postId, input.postId) : isNull(notification.postId),
+        isNull(notification.readAt)
+      ),
+      columns: { id: true },
+    });
+
+    if (duplicate) {
+      return;
+    }
+  }
+
   await db.insert(notification).values({
     id: randomUUID(),
     recipientId: input.recipientId,
@@ -54,14 +72,13 @@ export async function createNotification(input: {
 }
 
 const actorColumns = { id: true, name: true, image: true } as const;
-const cursorSchema = z.object({ createdAt: z.coerce.date(), id: z.string() });
 
 export const notificationRouter = createPublicTRPCRouter({
   list: authedProcedure
     .input(
       z
         .object({
-          cursor: cursorSchema.optional(),
+          cursor: createdAtCursorSchema.optional(),
           limit: z.number().int().min(1).max(50).default(30),
         })
         .optional()
@@ -71,14 +88,9 @@ export const notificationRouter = createPublicTRPCRouter({
       const limit = input?.limit ?? 30;
 
       const conditions = [eq(notification.recipientId, ctx.session.user.id)];
-      if (cursor) {
-        const cursorCondition = or(
-          lt(notification.createdAt, cursor.createdAt),
-          and(eq(notification.createdAt, cursor.createdAt), lt(notification.id, cursor.id))
-        );
-        if (cursorCondition) {
-          conditions.push(cursorCondition);
-        }
+      const cursorCondition = afterCursor(notification, cursor);
+      if (cursorCondition) {
+        conditions.push(cursorCondition);
       }
 
       const rows = await db.query.notification.findMany({
@@ -91,14 +103,7 @@ export const notificationRouter = createPublicTRPCRouter({
         },
       });
 
-      const hasMore = rows.length > limit;
-      const items = hasMore ? rows.slice(0, limit) : rows;
-      const last = items.at(-1);
-
-      return {
-        items,
-        nextCursor: hasMore && last ? { createdAt: last.createdAt, id: last.id } : null,
-      };
+      return toPage(rows, limit, byOwnCursor);
     }),
 
   unreadCount: authedProcedure.query(async ({ ctx }) => {
@@ -122,28 +127,22 @@ export const notificationRouter = createPublicTRPCRouter({
     return count;
   }),
 
-  markRead: authedProcedure
-    .input(z.object({ id: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      await db
-        .update(notification)
-        .set({ readAt: new Date() })
-        .where(
-          and(eq(notification.id, input.id), eq(notification.recipientId, ctx.session.user.id))
-        );
+  markRead: authedProcedure.input(z.object({ id: z.string() })).mutation(async ({ ctx, input }) => {
+    await db
+      .update(notification)
+      .set({ readAt: new Date() })
+      .where(and(eq(notification.id, input.id), eq(notification.recipientId, ctx.session.user.id)));
 
-      await invalidateUnreadCount(ctx.session.user.id);
+    await invalidateUnreadCount(ctx.session.user.id);
 
-      return { id: input.id };
-    }),
+    return { id: input.id };
+  }),
 
   markAllRead: authedProcedure.mutation(async ({ ctx }) => {
     await db
       .update(notification)
       .set({ readAt: new Date() })
-      .where(
-        and(eq(notification.recipientId, ctx.session.user.id), isNull(notification.readAt))
-      );
+      .where(and(eq(notification.recipientId, ctx.session.user.id), isNull(notification.readAt)));
 
     await getRedis()
       .set(unreadCacheKey(ctx.session.user.id), 0, { ex: UNREAD_CACHE_TTL_SECONDS })

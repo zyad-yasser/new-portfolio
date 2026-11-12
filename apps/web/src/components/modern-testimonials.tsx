@@ -1,12 +1,12 @@
 "use client";
 
-import { getFirebaseStorageUrl } from "@/constants";
-import { containerVariantsSlow, itemVariants } from "@/lib/motion";
-import { testimonials } from "@/statics";
 import { Card, CardContent } from "@repo/ui/card";
+import { containerVariantsSlow, itemVariants } from "@repo/ui/lib/motion";
 import { motion } from "framer-motion";
 import { Quote, User } from "lucide-react";
 import Image from "next/image";
+import { getFirebaseStorageUrl } from "@/constants";
+import { testimonials } from "@/statics";
 import { SectionHeader } from "./ui/section-header";
 
 export function ModernTestimonials() {

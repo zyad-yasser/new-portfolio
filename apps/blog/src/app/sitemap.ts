@@ -1,5 +1,5 @@
 import { db } from "@repo/db";
-import { category, post, series, tag } from "@repo/db/schema";
+import { post } from "@repo/db/schema";
 import { eq } from "drizzle-orm";
 import type { MetadataRoute } from "next";
 

@@ -1,17 +1,16 @@
-/* Opt-in "premium" surface/motion utilities, shared across @repo/ui consumers.
-   Hue-agnostic — every color reference goes through theme.css's tokens, so each
-   consuming app renders these with its own palette. Import explicitly per app
-   (not bundled into theme.css) since not every consumer wants them. */
-
 .card-hover {
-  transition: transform 0.4s var(--ease-premium), box-shadow 0.4s var(--ease-premium), border-color
-    0.4s var(--ease-premium);
+  transition:
+    transform 0.4s var(--ease-premium),
+    box-shadow 0.4s var(--ease-premium),
+    border-color 0.4s var(--ease-premium);
   border: 1px solid hsl(var(--border));
 }
 
 .card-hover:hover {
   border-color: hsl(var(--primary) / 0.35);
-  box-shadow: 0 20px 60px -15px hsl(var(--primary) / 0.15), 0 8px 24px -8px hsl(0 0% 0% / 0.4);
+  box-shadow:
+    0 20px 60px -15px hsl(var(--primary) / 0.15),
+    0 8px 24px -8px hsl(0 0% 0% / 0.4);
   transform: translateY(-4px);
 }
 
@@ -21,8 +20,10 @@
 }
 
 .btn-glow:hover {
-  box-shadow: 0 0 0 1px hsl(var(--primary)), 0 0 30px hsl(var(--primary) / 0.35), 0 8px 20px
-    hsl(var(--primary) / 0.25);
+  box-shadow:
+    0 0 0 1px hsl(var(--primary)),
+    0 0 30px hsl(var(--primary) / 0.35),
+    0 8px 20px hsl(var(--primary) / 0.25);
 }
 
 .glass {

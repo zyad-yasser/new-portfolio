@@ -1,7 +1,5 @@
 "use client";
 
-import { MediaPickerDialog } from "@/components/media/media-picker-dialog";
-import type { MediaItem } from "@/components/media/use-media-upload";
 import type { TiptapDoc } from "@repo/db/schema";
 import { Button } from "@repo/ui/button";
 import { Separator } from "@repo/ui/separator";
@@ -20,6 +18,8 @@ import {
   Undo,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { MediaPickerDialog } from "@/components/media/media-picker-dialog";
+import type { MediaItem } from "@/components/media/use-media-upload";
 import { createExtensions } from "./extensions";
 
 function ToolbarButton({

@@ -1,6 +1,6 @@
 import { requireEnv } from "@repo/utils";
 import { createRateLimiter, getClientIp, safeLimit } from "@repo/utils/rate-limit";
-import { TRPCError, initTRPC } from "@trpc/server";
+import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import type { PublicTRPCContext } from "./context";
 
@@ -9,8 +9,6 @@ const t = initTRPC.context<PublicTRPCContext>().create({
 });
 
 const appName = requireEnv("APP_NAME");
-// Not an auth action — this is a generous backstop against runaway automated abuse, not a
-// throttle on normal use. Auth-specific rate limiting lives in @repo/auth's `rateLimit` config.
 const baseRateLimiter = createRateLimiter({ prefix: `${appName}:trpc`, limit: 600, window: "1 m" });
 
 const rateLimited = t.middleware(async ({ ctx, next }) => {
@@ -63,11 +61,16 @@ export function strictRateLimit({
   const limiter = createRateLimiter({ prefix: `${appName}:trpc:${path}`, limit, window });
 
   return t.middleware(async ({ ctx, next }) => {
-    const ip = getClientIp(ctx.headers);
-    const { success } = await safeLimit(limiter, ip);
+    const keys = [getClientIp(ctx.headers)];
+    if (ctx.session) {
+      keys.push(`user:${ctx.session.user.id}`);
+    }
 
-    if (!success) {
-      throw new TRPCError({ code: "TOO_MANY_REQUESTS" });
+    for (const key of keys) {
+      const { success } = await safeLimit(limiter, key);
+      if (!success) {
+        throw new TRPCError({ code: "TOO_MANY_REQUESTS" });
+      }
     }
 
     return next();

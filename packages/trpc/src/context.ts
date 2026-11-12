@@ -1,16 +1,8 @@
 import { auth } from "@repo/auth";
-import { SameOriginError, assertSameOrigin } from "@repo/utils/same-origin";
-import { TRPCError } from "@trpc/server";
+import { assertTRPCSameOrigin } from "./assert-trpc-same-origin";
 
 export async function createTRPCContext(opts: { headers: Headers }) {
-  try {
-    assertSameOrigin(opts.headers);
-  } catch (error) {
-    if (error instanceof SameOriginError) {
-      throw new TRPCError({ code: "FORBIDDEN", message: error.message });
-    }
-    throw error;
-  }
+  assertTRPCSameOrigin(opts.headers);
 
   const session = await auth.api.getSession({ headers: opts.headers });
 

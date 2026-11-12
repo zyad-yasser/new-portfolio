@@ -2,16 +2,9 @@
 @import "@repo/ui/styles/theme.css";
 @source "../../../../packages/ui/src";
 
-/* Sections are anchor-scroll targets (nav links, hero CTAs) — offset them below
-   the sticky header (h-16 = 4rem) so headings don't land tucked under it. */
 section[id] {
   scroll-margin-top: 4.5rem;
 }
-
-/* Note: plain single-property color utilities (.bg-primary, .text-muted-foreground, .border-border,
-   .ring-ring, etc.) are intentionally NOT hand-written here — Tailwind v4 generates them directly
-   from the @theme color tokens above. Only classes below bundle extra behavior beyond a straight
-   color mapping (extra properties, hover-only states, etc.), which is why they're authored by hand. */
 
 .hover\:bg-primary\/90:hover {
   background-color: hsl(var(--primary) / 0.9);
@@ -28,23 +21,28 @@ section[id] {
 }
 
 .card-hover {
-  transition: transform 0.4s var(--ease-premium), box-shadow 0.4s var(--ease-premium), border-color
-    0.4s var(--ease-premium);
+  transition:
+    transform 0.4s var(--ease-premium),
+    box-shadow 0.4s var(--ease-premium),
+    border-color 0.4s var(--ease-premium);
   border: 1px solid hsl(var(--border));
 }
 
 .card-hover:hover {
   border-color: hsl(var(--primary) / 0.35);
-  box-shadow: 0 20px 60px -15px hsl(var(--primary) / 0.15), 0 8px 24px -8px hsl(0 0% 0% / 0.4);
+  box-shadow:
+    0 20px 60px -15px hsl(var(--primary) / 0.15),
+    0 8px 24px -8px hsl(0 0% 0% / 0.4);
   transform: translateY(-4px);
 }
 
 .btn-glow:hover {
-  box-shadow: 0 0 0 1px hsl(var(--primary)), 0 0 30px hsl(var(--primary) / 0.35), 0 8px 20px
-    hsl(var(--primary) / 0.25);
+  box-shadow:
+    0 0 0 1px hsl(var(--primary)),
+    0 0 30px hsl(var(--primary) / 0.35),
+    0 8px 20px hsl(var(--primary) / 0.25);
 }
 
-/* Liquid Glass surface treatment — frosted, translucent panels for premium depth */
 .glass {
   background: hsl(var(--card) / 0.6);
   backdrop-filter: blur(20px) saturate(160%);
@@ -63,9 +61,6 @@ section[id] {
   box-shadow: 0 0 60px hsl(var(--primary) / 0.12);
 }
 
-/* Rotating conic-gradient ring around a card — the wrapper's own padding
-   reveals a sliver of the animated gradient behind the card, so no clipping
-   masks are needed. Used for spotlighting cards (open source contributions). */
 @property --border-angle {
   syntax: "<angle>";
   initial-value: 0deg;
@@ -111,7 +106,9 @@ section[id] {
 
 .focus-visible\:ring-2:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--primary));
+  box-shadow:
+    0 0 0 2px hsl(var(--background)),
+    0 0 0 4px hsl(var(--primary));
 }
 
 .sr-only {
@@ -194,12 +191,6 @@ button:focus-visible {
   }
 }
 
-/* Hero background name: a huge, dark "shadow" watermark of the name with an
-   occasional analog-glitch flicker — mostly static, cuts to a color-split
-   alternate word for a single frame every few seconds via steps(1), never a
-   smooth distortion. Three independent word-layers (different durations, so
-   they drift out of sync) sit absolutely over the base name and flash their
-   own text briefly instead of just re-showing "Zyad Yasser". */
 .hero-glitch-name {
   position: relative;
   display: inline-block;
@@ -231,8 +222,6 @@ button:focus-visible {
   animation: hero-glitch-3 13s infinite steps(1);
 }
 
-/* Rest at opacity 0 the whole cycle; each glitch layer only becomes visible
-   for the few frames of its brief mid-cycle burst, then disappears again. */
 @keyframes hero-glitch-1 {
   0%,
   92%,

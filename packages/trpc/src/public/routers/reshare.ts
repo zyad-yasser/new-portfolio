@@ -3,20 +3,38 @@ import { post, postReshare } from "@repo/db/schema";
 import { TRPCError } from "@trpc/server";
 import { and, desc, eq } from "drizzle-orm";
 import { z } from "zod";
-import { authedProcedure, createPublicTRPCRouter, verifiedProcedure } from "../init";
+import {
+  authedProcedure,
+  createPublicTRPCRouter,
+  strictRateLimit,
+  verifiedProcedure,
+} from "../init";
+import { afterCursor, pageInputSchema, toPage } from "../pagination";
 import { assertNotBlocked } from "./block";
 import { createNotification } from "./notification";
 import { formatPost, postWith } from "./post";
+import { isReadableBy } from "./readable-post";
 
 export const reshareRouter = createPublicTRPCRouter({
-  mine: authedProcedure.query(async ({ ctx }) => {
+  mine: authedProcedure.input(pageInputSchema(20, 50).optional()).query(async ({ ctx, input }) => {
+    const limit = input?.limit ?? 20;
     const rows = await db.query.postReshare.findMany({
-      where: eq(postReshare.userId, ctx.session.user.id),
-      orderBy: desc(postReshare.createdAt),
+      where: and(
+        eq(postReshare.userId, ctx.session.user.id),
+        afterCursor({ createdAt: postReshare.createdAt, id: postReshare.postId }, input?.cursor)
+      ),
+      orderBy: [desc(postReshare.createdAt), desc(postReshare.postId)],
+      limit: limit + 1,
       with: { post: { with: postWith } },
     });
 
-    return rows.map((row) => formatPost(row.post));
+    const page = toPage(rows, limit, (row) => ({ createdAt: row.createdAt, id: row.postId }));
+    return {
+      ...page,
+      items: page.items
+        .filter((row) => isReadableBy(row.post, ctx.session.user.id))
+        .map((row) => formatPost(row.post)),
+    };
   }),
 
   isReshared: authedProcedure
@@ -33,11 +51,12 @@ export const reshareRouter = createPublicTRPCRouter({
     }),
 
   create: verifiedProcedure
+    .use(strictRateLimit({ path: "reshare.create", limit: 100, window: "1 h" }))
     .input(z.object({ postId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const target = await db.query.post.findFirst({ where: eq(post.id, input.postId) });
 
-      if (!target || !target.published) {
+      if (!target?.published) {
         throw new TRPCError({ code: "NOT_FOUND" });
       }
 

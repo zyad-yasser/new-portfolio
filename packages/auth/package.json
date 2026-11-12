@@ -5,13 +5,15 @@
   "exports": {
     ".": "./src/index.ts",
     "./client": "./src/client.ts",
+    "./shared": "./src/shared.ts",
     "./public": "./src/public.ts",
     "./public-client": "./src/public-client.ts",
     "./error-message": "./src/error-message.ts",
     "./oauth-error-message": "./src/oauth-error-message.ts",
     "./password-reset-throttle": "./src/password-reset-throttle.ts",
     "./use-password-reset-cooldown": "./src/use-password-reset-cooldown.ts",
-    "./use-resend-verification-email": "./src/use-resend-verification-email.ts"
+    "./use-resend-verification-email": "./src/use-resend-verification-email.ts",
+    "./session-proxy": "./src/session-proxy.ts"
   },
   "scripts": {
     "lint": "biome lint .",
@@ -24,15 +26,17 @@
     "@repo/db": "workspace:*",
     "@repo/email": "workspace:*",
     "@repo/utils": "workspace:*",
-    "better-auth": "^1.6.25"
+    "better-auth": "^1.7.17"
   },
   "peerDependencies": {
+    "next": "^16.4.5",
     "react": "^19.2.4"
   },
   "devDependencies": {
-    "@types/node": "^22.10.2",
-    "@types/react": "^19.0.2",
-    "typescript": "^5.7.2",
-    "vitest": "^4.1.10"
+    "@types/node": "^24.19.2",
+    "@types/react": "^19.3.0",
+    "next": "^16.4.5",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.0"
   }
 }

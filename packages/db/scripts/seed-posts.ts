@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { db } from "../src";
 import type { TiptapDoc } from "../src/schema";
-import { category, post, user } from "../src/schema";
+import { post, user } from "../src/schema";
 
 const POST_COUNT = 120;
 const MINUTES_BETWEEN_POSTS = 45;

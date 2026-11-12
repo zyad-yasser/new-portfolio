@@ -1,11 +1,12 @@
 import { randomUUID } from "node:crypto";
 import { db } from "@repo/db";
-import { post, postTag, series, tag, userBlock } from "@repo/db/schema";
 import type { PostType, TiptapDoc } from "@repo/db/schema";
+import { post, postTag, series, tag } from "@repo/db/schema";
 import { requireEnv } from "@repo/utils";
 import { createRateLimiter, getClientIp, safeLimit } from "@repo/utils/rate-limit";
+import { getPublicUrl } from "@repo/utils/storage";
 import { TRPCError } from "@trpc/server";
-import { and, asc, desc, eq, lt, ne, notInArray, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, ne, notInArray, sql } from "drizzle-orm";
 import type { PgUpdateSetSource } from "drizzle-orm/pg-core";
 import { z } from "zod";
 import {
@@ -15,9 +16,11 @@ import {
   strictRateLimit,
   verifiedProcedure,
 } from "../init";
-import { assertNotBlocked } from "./block";
+import { afterCursor, byOwnCursor, createdAtCursorSchema, toPage } from "../pagination";
+import { assertNotBlocked, getBlockedUserIds } from "./block";
 import { createNotification } from "./notification";
 import { ensureUserProfile } from "./profile";
+import { assertReadablePost } from "./readable-post";
 
 const appName = requireEnv("APP_NAME");
 const viewRateLimiter = createRateLimiter({
@@ -27,6 +30,35 @@ const viewRateLimiter = createRateLimiter({
 });
 
 const WORDS_PER_MINUTE = 200;
+const STORAGE_URL_PROBE = "__probe__";
+
+const canonicalUrlSchema = z
+  .string()
+  .url()
+  .refine((value) => value.startsWith("https://"), "Canonical URL must use https");
+
+function isOwnMediaUrl(url: string, userId: string) {
+  const [prefix = "", suffix = ""] = getPublicUrl(`media/${userId}/${STORAGE_URL_PROBE}`).split(
+    STORAGE_URL_PROBE
+  );
+  const name = url.slice(prefix.length, url.length - suffix.length);
+  return (
+    !!prefix &&
+    url.startsWith(prefix) &&
+    url.endsWith(suffix) &&
+    name.length > 0 &&
+    !/[/\\]|%2f|%5c/i.test(name)
+  );
+}
+
+function assertOwnCoverImage(url: string | null | undefined, userId: string) {
+  if (url && !isOwnMediaUrl(url, userId)) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "Cover image must come from your media library.",
+    });
+  }
+}
 const MAX_TAGS = 5;
 
 function slugifyBase(value: string) {
@@ -107,38 +139,39 @@ async function computeAppendOrder(seriesId: string, authorId: string) {
     throw new TRPCError({ code: "FORBIDDEN" });
   }
 
-  const existing = await db.query.post.findMany({
-    where: eq(post.seriesId, seriesId),
-    columns: { id: true },
-  });
-  return existing.length;
+  const [row] = await db
+    .select({ next: sql<number>`coalesce(max(${post.seriesOrder}), -1) + 1` })
+    .from(post)
+    .where(eq(post.seriesId, seriesId));
+  return Number(row?.next ?? 0);
 }
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
 async function syncPostTags(tx: Tx, postId: string, tagNames: string[]) {
-  const tagIds: string[] = [];
-
+  const namesBySlug = new Map<string, string>();
   for (const rawName of tagNames) {
     const name = rawName.trim();
     const slug = slugifyBase(name) || "tag";
-    const existing = await tx.query.tag.findFirst({ where: eq(tag.slug, slug) });
-
-    if (existing) {
-      tagIds.push(existing.id);
-      continue;
+    if (!namesBySlug.has(slug)) {
+      namesBySlug.set(slug, name);
     }
-
-    const id = randomUUID();
-    await tx.insert(tag).values({ id, name, slug });
-    tagIds.push(id);
   }
+  const slugs = [...namesBySlug.keys()];
 
   await tx.delete(postTag).where(eq(postTag.postId, postId));
 
-  if (tagIds.length) {
-    await tx.insert(postTag).values(tagIds.map((tagId) => ({ postId, tagId })));
+  if (!slugs.length) {
+    return;
   }
+
+  await tx
+    .insert(tag)
+    .values(slugs.map((slug) => ({ id: randomUUID(), name: namesBySlug.get(slug) ?? slug, slug })))
+    .onConflictDoNothing({ target: tag.slug });
+
+  const tags = await tx.select({ id: tag.id }).from(tag).where(inArray(tag.slug, slugs));
+  await tx.insert(postTag).values(tags.map((row) => ({ postId, tagId: row.id })));
 }
 
 const authorColumns = { id: true, name: true, image: true } as const;
@@ -170,18 +203,16 @@ export function formatPost(row: PostRow) {
   return {
     ...rest,
     tags: postTags.map((postTag) => postTag.tag),
-    quotedPost: quotedPost ? formatQuotedPost(quotedPost) : null,
+    quotedPost: quotedPost?.published ? formatQuotedPost(quotedPost) : null,
   };
 }
-
-const cursorSchema = z.object({ createdAt: z.coerce.date(), id: z.string() });
 
 export const postRouter = createPublicTRPCRouter({
   list: publicProcedure
     .input(
       z
         .object({
-          cursor: cursorSchema.optional(),
+          cursor: createdAtCursorSchema.optional(),
           limit: z.number().int().min(1).max(50).default(20),
         })
         .optional()
@@ -190,27 +221,15 @@ export const postRouter = createPublicTRPCRouter({
       const cursor = input?.cursor;
       const limit = input?.limit ?? 20;
 
-      const blockedIds = ctx.session
-        ? (
-            await db.query.userBlock.findMany({
-              where: eq(userBlock.blockerId, ctx.session.user.id),
-              columns: { blockedId: true },
-            })
-          ).map((row) => row.blockedId)
-        : [];
+      const blockedIds = await getBlockedUserIds(ctx.session?.user.id);
 
       const conditions = [eq(post.published, true)];
       if (blockedIds.length) {
         conditions.push(notInArray(post.authorId, blockedIds));
       }
-      if (cursor) {
-        const cursorCondition = or(
-          lt(post.createdAt, cursor.createdAt),
-          and(eq(post.createdAt, cursor.createdAt), lt(post.id, cursor.id))
-        );
-        if (cursorCondition) {
-          conditions.push(cursorCondition);
-        }
+      const cursorCondition = afterCursor(post, cursor);
+      if (cursorCondition) {
+        conditions.push(cursorCondition);
       }
 
       const rows = await db.query.post.findMany({
@@ -220,21 +239,15 @@ export const postRouter = createPublicTRPCRouter({
         with: postWith,
       });
 
-      const hasMore = rows.length > limit;
-      const items = hasMore ? rows.slice(0, limit) : rows;
-      const last = items.at(-1);
-
-      return {
-        items: items.map(formatPost),
-        nextCursor: hasMore && last ? { createdAt: last.createdAt, id: last.id } : null,
-      };
+      const page = toPage(rows, limit, byOwnCursor);
+      return { ...page, items: page.items.map(formatPost) };
     }),
 
   mine: authedProcedure
     .input(
       z
         .object({
-          cursor: cursorSchema.optional(),
+          cursor: createdAtCursorSchema.optional(),
           limit: z.number().int().min(1).max(50).default(20),
         })
         .optional()
@@ -244,13 +257,9 @@ export const postRouter = createPublicTRPCRouter({
       const limit = input?.limit ?? 20;
 
       const conditions = [eq(post.authorId, ctx.session.user.id)];
-      if (cursor) {
-        conditions.push(
-          or(
-            lt(post.createdAt, cursor.createdAt),
-            and(eq(post.createdAt, cursor.createdAt), lt(post.id, cursor.id))
-          )!
-        );
+      const cursorCondition = afterCursor(post, cursor);
+      if (cursorCondition) {
+        conditions.push(cursorCondition);
       }
 
       const rows = await db.query.post.findMany({
@@ -260,60 +269,52 @@ export const postRouter = createPublicTRPCRouter({
         with: postWith,
       });
 
-      const hasMore = rows.length > limit;
-      const items = hasMore ? rows.slice(0, limit) : rows;
-      const last = items.at(-1);
-
-      return {
-        items: items.map(formatPost),
-        nextCursor: hasMore && last ? { createdAt: last.createdAt, id: last.id } : null,
-      };
+      const page = toPage(rows, limit, byOwnCursor);
+      return { ...page, items: page.items.map(formatPost) };
     }),
 
-  getBySlug: publicProcedure
-    .input(z.object({ slug: z.string() }))
-    .query(async ({ ctx, input }) => {
-      const found = await db.query.post.findFirst({
-        where: eq(post.slug, input.slug),
-        with: postWith,
+  getBySlug: publicProcedure.input(z.object({ slug: z.string() })).query(async ({ ctx, input }) => {
+    const found = await db.query.post.findFirst({
+      where: eq(post.slug, input.slug),
+      with: postWith,
+    });
+
+    const isOwner = !!ctx.session && found?.authorId === ctx.session.user.id;
+
+    if (!found || (!found.published && !isOwner)) {
+      throw new TRPCError({ code: "NOT_FOUND" });
+    }
+
+    let seriesContext: {
+      position: number;
+      total: number;
+      prevSlug: string | null;
+      nextSlug: string | null;
+    } | null = null;
+
+    if (found.seriesId) {
+      const siblings = await db.query.post.findMany({
+        where: and(eq(post.seriesId, found.seriesId), eq(post.published, true)),
+        orderBy: asc(post.seriesOrder),
+        columns: { id: true, slug: true },
       });
-
-      const isOwner = !!ctx.session && found?.authorId === ctx.session.user.id;
-
-      if (!found || (!found.published && !isOwner)) {
-        throw new TRPCError({ code: "NOT_FOUND" });
+      const index = siblings.findIndex((sibling) => sibling.id === found.id);
+      if (index !== -1) {
+        seriesContext = {
+          position: index + 1,
+          total: siblings.length,
+          prevSlug: index > 0 ? (siblings[index - 1]?.slug ?? null) : null,
+          nextSlug: index < siblings.length - 1 ? (siblings[index + 1]?.slug ?? null) : null,
+        };
       }
+    }
 
-      let seriesContext: {
-        position: number;
-        total: number;
-        prevSlug: string | null;
-        nextSlug: string | null;
-      } | null = null;
-
-      if (found.seriesId) {
-        const siblings = await db.query.post.findMany({
-          where: and(eq(post.seriesId, found.seriesId), eq(post.published, true)),
-          orderBy: asc(post.seriesOrder),
-          columns: { id: true, slug: true },
-        });
-        const index = siblings.findIndex((sibling) => sibling.id === found.id);
-        if (index !== -1) {
-          seriesContext = {
-            position: index + 1,
-            total: siblings.length,
-            prevSlug: index > 0 ? (siblings[index - 1]?.slug ?? null) : null,
-            nextSlug: index < siblings.length - 1 ? (siblings[index + 1]?.slug ?? null) : null,
-          };
-        }
-      }
-
-      return {
-        ...formatPost(found),
-        readingMinutes: estimateReadingMinutes(extractPlainText(found.contentJson)),
-        seriesContext,
-      };
-    }),
+    return {
+      ...formatPost(found),
+      readingMinutes: estimateReadingMinutes(extractPlainText(found.contentJson)),
+      seriesContext,
+    };
+  }),
 
   create: verifiedProcedure
     .use(strictRateLimit({ path: "post.create", limit: 50, window: "1 h" }))
@@ -327,7 +328,7 @@ export const postRouter = createPublicTRPCRouter({
           seriesId: z.string().nullable().optional(),
           tagNames: z.array(z.string().trim().min(1).max(30)).max(MAX_TAGS).optional(),
           coverImageUrl: z.string().url().nullable().optional(),
-          canonicalUrl: z.string().url().nullable().optional(),
+          canonicalUrl: canonicalUrlSchema.nullable().optional(),
           published: z.boolean().default(false),
         })
         .refine((value) => value.type !== "article" || !!value.title?.length, {
@@ -336,6 +337,7 @@ export const postRouter = createPublicTRPCRouter({
         })
     )
     .mutation(async ({ ctx, input }) => {
+      assertOwnCoverImage(input.coverImageUrl, ctx.session.user.id);
       await ensureUserProfile(ctx.session.user.id);
       const title = input.title?.length ? input.title : null;
       const slug = await uniqueSlug(title);
@@ -390,7 +392,7 @@ export const postRouter = createPublicTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const quoted = await db.query.post.findFirst({ where: eq(post.id, input.quotedPostId) });
 
-      if (!quoted || !quoted.published) {
+      if (!quoted?.published) {
         throw new TRPCError({ code: "NOT_FOUND" });
       }
 
@@ -442,13 +444,13 @@ export const postRouter = createPublicTRPCRouter({
         seriesId: z.string().nullable().optional(),
         tagNames: z.array(z.string().trim().min(1).max(30)).max(MAX_TAGS).optional(),
         coverImageUrl: z.string().url().nullable().optional(),
-        canonicalUrl: z.string().url().nullable().optional(),
+        canonicalUrl: canonicalUrlSchema.nullable().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
       const current = await db.query.post.findFirst({
         where: and(eq(post.id, input.id), eq(post.authorId, ctx.session.user.id)),
-        columns: { title: true, contentJson: true, seriesId: true },
+        columns: { title: true, contentJson: true, seriesId: true, coverImageUrl: true },
       });
 
       if (!current) {
@@ -475,6 +477,9 @@ export const postRouter = createPublicTRPCRouter({
         patch.categoryId = input.categoryId;
       }
       if (input.coverImageUrl !== undefined) {
+        if (input.coverImageUrl !== current.coverImageUrl) {
+          assertOwnCoverImage(input.coverImageUrl, ctx.session.user.id);
+        }
         patch.coverImageUrl = input.coverImageUrl;
       }
       if (input.canonicalUrl !== undefined) {
@@ -508,20 +513,18 @@ export const postRouter = createPublicTRPCRouter({
       });
     }),
 
-  delete: verifiedProcedure
-    .input(z.object({ id: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      const rows = await db
-        .delete(post)
-        .where(and(eq(post.id, input.id), eq(post.authorId, ctx.session.user.id)))
-        .returning();
+  delete: verifiedProcedure.input(z.object({ id: z.string() })).mutation(async ({ ctx, input }) => {
+    const rows = await db
+      .delete(post)
+      .where(and(eq(post.id, input.id), eq(post.authorId, ctx.session.user.id)))
+      .returning();
 
-      if (!rows[0]) {
-        throw new TRPCError({ code: "NOT_FOUND" });
-      }
+    if (!rows[0]) {
+      throw new TRPCError({ code: "NOT_FOUND" });
+    }
 
-      return { id: rows[0].id };
-    }),
+    return { id: rows[0].id };
+  }),
 
   setPublished: verifiedProcedure
     .input(z.object({ id: z.string(), published: z.boolean() }))
@@ -538,6 +541,8 @@ export const postRouter = createPublicTRPCRouter({
   incrementView: publicProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
+      await assertReadablePost(input.id, ctx.session?.user.id, { checkBlock: false });
+
       const ip = getClientIp(ctx.headers);
       const { success } = await safeLimit(viewRateLimiter, `${ip}:${input.id}`);
 

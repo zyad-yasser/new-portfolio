@@ -12,7 +12,6 @@ test("post detail page renders content, reactions, and comments", async ({ page 
   await expect(page.getByText("typescript", { exact: true })).toBeVisible();
   await expect(page.getByText("postgres", { exact: true })).toBeVisible();
 
-  // Reaction bar renders all five reaction buttons.
   await expect(page.getByRole("button", { name: "Like" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Fire" })).toBeVisible();
 

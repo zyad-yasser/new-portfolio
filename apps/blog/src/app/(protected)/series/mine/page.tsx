@@ -1,6 +1,5 @@
 "use client";
 
-import { SiteHeader } from "@/components/site-header";
 import { getErrorMessage } from "@repo/trpc/error";
 import { publicApi } from "@repo/trpc/public/react";
 import {
@@ -32,6 +31,7 @@ import { ArrowDown, ArrowUp, Loader2, Pencil, Plus, Trash2 } from "lucide-react"
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
+import { SiteHeader } from "@/components/site-header";
 
 type SeriesFormValues = { title: string; description: string };
 

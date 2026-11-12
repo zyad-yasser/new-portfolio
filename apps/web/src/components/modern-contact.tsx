@@ -1,12 +1,12 @@
 "use client";
 
-import { containerVariants, itemVariants } from "@/lib/motion";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Badge } from "@repo/ui/badge";
 import { Button } from "@repo/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@repo/ui/form";
 import { Input } from "@repo/ui/input";
+import { containerVariants, itemVariants } from "@repo/ui/lib/motion";
 import { Textarea } from "@repo/ui/textarea";
 import { Turnstile } from "@repo/ui/turnstile";
 import { type ContactFormValues, contactFormSchema } from "@repo/utils/schemas/contact";
@@ -145,9 +145,10 @@ export function ModernContact() {
                               <FormItem>
                                 <FormLabel>
                                   Name{" "}
-                                  <span className="text-destructive" aria-label="required">
+                                  <span className="text-destructive" aria-hidden="true">
                                     *
                                   </span>
+                                  <span className="sr-only">(required)</span>
                                 </FormLabel>
                                 <FormControl>
                                   <Input
@@ -168,9 +169,10 @@ export function ModernContact() {
                               <FormItem>
                                 <FormLabel>
                                   Subject{" "}
-                                  <span className="text-destructive" aria-label="required">
+                                  <span className="text-destructive" aria-hidden="true">
                                     *
                                   </span>
+                                  <span className="sr-only">(required)</span>
                                 </FormLabel>
                                 <FormControl>
                                   <Input
@@ -192,9 +194,10 @@ export function ModernContact() {
                             <FormItem>
                               <FormLabel>
                                 Email{" "}
-                                <span className="text-destructive" aria-label="required">
+                                <span className="text-destructive" aria-hidden="true">
                                   *
                                 </span>
+                                <span className="sr-only">(required)</span>
                               </FormLabel>
                               <FormControl>
                                 <Input
@@ -215,9 +218,10 @@ export function ModernContact() {
                             <FormItem>
                               <FormLabel>
                                 Message{" "}
-                                <span className="text-destructive" aria-label="required">
+                                <span className="text-destructive" aria-hidden="true">
                                   *
                                 </span>
+                                <span className="sr-only">(required)</span>
                               </FormLabel>
                               <FormControl>
                                 <Textarea

@@ -1,17 +1,28 @@
 "use client";
 
-import { PostCard } from "@/components/posts/post-card";
-import { SiteHeader } from "@/components/site-header";
 import { publicApi } from "@repo/trpc/public/react";
 import { Button } from "@repo/ui/button";
 import { Skeleton } from "@repo/ui/skeleton";
 import { TooltipProvider } from "@repo/ui/tooltip";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { PostCard } from "@/components/posts/post-card";
+import { SiteHeader } from "@/components/site-header";
 
 export default function SeriesDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const { data: series, isLoading, error } = publicApi.series.getBySlug.useQuery({ slug });
+  const {
+    data: postPages,
+    isLoading: postsLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = publicApi.series.posts.useInfiniteQuery(
+    { slug },
+    { enabled: !!series, getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined }
+  );
+  const posts = postPages?.pages.flatMap((page) => page.items) ?? [];
 
   if (isLoading) {
     return (
@@ -61,22 +72,42 @@ export default function SeriesDetailPage() {
               <span className="font-medium text-foreground">{series.author.name}</span>
             )}
             {" · "}
-            {series.posts.length} {series.posts.length === 1 ? "post" : "posts"}
+            {series.postCount} {series.postCount === 1 ? "post" : "posts"}
           </span>
         </div>
 
-        {series.posts.length === 0 ? (
+        {postsLoading ? (
+          <div className="columns-1 gap-5 sm:columns-2">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton
+                key={i}
+                className="skeleton-shimmer mb-5 h-52 w-full rounded-xl break-inside-avoid"
+              />
+            ))}
+          </div>
+        ) : posts.length === 0 ? (
           <p className="text-muted-foreground">No published posts in this series yet.</p>
         ) : (
           <TooltipProvider>
             <div className="columns-1 gap-5 sm:columns-2">
-              {series.posts.map((post) => (
+              {posts.map((post) => (
                 <div key={post.id} className="mb-5 break-inside-avoid">
                   <PostCard post={post} />
                 </div>
               ))}
             </div>
           </TooltipProvider>
+        )}
+
+        {hasNextPage && (
+          <Button
+            variant="outline"
+            className="self-center"
+            disabled={isFetchingNextPage}
+            onClick={() => fetchNextPage()}
+          >
+            {isFetchingNextPage ? "Loading…" : "Load more"}
+          </Button>
         )}
       </main>
     </>

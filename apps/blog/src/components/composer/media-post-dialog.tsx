@@ -1,7 +1,5 @@
 "use client";
 
-import { MediaPickerDialog } from "@/components/media/media-picker-dialog";
-import type { MediaItem } from "@/components/media/use-media-upload";
 import type { TiptapDoc } from "@repo/db/schema";
 import { getErrorMessage } from "@repo/trpc/error";
 import { publicApi } from "@repo/trpc/public/react";
@@ -13,6 +11,8 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import { MediaPickerDialog } from "@/components/media/media-picker-dialog";
+import type { MediaItem } from "@/components/media/use-media-upload";
 
 function buildContentJson(media: MediaItem, caption: string): TiptapDoc {
   const mediaNode: TiptapDoc = media.mimeType.startsWith("video/")

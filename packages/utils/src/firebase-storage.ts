@@ -34,19 +34,23 @@ export function getPublicUrl(key: string) {
 export async function createPresignedUploadUrl({
   key,
   contentType,
+  contentLength,
   expiresInSeconds = PRESIGN_EXPIRY_SECONDS,
 }: {
   key: string;
   contentType: string;
+  contentLength: number;
   expiresInSeconds?: number;
 }) {
   if (isEmulator()) {
     return {
       uploadUrl: `/api/media-upload?key=${encodeURIComponent(key)}`,
       publicUrl: getPublicUrl(key),
+      uploadHeaders: {} as Record<string, string>,
     };
   }
 
+  const uploadHeaders = { "x-goog-content-length-range": `0,${contentLength}` };
   const [uploadUrl] = await getBucket()
     .file(key)
     .getSignedUrl({
@@ -54,9 +58,20 @@ export async function createPresignedUploadUrl({
       action: "write",
       expires: Date.now() + expiresInSeconds * 1000,
       contentType,
+      extensionHeaders: uploadHeaders,
     });
 
-  return { uploadUrl, publicUrl: getPublicUrl(key) };
+  return { uploadUrl, publicUrl: getPublicUrl(key), uploadHeaders };
+}
+
+export async function getObjectInfo(key: string) {
+  const file = getBucket().file(key);
+  const [exists] = await file.exists();
+  if (!exists) {
+    return null;
+  }
+  const [metadata] = await file.getMetadata();
+  return { size: Number(metadata.size ?? 0), contentType: metadata.contentType ?? "" };
 }
 
 export async function uploadObjectDirect(key: string, body: Buffer, contentType: string) {

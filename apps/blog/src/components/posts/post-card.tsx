@@ -1,7 +1,5 @@
 "use client";
 
-import { ReshareButton } from "@/components/posts/reshare-button";
-import { categoryColorClasses } from "@/lib/category-colors";
 import { publicAuthClient } from "@repo/auth/public-client";
 import type { TiptapDoc } from "@repo/db/schema";
 import { getErrorMessage } from "@repo/trpc/error";
@@ -17,6 +15,8 @@ import { Bookmark, Eye, Heart, Library, MessageSquare, Quote, Share2 } from "luc
 import Image from "next/image";
 import Link from "next/link";
 import { toast } from "sonner";
+import { ReshareButton } from "@/components/posts/reshare-button";
+import { categoryColorClasses } from "@/lib/category-colors";
 
 type PostCardAuthor = { name: string; image: string | null; profile: { username: string } | null };
 

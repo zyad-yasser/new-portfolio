@@ -1,6 +1,5 @@
 "use client";
 
-import { VerifiedGate } from "@/components/verified-gate";
 import { publicAuthClient } from "@repo/auth/public-client";
 import type { TiptapDoc } from "@repo/db/schema";
 import { getErrorMessage } from "@repo/trpc/error";
@@ -18,6 +17,7 @@ import { Textarea } from "@repo/ui/textarea";
 import { Loader2, Quote as QuoteIcon, Repeat2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { VerifiedGate } from "@/components/verified-gate";
 
 function buildQuoteContentJson(comment: string): TiptapDoc {
   const trimmed = comment.trim();

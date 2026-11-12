@@ -1,4 +1,4 @@
-import { EmailVerificationBanner } from "@/components/email-verification-banner";
+import { EmailVerificationBanner } from "@repo/auth-ui/email-verification-banner";
 import { PublicTRPCReactProvider } from "@repo/trpc/public/react";
 import { Toaster } from "@repo/ui/sonner";
 import { ThemeProvider } from "@repo/ui/theme-provider";
@@ -27,7 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           disableTransitionOnChange
         >
           <PublicTRPCReactProvider>
-            <EmailVerificationBanner />
+            <EmailVerificationBanner message="Verify your email to leave a review." />
             {children}
             <Toaster />
           </PublicTRPCReactProvider>

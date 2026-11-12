@@ -19,8 +19,6 @@ import {
 
 const TEST_USER_PASSWORD = "SeedUser-Pass123!";
 
-// A minimal valid 1x1 red PNG, embedded so the sample media post has a real, working image
-// with no network dependency at seed time.
 const SEED_SAMPLE_PNG_BASE64 =
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4z8AAAAMBAQAY3Y2wAAAAAElFTkSuQmCC";
 
@@ -235,8 +233,6 @@ async function seedBlogPosts(adminId: string) {
   }
 }
 
-// Reset (not just create-if-missing) so the documented password and verification status stay
-// as documented across reseeds, even if a prior run or manual testing changed them.
 async function seedTestUsers() {
   const hash = await hashPassword(TEST_USER_PASSWORD);
   const ids: Record<string, string> = {};
@@ -481,11 +477,6 @@ async function seedQuote(reviewerId: string, mediaPostId: string | null) {
   console.log("Created sample quote post");
 }
 
-// Inserts directly rather than calling @repo/auth's `auth.api.signUpEmail` so this package
-// doesn't have to depend on @repo/auth (which itself depends on @repo/db - a real dependency
-// cycle Turborepo would reject). This mirrors exactly what signUpEmail does internally for
-// the credential provider: a `user` row plus an `account` row with providerId "credential"
-// and accountId set to the user's own id (see better-auth's api/routes/sign-up.ts).
 const countFormattingFixturePosts: {
   title: string;
   excerptText: string;

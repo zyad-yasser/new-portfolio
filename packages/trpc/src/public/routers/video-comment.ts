@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { db } from "@repo/db";
-import { HIGHLIGHT_COLORS, post, postVideoComment } from "@repo/db/schema";
 import type { TiptapDoc } from "@repo/db/schema";
+import { HIGHLIGHT_COLORS, postVideoComment } from "@repo/db/schema";
 import { TRPCError } from "@trpc/server";
 import { and, asc, eq } from "drizzle-orm";
 import { z } from "zod";
@@ -11,6 +11,7 @@ import {
   strictRateLimit,
   verifiedProcedure,
 } from "../init";
+import { assertReadablePost } from "./readable-post";
 
 const tiptapNodeSchema: z.ZodType<TiptapDoc> = z.lazy(() =>
   z.object({
@@ -49,11 +50,7 @@ export const videoCommentRouter = createPublicTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const targetPost = await db.query.post.findFirst({ where: eq(post.id, input.postId) });
-
-      if (!targetPost) {
-        throw new TRPCError({ code: "NOT_FOUND" });
-      }
+      await assertReadablePost(input.postId, ctx.session.user.id);
 
       const rows = await db
         .insert(postVideoComment)
@@ -107,20 +104,18 @@ export const videoCommentRouter = createPublicTRPCRouter({
       return rows[0];
     }),
 
-  delete: verifiedProcedure
-    .input(z.object({ id: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      const rows = await db
-        .delete(postVideoComment)
-        .where(
-          and(eq(postVideoComment.id, input.id), eq(postVideoComment.userId, ctx.session.user.id))
-        )
-        .returning({ id: postVideoComment.id });
+  delete: verifiedProcedure.input(z.object({ id: z.string() })).mutation(async ({ ctx, input }) => {
+    const rows = await db
+      .delete(postVideoComment)
+      .where(
+        and(eq(postVideoComment.id, input.id), eq(postVideoComment.userId, ctx.session.user.id))
+      )
+      .returning({ id: postVideoComment.id });
 
-      if (!rows[0]) {
-        throw new TRPCError({ code: "NOT_FOUND" });
-      }
+    if (!rows[0]) {
+      throw new TRPCError({ code: "NOT_FOUND" });
+    }
 
-      return rows[0];
-    }),
+    return rows[0];
+  }),
 });

@@ -1,6 +1,5 @@
 "use client";
 
-import { type MediaItem, useMediaUpload } from "@/components/media/use-media-upload";
 import { getErrorMessage } from "@repo/trpc/error";
 import { publicApi } from "@repo/trpc/public/react";
 import { Button } from "@repo/ui/button";
@@ -23,6 +22,7 @@ import {
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { type MediaItem, useMediaUpload } from "@/components/media/use-media-upload";
 
 const IMAGE_ACCEPT = "image/png,image/jpeg,image/webp,image/gif";
 const ALL_ACCEPT = `${IMAGE_ACCEPT},video/mp4,video/webm,video/quicktime`;
